@@ -60,3 +60,9 @@ Route::middleware('auth:modele')->group(function () {
 
 // API publique pour tous
 Route::get('/api/live/active', [LiveController::class, 'activeLives']);
+use App\Http\Controllers\AuthController;
+
+Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth');

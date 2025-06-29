@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE BEAUTY</title>
+    <title>LIVE BEAUTY - Tableau de bord</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
@@ -150,7 +149,6 @@
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
                     <!-- Menus -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="filleDropdown" role="button"
@@ -162,7 +160,6 @@
                             <li><a class="dropdown-item" href="#">Top Modèles</a></li>
                         </ul>
                     </li>
-
                     <li class="nav-item"><a class="nav-link" href="#">Club Elite</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Awards</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Meilleurs Membres</a></li>
@@ -173,8 +170,8 @@
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-envelope"></i></a>
-                  <button class="btn btn-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Connexion</button>
-                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">Inscription GRATUITE</button>
+                    <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span>
+                    <a href="{{ route('logout') }}" class="btn btn-outline-light">Déconnexion</a>
                 </div>
             </div>
         </div>
@@ -191,7 +188,7 @@
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
-                <!-- Menu avec sous-menus repliables -->
+
                 <a href="#" onclick="toggleMenu(this)">En direct</a>
                 <div class="submenu">
                     <a href="#">- VIP</a>
@@ -259,16 +256,8 @@
         </div>
     </div>
 
-    <!-- Script de changement dynamique -->
+    <!-- JS -->
     <script>
-        function afficherCartes(type) {
-            let filles = document.querySelectorAll('.card-item.fille');
-
-            if (type === 'fille') {
-                filles.forEach(card => card.classList.remove('d-none'));
-            }
-        }
-
         function toggleMenu(element) {
             let submenu = element.nextElementSibling;
             if (submenu && submenu.classList.contains('submenu')) {
@@ -277,80 +266,29 @@
         }
 
         async function fetchLiveModels() {
-    try {
-      const response = await fetch('/api/live/active'); // à créer en Laravel côté backend
-      const lives = await response.json();
+            try {
+                const response = await fetch('/api/live/active');
+                const lives = await response.json();
 
-      const liveContainer = document.getElementById('activeLives');
-      liveContainer.innerHTML = '';
+                const liveContainer = document.getElementById('activeLives');
+                liveContainer.innerHTML = '';
 
-      lives.forEach(model => {
-        const link = document.createElement('a');
-        link.href = `/live/${model.id}`;
-        link.textContent = `🔴 ${model.prenom}`;
-        link.classList.add('d-block', 'mb-1');
-        liveContainer.appendChild(link);
-      });
-    } catch (e) {
-      console.error("Erreur de chargement des lives", e);
-    }
-  }
+                lives.forEach(model => {
+                    const link = document.createElement('a');
+                    link.href = `/live/${model.id}`;
+                    link.textContent = `🔴 ${model.prenom}`;
+                    link.classList.add('d-block', 'mb-1');
+                    liveContainer.appendChild(link);
+                });
+            } catch (e) {
+                console.error("Erreur de chargement des lives", e);
+            }
+        }
 
-  fetchLiveModels();
-  setInterval(fetchLiveModels, 15000); // actualisation toutes les 15 sec
+        fetchLiveModels();
+        setInterval(fetchLiveModels, 15000);
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Modal Connexion -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="{{ route('login.submit') }}" class="modal-content bg-dark text-white">
-      @csrf
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Connexion</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="email_login" class="form-label">Email</label>
-          <input type="email" class="form-control" name="email" required>
-        </div>
-        <div class="mb-3">
-          <label for="password_login" class="form-label">Mot de passe</label>
-          <input type="password" class="form-control" name="password" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-warning">Se connecter</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal Inscription -->
-<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="{{ route('register.submit') }}" class="modal-content bg-dark text-white">
-      @csrf
-      <div class="modal-header">
-        <h5 class="modal-title" id="registerModalLabel">Inscription</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-2"><input name="nom" class="form-control" placeholder="Nom" required></div>
-        <div class="mb-2"><input name="prenoms" class="form-control" placeholder="Prénoms" required></div>
-        <div class="mb-2"><input name="age" type="number" class="form-control" placeholder="Âge" required></div>
-        <div class="mb-2"><input name="pseudo" class="form-control" placeholder="Pseudo" required></div>
-        <div class="mb-2"><input name="departement" class="form-control" placeholder="Département" required></div>
-        <div class="mb-2"><input name="email" type="email" class="form-control" placeholder="Email" required></div>
-        <div class="mb-2"><input name="password" type="password" class="form-control" placeholder="Mot de passe" required></div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-warning">S’inscrire</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 </body>
 </html>
