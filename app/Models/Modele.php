@@ -18,6 +18,7 @@ class Modele extends Model
     'photos',
     'email',
     'password',
+    'en_ligne',
 ];
     protected $casts = [
         'photos' => 'array', // Pour stocker un tableau d'images

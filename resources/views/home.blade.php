@@ -187,10 +187,10 @@
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h5>Catégories</h5>
-
-                <!-- Boutons Fille -->
-                <button class="btn btn-genre" onclick="afficherCartes('fille')">Filles</button>
-
+                <h5>Lives Actifs</h5>
+                <div id="activeLives">
+                <!-- Chargement dynamique -->
+                </div>
                 <!-- Menu avec sous-menus repliables -->
                 <a href="#" onclick="toggleMenu(this)">En direct</a>
                 <div class="submenu">
@@ -275,6 +275,29 @@
                 submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
             }
         }
+
+        async function fetchLiveModels() {
+    try {
+      const response = await fetch('/api/live/active'); // à créer en Laravel côté backend
+      const lives = await response.json();
+
+      const liveContainer = document.getElementById('activeLives');
+      liveContainer.innerHTML = '';
+
+      lives.forEach(model => {
+        const link = document.createElement('a');
+        link.href = `/live/${model.id}`;
+        link.textContent = `🔴 ${model.prenom}`;
+        link.classList.add('d-block', 'mb-1');
+        liveContainer.appendChild(link);
+      });
+    } catch (e) {
+      console.error("Erreur de chargement des lives", e);
+    }
+  }
+
+  fetchLiveModels();
+  setInterval(fetchLiveModels, 15000); // actualisation toutes les 15 sec
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
