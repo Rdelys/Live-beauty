@@ -220,9 +220,33 @@
 
   <div class="content">
     <div id="dashboard-content" class="content-section">
-      <h2>Tableau de bord</h2>
-      <p>Bienvenue dans l'espace d'administration de Live Beauty.</p>
+  <h2>Tableau de bord</h2>
+  <p>Bienvenue dans l'espace d'administration de Live Beauty.</p>
+
+  <!-- Cards displaying the count of models and tokens -->
+  <div class="row">
+    <!-- Card for Nombre de Modèles -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white">
+        <div class="card-body">
+          <h5 class="card-title">Nombre de Modèles</h5>
+          <p class="card-text">{{ $nombreDeModeles }}</p>
+        </div>
+      </div>
     </div>
+
+    <!-- Card for Nombre de Jetons -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white">
+        <div class="card-body">
+          <h5 class="card-title">Nombre de Jetons</h5>
+          <p class="card-text">{{ $nombreDeJetons }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <div id="modeles-content" class="content-section d-none">
   <h2>Modèles</h2>
@@ -376,23 +400,21 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Jeton Or</td>
-            <td>Accès premium complet</td>
-            <td>100€</td>
-          </tr>
-          <tr>
-            <td>Jeton Argent</td>
-            <td>Accès standard</td>
-            <td>50€</td>
-          </tr>
-        </tbody>
+@foreach($jetons as $jeton)
+    <tr>
+        <td>{{ $jeton->nom }}</td>
+        <td>{{ $jeton->description }}</td>
+        <td>{{ $jeton->prix }}€</td>
+    </tr>
+@endforeach
+</tbody>
       </table>
     </div>
 
     <div id="ajout-jetons-content" class="content-section d-none">
       <h2>Ajout de jetons</h2>
-      <form id="form-jetons">
+<form id="form-jetons" action="{{ route('jetons.store') }}" method="POST">
+    @csrf
         <div id="jetons-container">
           <div class="jeton-group mb-3 d-flex gap-3 flex-wrap">
             <div class="form-group flex-fill">
@@ -461,11 +483,6 @@
           e.target.closest(".jeton-group").remove();
         }
       });
-
-      document.getElementById("form-jetons").addEventListener("submit", e => {
-        e.preventDefault();
-        alert("Jetons ajoutés !");
-      });
     });
 
     // Gestion des photos dynamiques
@@ -484,12 +501,6 @@ document.getElementById("photos-container").addEventListener("click", function (
   }
 });
 
-// Simulation de soumission
-document.getElementById("form-modeles").addEventListener("submit", function (e) {
-  e.preventDefault();
-  alert("Formulaire de modèle soumis !");
-});
-
 // Afficher une image en grand via modal
 document.addEventListener("click", function(e) {
   if (e.target.matches(".zoomable-photo")) {
@@ -502,5 +513,22 @@ document.addEventListener("click", function(e) {
 });
 
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+</div>
+</div>
+<footer class="text-center text-muted mt-4">  
+  &copy; 2023 Live Beauty. Tous droits réservés.
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+<script>    
+
 </body>
 </html>

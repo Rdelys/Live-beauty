@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ModeleController;
+use App\Http\Controllers\JetonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,3 +34,5 @@ Route::put('/admin/modeles/{id}', [ModeleController::class, 'update'])->name('mo
 
 // Supprimer
 Route::delete('/admin/modeles/{id}', [ModeleController::class, 'destroy'])->name('modeles.destroy');
+
+Route::post('/jetons/store', [JetonController::class, 'store'])->name('jetons.store');

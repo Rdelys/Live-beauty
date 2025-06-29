@@ -163,17 +163,6 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="garconDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Garçons</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Cams en Direct</a></li>
-                            <li><a class="dropdown-item" href="#">Nouveaux Modèles</a></li>
-                            <li><a class="dropdown-item" href="#">Promotions <span class="badge bg-warning text-dark">2</span></a></li>
-                            <li><a class="dropdown-item" href="#">Top Modèles</a></li>
-                        </ul>
-                    </li>
-
                     <li class="nav-item"><a class="nav-link" href="#">Club Elite</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Awards</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Meilleurs Membres</a></li>
@@ -199,9 +188,8 @@
             <div class="col-md-2 sidebar">
                 <h5>Catégories</h5>
 
-                <!-- Boutons Fille/Garçon -->
+                <!-- Boutons Fille -->
                 <button class="btn btn-genre" onclick="afficherCartes('fille')">Filles</button>
-                <button class="btn btn-genre" onclick="afficherCartes('garcon')">Garçons</button>
 
                 <!-- Menu avec sous-menus repliables -->
                 <a href="#" onclick="toggleMenu(this)">En direct</a>
@@ -265,22 +253,6 @@
                         </div>
                     </div>
 
-                    <!-- Cartes Garçon -->
-                    <div class="col-md-4 card-item garcon d-none">
-                        <div class="position-relative model-card">
-                            <span class="vip-badge">VIP</span>
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnlJ6HRCQIDXHIZN45ba9Y_JNCy2bJQ1mQwg&s" alt="Garçon 1">
-                            <div class="model-name">AlexRomeo</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 card-item garcon d-none">
-                        <div class="position-relative model-card">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcwUMM6-t689POZ5ty3hHFAcXSsEogLlrGig&s" alt="Garçon 2">
-                            <div class="model-name">ChrisStrong</div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
@@ -291,14 +263,9 @@
     <script>
         function afficherCartes(type) {
             let filles = document.querySelectorAll('.card-item.fille');
-            let garcons = document.querySelectorAll('.card-item.garcon');
 
             if (type === 'fille') {
                 filles.forEach(card => card.classList.remove('d-none'));
-                garcons.forEach(card => card.classList.add('d-none'));
-            } else if (type === 'garcon') {
-                garcons.forEach(card => card.classList.remove('d-none'));
-                filles.forEach(card => card.classList.add('d-none'));
             }
         }
 
@@ -312,5 +279,4 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

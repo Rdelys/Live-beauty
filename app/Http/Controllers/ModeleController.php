@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Modele;
 use Illuminate\Http\Request;
         use Illuminate\Support\Facades\Hash;
+use App\Models\Jeton;
 
 
 class ModeleController extends Controller
@@ -52,8 +53,13 @@ Modele::create([
     public function index()
 {
     $modeles = Modele::all();
-    return view('admin', compact('modeles')); // Assurez-vous que c'est bien la bonne vue
+    $jetons = Jeton::all();
+    $nombreDeModeles = $modeles->count();  // Nombre de modèles
+    $nombreDeJetons = $jetons->count();    // Nombre de jetons
+
+    return view('admin', compact('modeles', 'jetons', 'nombreDeModeles', 'nombreDeJetons'));
 }
+
 
 public function edit($id)
 {
