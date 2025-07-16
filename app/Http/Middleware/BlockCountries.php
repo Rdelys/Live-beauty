@@ -9,35 +9,49 @@ use GeoIP;
 class BlockCountries
 {
     protected $blockedCountries = [
-        'IR', // Iran
-        'SA', // Saudi Arabia
-        'AF', // Afghanistan
-        'BN', // Brunei
-        'MY', // Malaysia
-        'PK', // Pakistan
-        'IN', // India
-        'CN', // China
-        'RUS', // Russia
-        'TR', // Turkey
-        'BY', // Belarus
-        'KR', // South Korea
-        'ID', // Indonesia
+        'IR', 'SA', 'AF', 'BN', 'MY',
+        'PK', 'IN', 'CN', 'RU', 'TR',
+        'BY', 'KR', 'ID',
     ];
 
     public function handle(Request $request, Closure $next)
     {
-        try {
-            // Récupération IP client (gestion proxy)
-            $ip = $request->header('X-Forwarded-For') ?: $request->ip();
+        $ip = $request->getClientIp();
 
-            // Utilisation façade GeoIP
+        try {
             $location = GeoIP::getLocation($ip);
 
-            if (in_array($location->iso_code, $this->blockedCountries)) {
+            $iso = $location->iso_code ?? null;
+            $country = $location->country ?? 'Inconnu';
+
+            \Log::info("GeoIP - IP : $ip, Pays : $country ($iso)");
+
+            if (!$iso) {
+                \Log::warning("GeoIP - iso_code manquant pour IP : $ip");
+            }
+
+            if (in_array($iso, $this->blockedCountries)) {
+                \Log::warning("Visiteur BLOQUÉ - IP : $ip, Pays : $iso");
                 abort(403, 'Accès refusé depuis votre pays.');
             }
+
+            // Injection console log uniquement pour les requêtes HTML (pas API/AJAX)
+            if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
+                app()->terminating(function () use ($ip, $country, $iso) {
+                    echo "<script>console.log('IP: {$ip}, Pays: {$country} ({$iso})');</script>";
+                });
+            }
+
         } catch (\Exception $e) {
-            // En cas d’erreur de géolocalisation, on laisse passer (ou bloquer ici si besoin)
+            \Log::error("Erreur GeoIP - IP : $ip, message : " . $e->getMessage());
+
+            // Facultatif : aussi afficher l’erreur dans la console navigateur
+            if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
+                app()->terminating(function () use ($ip, $e) {
+                    $message = addslashes($e->getMessage());
+                    echo "<script>console.error('GeoIP ERROR - IP: {$ip}, Message: {$message}');</script>";
+                });
+            }
         }
 
         return $next($request);
