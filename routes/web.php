@@ -15,6 +15,9 @@ use App\Http\Controllers\ModeleAuthController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/forbidden', function () {
+    return response()->view('errors.403', [], 403);
+})->name('forbidden');
 
 
 Route::get('/', function () {

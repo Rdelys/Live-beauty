@@ -11,11 +11,15 @@ class BlockCountries
     protected $blockedCountries = [
         'IR', 'SA', 'AF', 'BN', 'MY',
         'PK', 'IN', 'CN', 'RU', 'TR',
-        'BY', 'KR', 'ID','US',
+        'BY', 'KR', 'ID',
     ];
 
     public function handle(Request $request, Closure $next)
     {
+
+         if ($request->routeIs('forbidden')) {
+        return $next($request);
+    }
         $ip = $request->getClientIp();
 
         try {
@@ -32,7 +36,9 @@ class BlockCountries
 
             if (in_array($iso, $this->blockedCountries)) {
                 \Log::warning("Visiteur BLOQUÉ - IP : $ip, Pays : $iso");
-                abort(403, 'Accès refusé depuis votre pays.');
+                
+                // Redirection vers la page 403 personnalisée
+                return redirect()->route('forbidden');
             }
 
             // Injection console log uniquement pour les requêtes HTML (pas API/AJAX)
@@ -41,11 +47,9 @@ class BlockCountries
                     echo "<script>console.log('IP: {$ip}, Pays: {$country} ({$iso})');</script>";
                 });
             }
-
         } catch (\Exception $e) {
             \Log::error("Erreur GeoIP - IP : $ip, message : " . $e->getMessage());
 
-            // Facultatif : aussi afficher l’erreur dans la console navigateur
             if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
                 app()->terminating(function () use ($ip, $e) {
                     $message = addslashes($e->getMessage());
