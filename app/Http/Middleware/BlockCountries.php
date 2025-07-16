@@ -4,8 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use GeoIP; // ⬅️ Ajoute cette ligne
-
+use GeoIP;
 
 class BlockCountries
 {
@@ -18,7 +17,7 @@ class BlockCountries
         'PK', // Pakistan
         'IN', // India
         'CN', // China
-        'RU', // Russia
+        'RUS', // Russia
         'TR', // Turkey
         'BY', // Belarus
         'KR', // South Korea
@@ -28,21 +27,19 @@ class BlockCountries
     public function handle(Request $request, Closure $next)
     {
         try {
-            $location = geoip($request->ip());
+            // Récupération IP client (gestion proxy)
+            $ip = $request->header('X-Forwarded-For') ?: $request->ip();
+
+            // Utilisation façade GeoIP
+            $location = GeoIP::getLocation($ip);
 
             if (in_array($location->iso_code, $this->blockedCountries)) {
-                // Option 1 : Bloquer
                 abort(403, 'Accès refusé depuis votre pays.');
-
-                // Option 2 : Rediriger vers une page spécifique
-                // return redirect('/blocked');
             }
         } catch (\Exception $e) {
-            // Si l’IP ne peut pas être localisée
-            // Tu peux décider de bloquer ou autoriser par défaut
+            // En cas d’erreur de géolocalisation, on laisse passer (ou bloquer ici si besoin)
         }
 
         return $next($request);
     }
 }
-
