@@ -21,6 +21,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+            \App\Http\Middleware\BlockCountries::class,
+
     ];
 
     /**
@@ -66,4 +68,10 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'auth.modele' => \App\Http\Middleware\AuthModele::class,
     ];
+
+    protected $routeMiddleware = [
+    // autres...
+    'block.countries' => \App\Http\Middleware\BlockCountries::class,
+];
+
 }
