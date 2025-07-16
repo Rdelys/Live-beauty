@@ -11,7 +11,7 @@ class BlockCountries
     protected $blockedCountries = [
         'IR', 'SA', 'AF', 'BN', 'MY',
         'PK', 'IN', 'CN', 'RU', 'TR',
-        'BY', 'KR', 'ID',
+        'BY', 'KR', 'ID','US',
     ];
 
     public function handle(Request $request, Closure $next)
