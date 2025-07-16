@@ -58,8 +58,9 @@ Route::middleware('auth:modele')->group(function () {
     Route::post('/api/live/stop', [LiveController::class, 'stopLive']);
 });
 Route::middleware(['block.countries'])->group(function () {
-    Route::get('/', [HomeController::class, 'index']);
-    // autres routes ici...
+    Route::get('/', function () {
+        return view('home');
+    });
 });
 
 // API publique pour tous
