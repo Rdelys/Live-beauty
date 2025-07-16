@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use GeoIP; // ⬅️ Ajoute cette ligne
+
 
 class BlockCountries
 {
