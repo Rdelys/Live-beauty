@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ModeleController;
 use App\Http\Controllers\JetonController;
 use App\Http\Controllers\ModeleAuthController;
+use App\Http\Controllers\LiveController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -50,16 +52,15 @@ Route::middleware('auth.modele')->group(function () {
     Route::get('/modele/profil', [ModeleAuthController::class, 'profile'])->name('modele.profil');
 });
 
+
 // routes/web.php
-use App\Http\Controllers\LiveController;
 
 Route::get('/live/{id}', [LiveController::class, 'showLive']);
 
 // Pour les utilisateurs connectés via middleware auth (modele ou user)
-Route::middleware('auth:modele')->group(function () {
-    Route::post('/api/live/start', [LiveController::class, 'startLive']);
-    Route::post('/api/live/stop', [LiveController::class, 'stopLive']);
-});
+Route::post('/api/live/start', [LiveController::class, 'start']);
+Route::post('/api/live/stop', [LiveController::class, 'stop']);
+
 Route::middleware(['block.countries'])->group(function () {
     Route::get('/', function () {
         return view('home');
@@ -67,10 +68,20 @@ Route::middleware(['block.countries'])->group(function () {
 });
 
 // API publique pour tous
-Route::get('/api/live/active', [LiveController::class, 'activeLives']);
+Route::get('/api/live/active', [LiveController::class, 'active']);
 use App\Http\Controllers\AuthController;
 
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth');
+
+Route::post('/live/start', [LiveController::class, 'start']);
+Route::post('/live/stop', [LiveController::class, 'stop']);
+Route::get('/live/active', [LiveController::class, 'active']);
+
+// web.php
+Route::get('/live/{id}', function ($id) {
+    $modele = \App\Models\Modele::findOrFail($id);
+    return view('live.show', compact('modele'));
+});

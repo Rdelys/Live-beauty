@@ -10,41 +10,31 @@ use Illuminate\Support\Facades\Auth;
 
 class LiveController extends Controller
 {
-    public function startLive()
+    public function start(Request $request)
     {
-        $modele = Auth::guard('modele')->user();
+        $modele = Modele::find(session('modele_id'));
+        if ($modele) {
+            $modele->en_live = true;
+            $modele->save();
+        }
 
-        $live = Live::updateOrCreate(
-            ['modele_id' => $modele->id],
-            ['is_active' => true]
-        );
-
-        return response()->json(['status' => 'started']);
+        return response()->json(['success' => true]);
     }
 
-    public function stopLive()
+    public function stop(Request $request)
     {
-        $modele = Auth::guard('modele')->user();
+        $modele = Modele::find(session('modele_id'));
+        if ($modele) {
+            $modele->en_live = false;
+            $modele->save();
+        }
 
-        Live::where('modele_id', $modele->id)->update(['is_active' => false]);
-
-        return response()->json(['status' => 'stopped']);
+        return response()->json(['success' => true]);
     }
 
-    public function activeLives()
+    public function active()
     {
-        $lives = Live::with('modele')->where('is_active', true)->get();
-        return response()->json($lives->map(function ($live) {
-            return [
-                'id' => $live->modele->id,
-                'prenom' => $live->modele->prenom,
-            ];
-        }));
-    }
-
-    public function showLive($id)
-    {
-        $modele = Modele::findOrFail($id);
-        return view('live', compact('modele'));
+        $lives = Modele::where('en_live', true)->get(['id', 'prenom']);
+        return response()->json($lives);
     }
 }
