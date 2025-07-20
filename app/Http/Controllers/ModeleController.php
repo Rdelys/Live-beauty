@@ -103,6 +103,11 @@ public function destroy($id)
         $modele = Modele::findOrFail($id);
         return view('modele.show', compact('modele'));
     }
+public function accueil()
+{
+    $modeles = Modele::all();
+    return view('home', compact('modeles'));
+}
 
 }
 

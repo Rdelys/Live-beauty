@@ -96,17 +96,18 @@
         }
 
         .model-card {
-            background-color: #1f1f1f;
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
+    min-height: 370px; /* pour harmoniser si besoin */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
 
         .model-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-        }
+    transform: scale(1.03); /* Légèrement moins agressif */
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
 
         .model-card img {
             width: 100%;
@@ -133,6 +134,33 @@
             border-radius: 5px;
             font-weight: bold;
         }
+.model-img {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+    background-color: #000; /* Ajoute un fond pour les bandes noires */
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 2;
+}
+.status-online {
+    background-color: #28a745; /* Vert */
+}
+.status-offline {
+    background-color: #dc3545; /* Rouge */
+}
+
+
     </style>
 </head>
 
@@ -237,21 +265,64 @@
             <div class="col-md-10 p-4">
                 <div class="row g-4">
 
-                    <!-- Cartes Fille -->
-                    <div class="col-md-4 card-item fille">
-                        <div class="position-relative model-card">
-                            <span class="vip-badge">VIP</span>
-                            <img src="https://image.made-in-china.com/202f0j00YaMRCnjBLJrS/Push-up-Solid-Bikini-Sexy-Swimsuit-Australia-Sexy-Girl.webp" alt="Fille 1">
-                            <div class="model-name">KaylinJann</div>
-                        </div>
-                    </div>
+                    @foreach($modeles as $modele)
+    <div class="col-md-4 card-item fille">
+        <div class="position-relative model-card">
+            <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
 
-                    <div class="col-md-4 card-item fille">
-                        <div class="position-relative model-card">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI4wym7GCF2DQBOtarofNNHw7azpMx_A28RA&s" alt="Fille 2">
-                            <div class="model-name">Yasmina</div>
+            @if($modele->en_ligne)
+                <span class="vip-badge">VIP</span>
+            @endif
+
+            @php
+                $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+    $photos = $photos ?: [];
+                $hasVideo = $modele->video_file || $modele->video_link;
+            @endphp
+
+            <div id="carousel-{{ $modele->id }}" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @foreach($photos as $index => $photo)
+                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+<img src="{{ asset('storage/' . $photo) }}" class="d-block w-100 model-img" alt="Photo {{ $index + 1 }}">
                         </div>
-                    </div>
+                    @endforeach
+                </div>
+
+                @if(count($photos) > 1)
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                @endif
+            </div>
+
+            @if($hasVideo)
+<div class="d-grid gap-2 p-2">
+    <button class="btn btn-outline-warning" onclick="toggleVideo({{ $modele->id }})" id="btn-video-{{ $modele->id }}">🎬 Voir la vidéo</button>
+    <button class="btn btn-outline-light d-none" onclick="togglePhotos({{ $modele->id }})" id="btn-photos-{{ $modele->id }}">🖼️ Retour aux photos</button>
+</div>
+            @endif
+
+            <div class="model-name">{{ $modele->prenom }}</div>
+
+            <!-- Vidéo (masquée par défaut) -->
+            <div id="video-{{ $modele->id }}" class="d-none">
+                @if($modele->video_file)
+                    <video controls style="width:100%; height:250px; object-fit:cover;">
+                        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
+                        Votre navigateur ne prend pas en charge la vidéo.
+                    </video>
+                @elseif($modele->video_link)
+                    <iframe width="100%" height="250" src="{{ $modele->video_link }}" frameborder="0" allowfullscreen></iframe>
+                @endif
+            </div>
+        </div>
+    </div>
+@endforeach
+
 
                 </div>
             </div>
@@ -351,6 +422,35 @@
     </form>
   </div>
 </div>
+<script>
+function toggleVideo(id) {
+    const carousel = document.getElementById(`carousel-${id}`);
+    const video = document.getElementById(`video-${id}`);
+    const btnVideo = document.getElementById(`btn-video-${id}`);
+    const btnPhotos = document.getElementById(`btn-photos-${id}`);
+
+    if (carousel && video) {
+        carousel.classList.add('d-none');
+        video.classList.remove('d-none');
+        btnVideo.classList.add('d-none');
+        btnPhotos.classList.remove('d-none');
+    }
+}
+
+function togglePhotos(id) {
+    const carousel = document.getElementById(`carousel-${id}`);
+    const video = document.getElementById(`video-${id}`);
+    const btnVideo = document.getElementById(`btn-video-${id}`);
+    const btnPhotos = document.getElementById(`btn-photos-${id}`);
+
+    if (carousel && video) {
+        video.classList.add('d-none');
+        carousel.classList.remove('d-none');
+        btnPhotos.classList.add('d-none');
+        btnVideo.classList.remove('d-none');
+    }
+}
+</script>
 
 </body>
 </html>

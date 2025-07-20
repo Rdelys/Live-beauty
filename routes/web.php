@@ -59,5 +59,8 @@ Route::middleware(['block.countries'])->group(function () {
     });
 });
 
+
+Route::get('/', [ModeleController::class, 'accueil'])->name('home');
+
 // ❌ SUPPRIMÉ : Ne jamais redéfinir la route live ici !
 // Route::get('/live/{id}', function (...) { ... });
