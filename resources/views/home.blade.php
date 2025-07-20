@@ -160,6 +160,45 @@
     background-color: #dc3545; /* Rouge */
 }
 
+#modelDetailModal .modal-content {
+    background-color: transparent;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+}
+
+#modelDetailModal .modal-body {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+
+
+#modal-carousel {
+    z-index: 1;
+}
+
+#modal-carousel .carousel-inner {
+    height: 100vh;
+    width: 100%;
+}
+
+#modal-carousel .carousel-item {
+    height: 100%;
+    width: 100%;
+}
+
+#modal-carousel .carousel-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover; /* bien cadré sans étirer */
+    filter: blur(4px) brightness(0.4);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 
     </style>
 </head>
@@ -267,7 +306,7 @@
 
                     @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
-        <div class="position-relative model-card">
+<div class="position-relative model-card" style="cursor:pointer;" onclick="afficherDetailModele({{ $modele->id }})">
             <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
 
             @if($modele->en_ligne)
@@ -329,6 +368,35 @@
 
         </div>
     </div>
+<!-- Modal de Détail du Modèle -->
+<div class="modal fade" id="modelDetailModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-fullscreen modal-dialog-centered">
+    <div class="modal-content pmodal--0 border-0 bg-dark text-white position-relative overflow-hidden">
+      <!-- Bouton fermeture -->
+<button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal" aria-label="Fermer">
+    <i class="fas fa-times"></i>
+</button>
+
+      <!-- Arrière-plan en carrousel -->
+      <div id="modal-carousel" class="position-absolute top-0 start-0 w-100 h-100 z-n1 carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner" id="modalCarouselInner"></div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#modal-carousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#modal-carousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
+      </div>
+
+      <!-- Contenu superposé -->
+      <div class="modal-body bg-black bg-opacity-75 p-4 rounded shadow-lg m-4" id="modelDetailContent" style="max-height:80vh; overflow-y:auto;">
+        <!-- Le contenu texte sera injecté ici -->
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
     <!-- Script de changement dynamique -->
     <script>
@@ -369,6 +437,77 @@
 
   fetchLiveModels();
   setInterval(fetchLiveModels, 15000); // actualisation toutes les 15 sec
+
+  function toggleVideo(id) {
+    const carousel = document.getElementById(`carousel-${id}`);
+    const video = document.getElementById(`video-${id}`);
+    const btnVideo = document.getElementById(`btn-video-${id}`);
+    const btnPhotos = document.getElementById(`btn-photos-${id}`);
+
+    if (carousel && video) {
+        carousel.classList.add('d-none');
+        video.classList.remove('d-none');
+        btnVideo.classList.add('d-none');
+        btnPhotos.classList.remove('d-none');
+    }
+}
+
+function togglePhotos(id) {
+    const carousel = document.getElementById(`carousel-${id}`);
+    const video = document.getElementById(`video-${id}`);
+    const btnVideo = document.getElementById(`btn-video-${id}`);
+    const btnPhotos = document.getElementById(`btn-photos-${id}`);
+
+    if (carousel && video) {
+        video.classList.add('d-none');
+        carousel.classList.remove('d-none');
+        btnPhotos.classList.add('d-none');
+        btnVideo.classList.remove('d-none');
+    }
+}
+
+ const modeles = @json($modeles); // Assure-toi d'avoir passé $modeles depuis le contrôleur
+
+    function afficherDetailModele(id) {
+    const modele = modeles.find(m => m.id === id);
+    if (!modele) return;
+
+    let photos = modele.photos;
+    try {
+        photos = typeof photos === 'string' ? JSON.parse(photos) : photos;
+        if (!Array.isArray(photos)) photos = [];
+    } catch (e) {
+        photos = [];
+    }
+
+    // Injecter les images dans le carrousel de fond
+    const carouselInner = document.getElementById('modalCarouselInner');
+    carouselInner.innerHTML = photos.map((photo, index) => `
+        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+            <img src="/storage/${photo}" alt="photo-${index}">
+        </div>
+    `).join('');
+
+    // Injecter les détails dans la zone centrale
+    const contentHTML = `
+        <h4 class="text-warning mb-3">Bio de ${modele.prenom}</h4>
+        <p><strong>${modele.age || 'Âge inconnu'} ans</strong> — ${modele.genre || 'Genre'} — ${modele.orientation || ''} — ${modele.langues || ''}</p>
+        <p>${modele.description || 'Aucune description disponible.'}</p>
+        <hr class="bg-light">
+        <h5>Ma bio:</h5>
+        <ul class="list-unstyled mb-3">
+            <li><strong>Taille:</strong> ${modele.taille || '-'} cm</li>
+            <li><strong>Fesses:</strong> ${modele.fesses || '-'}</li>
+            <li><strong>Poitrine:</strong> ${modele.poitrine || '-'}</li>
+        </ul>
+        <h5>Voici ce que je propose en Chat Privé :</h5>
+        <p>${modele.services_prives || 'Non précisé'}</p>
+    `;
+    document.getElementById('modelDetailContent').innerHTML = contentHTML;
+
+    new bootstrap.Modal(document.getElementById('modelDetailModal')).show();
+}
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -422,35 +561,5 @@
     </form>
   </div>
 </div>
-<script>
-function toggleVideo(id) {
-    const carousel = document.getElementById(`carousel-${id}`);
-    const video = document.getElementById(`video-${id}`);
-    const btnVideo = document.getElementById(`btn-video-${id}`);
-    const btnPhotos = document.getElementById(`btn-photos-${id}`);
-
-    if (carousel && video) {
-        carousel.classList.add('d-none');
-        video.classList.remove('d-none');
-        btnVideo.classList.add('d-none');
-        btnPhotos.classList.remove('d-none');
-    }
-}
-
-function togglePhotos(id) {
-    const carousel = document.getElementById(`carousel-${id}`);
-    const video = document.getElementById(`video-${id}`);
-    const btnVideo = document.getElementById(`btn-video-${id}`);
-    const btnPhotos = document.getElementById(`btn-photos-${id}`);
-
-    if (carousel && video) {
-        video.classList.add('d-none');
-        carousel.classList.remove('d-none');
-        btnPhotos.classList.add('d-none');
-        btnVideo.classList.remove('d-none');
-    }
-}
-</script>
-
 </body>
 </html>
