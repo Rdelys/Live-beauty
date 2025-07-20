@@ -135,6 +135,17 @@
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
       <video id="liveVideo" autoplay playsinline muted></video>
+      @if(!Auth::check())
+  <div id="countdownBox" class="text-center mt-2">
+    <p class="text-warning fs-5">
+      ⏳ Il vous reste <span id="countdown">10</span> secondes de live gratuit.
+    </p>
+    <p class="text-light small">
+      🔒 Connecte-toi ou crée un compte pour continuer à regarder le live.
+    </p>
+  </div>
+@endif
+
       <p class="mt-3">{{ $modele->description }}</p>
     </div>
 
@@ -164,17 +175,38 @@
   </div>
 
   <script>
-    async function startLiveView() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        document.getElementById('liveVideo').srcObject = stream;
-      } catch (err) {
-        console.error("Erreur caméra :", err);
-        alert("Impossible d'accéder à la webcam.");
-      }
-    }
+  async function startLiveView() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      const videoElement = document.getElementById('liveVideo');
+      videoElement.srcObject = stream;
 
-    startLiveView();
-  </script>
+      @if(!Auth::check())
+        let secondsLeft = 10;
+        const countdownSpan = document.getElementById('countdown');
+
+        const interval = setInterval(() => {
+          secondsLeft--;
+          countdownSpan.textContent = secondsLeft;
+
+          if (secondsLeft <= 0) {
+            clearInterval(interval);
+            // Stop stream
+            stream.getTracks().forEach(track => track.stop());
+            // Redirect
+            window.location.href = "{{ route('home') }}";
+          }
+        }, 1000);
+      @endif
+
+    } catch (err) {
+      console.error("Erreur caméra :", err);
+      alert("Impossible d'accéder à la webcam.");
+    }
+  }
+
+  startLiveView();
+</script>
+
 </body>
 </html>
