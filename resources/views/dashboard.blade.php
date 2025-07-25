@@ -132,6 +132,12 @@
             border-radius: 5px;
             font-weight: bold;
         }
+
+        .card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+}
+
     </style>
 </head>
 
@@ -167,10 +173,22 @@
                 </ul>
 
                 <div class="d-flex align-items-center">
+                    @if(Auth::check())
+    <div class="me-3 text-white fw-bold">
+        <i class="fas fa-coins text-warning me-1"></i>
+        {{ Auth::user()->jetons }} jetons
+    </div>
+@endif
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-envelope"></i></a>
+                    
                     <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span>
+                    
+                    <button class="btn btn-danger fw-bold rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#achatJetonsModal">
+  <i class="fas fa-coins me-1"></i> Achat Jetons
+</button>
+
                     <a href="{{ route('logout') }}" class="btn btn-outline-light">Déconnexion</a>
                 </div>
             </div>
@@ -290,5 +308,96 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <!-- Modal Achat Jetons -->
+<div class="modal fade" id="achatJetonsModal" tabindex="-1" aria-labelledby="achatJetonsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content text-white" style="background: #0d0d0d; border-radius: 20px; border: 2px solid #d6336c;">
+      <div class="modal-header border-0">
+        <h4 class="modal-title text-danger fw-bold" id="achatJetonsLabel">
+          <i class="fas fa-coins me-2"></i> Acheter des Jetons
+        </h4>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4 text-center">
+
+          @php
+            $packs = [
+              ['jetons' => 30, 'prix' => '5.49'],
+              ['jetons' => 60, 'prix' => '9.99'],
+              ['jetons' => 130, 'prix' => '19.99'],
+              ['jetons' => 300, 'prix' => '44.99'],
+              ['jetons' => 700, 'prix' => '99.99'],
+            ];
+          @endphp
+
+          @foreach($packs as $pack)
+          <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-lg"
+              style="background: linear-gradient(to bottom right, #1a1a1a, #000); border-radius: 15px;">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="text-danger fw-bold mb-3">{{ $pack['jetons'] }} <i class="fas fa-fire"></i> Jetons</h5>
+                <p class="fs-4 text-white-50 mb-4">{{ $pack['prix'] }} €</p>
+                <div id="paypal-button-container-{{ $pack['jetons'] }}"></div>
+              </div>
+            </div>
+          </div>
+          @endforeach
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PayPal SDK + Script -->
+<script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_SANDBOX_CLIENT_ID') }}&currency=EUR"></script>
+<script>
+  const packs = [
+    { jetons: 30, price: '5.49' },
+    { jetons: 60, price: '9.99' },
+    { jetons: 130, price: '19.99' },
+    { jetons: 300, price: '44.99' },
+    { jetons: 700, price: '99.99' },
+  ];
+
+  packs.forEach(pack => {
+    paypal.Buttons({
+      style: {
+        color: 'gold',
+        shape: 'pill',
+        label: 'pay'
+      },
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: pack.price }
+          }]
+        });
+      },
+      onApprove: (data, actions) => {
+        return actions.order.capture().then(function(details) {
+          fetch(`/acheter/jetons`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ nombre: pack.jetons })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              alert('🎉 Jetons ajoutés avec succès !');
+              location.reload();
+            }
+          });
+        });
+      }
+    }).render(`#paypal-button-container-${pack.jetons}`);
+  });
+</script>
+
+
 </body>
 </html>
