@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Modele;
+
 
 class AuthController extends Controller
 {
@@ -41,6 +43,25 @@ class AuthController extends Controller
     }
 
     public function dashboard() {
-        return view('dashboard');
-    }
+ $modeles = Modele::all();
+    return view('dashboard', compact('modeles'));    }
+
+    public function updateProfile(Request $request)
+{
+    $user = Auth::user();
+
+    $request->validate([
+        'nom' => 'nullable|string|max:255',
+        'prenoms' => 'nullable|string|max:255',
+        'age' => 'nullable|integer',
+        'pseudo' => 'required|string|max:255',
+        'departement' => 'nullable|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+    ]);
+
+    $user->update($request->only(['nom', 'prenoms', 'age', 'pseudo', 'departement', 'email']));
+
+    return redirect()->back()->with('success', 'Profil mis à jour avec succès.');
+}
+
 }

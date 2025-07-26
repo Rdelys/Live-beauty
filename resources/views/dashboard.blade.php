@@ -137,6 +137,60 @@
   transform: scale(1.05);
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
 }
+input.form-control:focus {
+  border-color: #ff4d4d !important;
+  box-shadow: 0 0 5px rgba(255, 77, 77, 0.5) !important;
+  background-color: #1a1a1a !important;
+}
+.model-img {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+    background-color: #000;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 2;
+}
+.status-online {
+    background-color: #28a745;
+}
+.status-offline {
+    background-color: #dc3545;
+}
+
+#modelDetailModal .modal-content {
+  background-color: transparent;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+#modal-carousel .carousel-inner {
+  height: 100vh;
+  width: 100%;
+}
+#modal-carousel .carousel-item {
+  height: 100%;
+  width: 100%;
+}
+#modal-carousel .carousel-item img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  filter: blur(4px) brightness(0.4);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
     </style>
 </head>
@@ -169,28 +223,35 @@
                     <li class="nav-item"><a class="nav-link" href="#">Club Elite</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Awards</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Meilleurs Membres</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Obtenez des Crédits</a></li>
                 </ul>
 
                 <div class="d-flex align-items-center">
-                    @if(Auth::check())
+                    
+                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-envelope"></i></a>
+                    
+@if(Auth::check())
     <div class="me-3 text-white fw-bold">
         <i class="fas fa-coins text-warning me-1"></i>
         {{ Auth::user()->jetons }} jetons
     </div>
 @endif
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-envelope"></i></a>
-                    
                     <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span>
                     
                     <button class="btn btn-danger fw-bold rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#achatJetonsModal">
-  <i class="fas fa-coins me-1"></i> Achat Jetons
-</button>
+                      <i class="fas fa-coins me-1"></i> Achat Jetons
+                    </button>
+                    <!-- Icône modifier profil -->
+<a href="#" class="text-white fs-5 me-3" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Modifier mon profil">
+    <i class="fas fa-user-cog"></i>
+</a>
 
-                    <a href="{{ route('logout') }}" class="btn btn-outline-light">Déconnexion</a>
-                </div>
+<!-- Icône déconnexion -->
+<a href="{{ route('logout') }}" class="text-white fs-5 me-2" title="Déconnexion">
+    <i class="fas fa-power-off"></i>
+</a>
+ </div>
             </div>
         </div>
     </nav>
@@ -251,28 +312,94 @@
             <!-- Cartes -->
             <div class="col-md-10 p-4">
                 <div class="row g-4">
+  @foreach($modeles as $modele)
+    <div class="col-md-4 card-item fille">
+        <div class="position-relative model-card" style="cursor:pointer;" onclick="afficherDetailModele({{ $modele->id }})">
+            <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
 
-                    <!-- Cartes Fille -->
-                    <div class="col-md-4 card-item fille">
-                        <div class="position-relative model-card">
-                            <span class="vip-badge">VIP</span>
-                            <img src="https://image.made-in-china.com/202f0j00YaMRCnjBLJrS/Push-up-Solid-Bikini-Sexy-Swimsuit-Australia-Sexy-Girl.webp" alt="Fille 1">
-                            <div class="model-name">KaylinJann</div>
-                        </div>
-                    </div>
+            @if($modele->en_ligne)
+                <span class="vip-badge">VIP</span>
+            @endif
 
-                    <div class="col-md-4 card-item fille">
-                        <div class="position-relative model-card">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI4wym7GCF2DQBOtarofNNHw7azpMx_A28RA&s" alt="Fille 2">
-                            <div class="model-name">Yasmina</div>
+            @php
+                $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+                $photos = $photos ?: [];
+                $hasVideo = $modele->video_file || $modele->video_link;
+            @endphp
+
+            <div id="carousel-{{ $modele->id }}" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @foreach($photos as $index => $photo)
+                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                            <img src="{{ asset('storage/' . $photo) }}" class="d-block w-100 model-img" alt="Photo {{ $index + 1 }}">
                         </div>
-                    </div>
+                    @endforeach
+                </div>
+                @if(count($photos) > 1)
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                @endif
+            </div>
+
+            @if($hasVideo)
+                <div class="d-grid gap-2 p-2">
+                    <button class="btn btn-outline-warning" onclick="toggleVideo({{ $modele->id }})" id="btn-video-{{ $modele->id }}">🎬 Voir la vidéo</button>
+                    <button class="btn btn-outline-light d-none" onclick="togglePhotos({{ $modele->id }})" id="btn-photos-{{ $modele->id }}">🖼️ Retour aux photos</button>
+                </div>
+            @endif
+
+            <div class="model-name">{{ $modele->prenom }}</div>
+
+            <!-- Vidéo -->
+            <div id="video-{{ $modele->id }}" class="d-none">
+                @if($modele->video_file)
+                    <video controls style="width:100%; height:250px; object-fit:cover;">
+                        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
+                        Votre navigateur ne prend pas en charge la vidéo.
+                    </video>
+                @elseif($modele->video_link)
+                    <iframe width="100%" height="250" src="{{ $modele->video_link }}" frameborder="0" allowfullscreen></iframe>
+                @endif
+            </div>
+        </div>
+    </div>
+@endforeach
+
 
                 </div>
             </div>
 
         </div>
     </div>
+<div class="modal fade" id="modelDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen modal-dialog-centered">
+    <div class="modal-content border-0 bg-dark text-white position-relative overflow-hidden">
+      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal" aria-label="Fermer">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Carrousel d'arrière-plan -->
+      <div id="modal-carousel" class="position-absolute top-0 start-0 w-100 h-100 z-n1 carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner" id="modalCarouselInner"></div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#modal-carousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#modal-carousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
+      </div>
+
+      <!-- Contenu superposé -->
+      <div class="modal-body bg-black bg-opacity-75 p-4 rounded shadow-lg m-4" id="modelDetailContent" style="max-height:80vh; overflow-y:auto;">
+        <div class="text-center text-muted">Chargement...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- JS -->
     <script>
@@ -305,6 +432,79 @@
 
         fetchLiveModels();
         setInterval(fetchLiveModels, 15000);
+
+        function toggleVideo(id) {
+    const carousel = document.getElementById(`carousel-${id}`);
+    const video = document.getElementById(`video-${id}`);
+    const btnVideo = document.getElementById(`btn-video-${id}`);
+    const btnPhotos = document.getElementById(`btn-photos-${id}`);
+
+    if (carousel && video) {
+        carousel.classList.add('d-none');
+        video.classList.remove('d-none');
+        btnVideo.classList.add('d-none');
+        btnPhotos.classList.remove('d-none');
+    }
+}
+
+function togglePhotos(id) {
+    const carousel = document.getElementById(`carousel-${id}`);
+    const video = document.getElementById(`video-${id}`);
+    const btnVideo = document.getElementById(`btn-video-${id}`);
+    const btnPhotos = document.getElementById(`btn-photos-${id}`);
+
+    if (carousel && video) {
+        video.classList.add('d-none');
+        carousel.classList.remove('d-none');
+        btnPhotos.classList.add('d-none');
+        btnVideo.classList.remove('d-none');
+    }
+}
+
+function afficherDetailModele(id) {
+  const content = document.getElementById('modelDetailContent');
+  content.innerHTML = `<div class="text-center text-muted">Chargement...</div>`;
+
+  fetch(`/api/modele/${id}`)
+    .then(res => res.json())
+    .then(modele => {
+      let photos = Array.isArray(modele.photos) ? modele.photos : JSON.parse(modele.photos || '[]');
+      const enLigne = modele.en_ligne;
+      const hasVideo = modele.video_file || modele.video_link;
+      const jetons = modele.prix_jetons || 20;
+
+      // Injecte les photos dans le carrousel
+      const carouselInner = document.getElementById('modalCarouselInner');
+      carouselInner.innerHTML = photos.map((photo, i) => `
+        <div class="carousel-item ${i === 0 ? 'active' : ''}">
+          <img src="/storage/${photo}" alt="photo-${i}">
+        </div>
+      `).join('');
+
+      // Contenu de la bio
+      content.innerHTML = `
+        <h4 class="text-warning mb-3">Bio de ${modele.prenom}</h4>
+        <p><strong>${modele.age || 'Âge inconnu'} ans</strong> — ${modele.genre || 'Genre'} — ${modele.orientation || ''} — ${modele.langues || ''}</p>
+        <p>${modele.description || 'Aucune description disponible.'}</p>
+        <hr class="bg-light">
+        <h5>Ma bio:</h5>
+        <ul class="list-unstyled mb-3">
+          <li><strong>Taille:</strong> ${modele.taille || '-'} cm</li>
+          <li><strong>Fesses:</strong> ${modele.fesses || '-'}</li>
+          <li><strong>Poitrine:</strong> ${modele.poitrine || '-'}</li>
+        </ul>
+        <h5>Voici ce que je propose en Chat Privé :</h5>
+        <p>${modele.services_prives || 'Non précisé'}</p>
+        ${enLigne ? `<button class="btn btn-success w-100 fw-bold mt-3">🔴 Démarrer session</button>` : `<span class="badge bg-secondary">Hors ligne</span>`}
+      `;
+
+      new bootstrap.Modal(document.getElementById('modelDetailModal')).show();
+    })
+    .catch(e => {
+      console.error(e);
+      content.innerHTML = `<div class="text-danger text-center">Erreur de chargement des détails.</div>`;
+    });
+}
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -349,6 +549,59 @@
     </div>
   </div>
 </div>
+@php
+    $user = Auth::user();
+@endphp
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ route('profile.update') }}" class="modal-content" style="background-color: #0d0d0d; color: #fff; border: 2px solid #d6336c; border-radius: 15px;">
+      @csrf
+      @method('PUT')
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-danger">
+          <i class="fas fa-user-edit me-2"></i> Modifier mon profil
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-user text-danger me-2"></i>Nom</label>
+          <input type="text" name="nom" class="form-control bg-dark text-white border-danger" value="{{ $user->nom }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-user-friends text-danger me-2"></i>Prénoms</label>
+          <input type="text" name="prenoms" class="form-control bg-dark text-white border-danger" value="{{ $user->prenoms }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-birthday-cake text-danger me-2"></i>Âge</label>
+          <input type="number" name="age" class="form-control bg-dark text-white border-danger" value="{{ $user->age }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-user-tag text-danger me-2"></i>Pseudo</label>
+          <input type="text" name="pseudo" class="form-control bg-dark text-white border-danger" value="{{ $user->pseudo }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-building text-danger me-2"></i>Département</label>
+          <input type="text" name="departement" class="form-control bg-dark text-white border-danger" value="{{ $user->departement }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-envelope text-danger me-2"></i>Email</label>
+          <input type="email" name="email" class="form-control bg-dark text-white border-danger" value="{{ $user->email }}">
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill">
+          <i class="fas fa-save me-2"></i> Enregistrer les modifications
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 <!-- PayPal SDK + Script -->
 <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_SANDBOX_CLIENT_ID') }}&currency=EUR"></script>

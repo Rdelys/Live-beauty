@@ -6,6 +6,7 @@ use App\Http\Controllers\JetonController;
 use App\Http\Controllers\ModeleAuthController;
 use App\Http\Controllers\LiveController;
 use App\Http\Controllers\AuthController;
+use App\Models\Modele;
 
 Route::get('/forbidden', function () {
     return response()->view('errors.403', [], 403);
@@ -69,3 +70,8 @@ Route::post('/acheter/jetons', [App\Http\Controllers\AchatJetonsController::clas
 
 Route::view('/cgu', 'legal.cgu')->name('cgu');
 Route::view('/politique-utilisation', 'legal.pu')->name('pu');
+Route::put('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update')->middleware('auth');
+Route::get('/api/modele/{id}', function ($id) {
+    $modele = Modele::findOrFail($id);
+    return response()->json($modele);
+});

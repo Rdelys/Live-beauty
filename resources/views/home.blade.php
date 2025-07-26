@@ -301,7 +301,6 @@
                     <li class="nav-item"><a class="nav-link" href="#">Club Elite</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Awards</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Meilleurs Membres</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Obtenez des Crédits</a></li>
                 </ul>
 
                 <div class="d-flex align-items-center">
