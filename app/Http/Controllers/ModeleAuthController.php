@@ -53,7 +53,7 @@ class ModeleAuthController extends Controller
 
     public function profile()
     {
-        $modele = Modele::findOrFail(session('modele_id'));
+$modele = Modele::with('jetons')->findOrFail(session('modele_id'));
         return view('modele.profil', compact('modele'));
     }
 }

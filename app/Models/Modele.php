@@ -26,4 +26,11 @@ class Modele extends Model
     ];
     protected $table = 'modeles'; // Assurez-vous que le nom de la table
 
+    // app/Models/Modele.php
+public function jetons()
+{
+    return $this->hasMany(Jeton::class);
+}
+
+
 }

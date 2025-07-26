@@ -75,3 +75,4 @@ Route::get('/api/modele/{id}', function ($id) {
     $modele = Modele::findOrFail($id);
     return response()->json($modele);
 });
+
