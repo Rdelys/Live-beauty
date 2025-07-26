@@ -152,23 +152,49 @@
     <!-- Jetons Section -->
     <div class="right-jetons">
       <h4 class="mb-4">💎 Choisis ton action avec des jetons</h4>
-      @foreach($jetons as $jeton)
-  <div class="jeton-card">
-    <div class="jeton-info">
-      <span class="jeton-name">{{ $jeton->nom }}</span>
-      <span class="jeton-desc">{{ $jeton->description }}</span>
+      @php
+  $jetonsPerso = $jetons->where('modele_id', $modele->id);
+  $jetonsGlobaux = $jetons->whereNull('modele_id');
+@endphp
+
+<!-- Jetons personnalisés du modèle -->
+@if($jetonsPerso->count())
+  <h5 class="text-white">🎯 Actions personnalisées par {{ $modele->prenom }}</h5>
+  @foreach($jetonsPerso as $jeton)
+    <div class="jeton-card">
+      <div class="jeton-info">
+        <span class="jeton-name">{{ $jeton->nom }}</span>
+        <span class="jeton-desc">{{ $jeton->description }}</span>
+      </div>
+      <button class="jeton-btn"
+        {{ !$modele->en_ligne || !Auth::check() ? 'disabled' : '' }}>
+        {{ $jeton->nombre_de_jetons }} jetons
+      </button>
     </div>
-    <button 
-      class="jeton-btn"
-      {{ !$modele->en_ligne || !Auth::check() ? 'disabled' : '' }}>
-      {{ $jeton->nombre_de_jetons }} € 💠
-    </button>
-  </div>
-@endforeach
+  @endforeach
+@endif
+
+<!-- Jetons globaux disponibles -->
+@if($jetonsGlobaux->count())
+  <h5 class="text-white mt-4">✨ Jetons standards disponibles</h5>
+  @foreach($jetonsGlobaux as $jeton)
+    <div class="jeton-card">
+      <div class="jeton-info">
+        <span class="jeton-name">{{ $jeton->nom }}</span>
+        <span class="jeton-desc">{{ $jeton->description }}</span>
+      </div>
+      <button class="jeton-btn"
+        {{ !$modele->en_ligne || !Auth::check() ? 'disabled' : '' }}>
+💠 {{ $jeton->nombre_de_jetons }} jetons requis
+      </button>
+    </div>
+  @endforeach
+@endif
 
 @if(!Auth::check())
   <div class="text-warning mt-2 small">🔒 Connecte-toi pour utiliser des jetons.</div>
 @endif
+
 
     </div>
 

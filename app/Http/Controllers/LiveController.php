@@ -41,12 +41,16 @@ class LiveController extends Controller
     public function show($id)
 {
     $modele = Modele::findOrFail($id);
-    $jetons = Jeton::all(); // assurez-vous que cette ligne est bien là
+
+    $jetons = Jeton::whereNull('modele_id')
+                   ->orWhere('modele_id', $modele->id)
+                   ->get();
 
     return view('live.show', [
         'modele' => $modele,
-        'jetons' => $jetons, // ✅ passe la variable à la vue
+        'jetons' => $jetons,
     ]);
 }
+
 
 }
