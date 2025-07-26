@@ -65,3 +65,7 @@ Route::get('/', [ModeleController::class, 'accueil'])->name('home');
 // ❌ SUPPRIMÉ : Ne jamais redéfinir la route live ici !
 // Route::get('/live/{id}', function (...) { ... });
 Route::post('/acheter/jetons', [App\Http\Controllers\AchatJetonsController::class, 'ajouter']);
+
+
+Route::view('/cgu', 'legal.cgu')->name('cgu');
+Route::view('/politique-utilisation', 'legal.pu')->name('pu');

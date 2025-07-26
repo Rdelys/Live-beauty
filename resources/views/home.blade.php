@@ -198,7 +198,75 @@
     top: 0;
     left: 0;
 }
+/* Appliquer à toutes les modales personnalisées */
+.modal-content.auth-modal {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+}
 
+/* Header/Footer */
+.modal-header,
+.modal-footer {
+    border: none;
+    background: transparent;
+}
+
+.modal-title {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Champs */
+.auth-modal .form-control {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.auth-modal .form-control::placeholder {
+    color: #aaa;
+}
+
+.auth-modal .form-control:focus {
+    background-color: #181818;
+    color: #fff;
+    border-color: #fff;
+    box-shadow: none;
+}
+
+/* Bouton */
+.auth-modal .btn-submit {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-weight: bold;
+    width: 100%;
+    transition: background 0.3s ease;
+}
+
+.auth-modal .btn-submit:hover {
+    background-color: #eaeaea;
+}
+
+/* Liens */
+.auth-modal a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.auth-modal .form-check-label {
+    color: #ccc;
+    font-size: 0.9rem;
+}
 
     </style>
 </head>
@@ -512,54 +580,69 @@ function togglePhotos(id) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Modal Connexion -->
+<!-- Modal Connexion -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST" action="{{ route('login.submit') }}" class="modal-content bg-dark text-white">
+    <form method="POST" action="{{ route('login.submit') }}" class="modal-content auth-modal">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Connexion</h5>
+        <h5 class="modal-title">Connexion à votre compte</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="email_login" class="form-label">Email</label>
-          <input type="email" class="form-control" name="email" required>
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label for="password_login" class="form-label">Mot de passe</label>
-          <input type="password" class="form-control" name="password" required>
+          <label class="form-label">Mot de passe</label>
+          <input type="password" name="password" class="form-control" required>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-warning">Se connecter</button>
+        <button type="submit" class="btn btn-submit">Connexion</button>
       </div>
     </form>
   </div>
 </div>
 
+
+<!-- Modal Inscription -->
 <!-- Modal Inscription -->
 <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST" action="{{ route('register.submit') }}" class="modal-content bg-dark text-white">
+    <form method="POST" action="{{ route('register.submit') }}" class="modal-content auth-modal">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title" id="registerModalLabel">Inscription</h5>
+        <h5 class="modal-title">Créer un compte</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-2"><input name="nom" class="form-control" placeholder="Nom" required></div>
-        <div class="mb-2"><input name="prenoms" class="form-control" placeholder="Prénoms" required></div>
-        <div class="mb-2"><input name="age" type="number" class="form-control" placeholder="Âge" required></div>
-        <div class="mb-2"><input name="pseudo" class="form-control" placeholder="Pseudo" required></div>
-        <div class="mb-2"><input name="departement" class="form-control" placeholder="Département" required></div>
-        <div class="mb-2"><input name="email" type="email" class="form-control" placeholder="Email" required></div>
-        <div class="mb-2"><input name="password" type="password" class="form-control" placeholder="Mot de passe" required></div>
+        <div class="mb-3">
+          <label class="form-label">Pseudo</label>
+          <input name="pseudo" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input name="email" type="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Mot de passe</label>
+          <input name="password" type="password" class="form-control" required>
+        </div>
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="cguCheck" required>
+          <label class="form-check-label" for="cguCheck">
+            J'accepte les <a href="{{ route('cgu') }}" target="_blank">CGU</a> et la <a href="{{ route('pu') }}" target="_blank">Politique d’Utilisation</a>.
+          </label>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-warning">S’inscrire</button>
+        <button type="submit" class="btn btn-submit">Inscription</button>
       </div>
     </form>
   </div>
 </div>
+
 </body>
 </html>
