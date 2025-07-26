@@ -12,14 +12,14 @@ class JetonController extends Controller
         $request->validate([
             'nom.*' => 'required|string|max:255',
             'description.*' => 'nullable|string|max:1000',
-            'prix.*' => 'required|numeric|min:0',
+            'nombre_de_jetons.*' => 'required|numeric|min:0',
         ]);
 
         foreach ($request->nom as $index => $nom) {
             Jeton::create([
                 'nom' => $nom,
                 'description' => $request->description[$index],
-                'prix' => $request->prix[$index],
+                'nombre_de_jetons' => $request->nombre_de_jetons[$index],
             ]);
         }
 

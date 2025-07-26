@@ -396,7 +396,7 @@
           <tr>
             <th>Nom</th>
             <th>Description</th>
-            <th>Prix</th>
+            <th>Nombre de jetons</th>
           </tr>
         </thead>
         <tbody>
@@ -404,7 +404,7 @@
     <tr>
         <td>{{ $jeton->nom }}</td>
         <td>{{ $jeton->description }}</td>
-        <td>{{ $jeton->prix }}€</td>
+        <td>{{ $jeton->nombre_de_jetons }}</td>
     </tr>
 @endforeach
 </tbody>
@@ -426,8 +426,8 @@
               <input type="text" name="description[]" class="form-control" />
             </div>
             <div class="form-group flex-fill">
-              <label>Prix (€)</label>
-              <input type="number" name="prix[]" class="form-control" />
+              <label>Nombre de jetons</label>
+              <input type="number" name="nombre_de_jetons[]" class="form-control" />
             </div>
             <button type="button" class="btn btn-success btn-action add-jeton">+</button>
           </div>

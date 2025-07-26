@@ -161,7 +161,7 @@
     <button 
       class="jeton-btn"
       {{ !$modele->en_ligne || !Auth::check() ? 'disabled' : '' }}>
-      {{ $jeton->prix }} € 💠
+      {{ $jeton->nombre_de_jetons }} € 💠
     </button>
   </div>
 @endforeach
