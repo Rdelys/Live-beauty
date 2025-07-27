@@ -190,60 +190,108 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-const startBtn = document.getElementById('startLiveBtn');
-const stopBtn = document.getElementById('stopLiveBtn');
-const liveVideo = document.getElementById('liveVideo');
-const liveSection = document.getElementById('liveSection');
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.2/dist/peerjs.min.js"></script>
+<script>
+const peer = new Peer("modele-{{ $modele->id }}", {
+  host: 'livebeautyofficial.com',
+  port: 9000,
+  path: '/',
+  secure: true
+});
+
 let mediaStream;
 
-startBtn.addEventListener('click', async () => {
-  try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    liveVideo.srcObject = mediaStream;
-    liveSection.style.display = 'block';
-    startBtn.style.display = 'none';
-    stopBtn.style.display = 'inline-block';
+peer.on('open', id => {
+  console.log("✅ PeerJS Modèle prêt avec ID :", id);
+  document.getElementById('startLiveBtn').disabled = false;
 
-    // Notifier Laravel que le live démarre
-    await fetch('/api/live/start', {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-  }
+  peer.on('call', call => {
+    console.log("📞 Appel entrant d’un viewer...");
+    if (mediaStream) {
+      call.answer(mediaStream);
+      console.log("✅ Stream envoyé au viewer.");
+    } else {
+      console.warn("⚠️ Stream non prêt, appel rejeté.");
+      call.close();
+    }
+  });
 });
 
-    console.log('Live lancé.');
-  } catch (error) {
-    alert("Erreur caméra : " + error.message);
-  }
-});
+document.addEventListener('DOMContentLoaded', () => {
+  const startLiveBtn = document.getElementById('startLiveBtn');
+  const stopLiveBtn = document.getElementById('stopLiveBtn');
+  const liveSection = document.getElementById('liveSection');
+  const liveVideo = document.getElementById('liveVideo');
 
-stopBtn.addEventListener('click', async () => {
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
-  }
+  startLiveBtn.addEventListener('click', async () => {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      liveVideo.srcObject = mediaStream;
+      liveSection.style.display = 'block';
+      startLiveBtn.style.display = 'none';
+      stopLiveBtn.style.display = 'inline-block';
 
-  liveVideo.srcObject = null;
-  liveSection.style.display = 'none';
-  startBtn.style.display = 'inline-block';
-  stopBtn.style.display = 'none';
+      await fetch('/api/live/start', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+      });
+    } catch (error) {
+      console.error("❌ Erreur d'accès à la caméra :", error);
+    }
+  });
 
-  // Notifier Laravel que le live s’arrête
-  await fetch('/api/live/stop', {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-  }
-});
+  stopLiveBtn.addEventListener('click', () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+    }
+    liveVideo.srcObject = null;
+    liveSection.style.display = 'none';
+    startLiveBtn.style.display = 'inline-block';
+    stopLiveBtn.style.display = 'none';
 
-  console.log('Live arrêté.');
+    fetch('/api/live/stop', { method: 'POST' });
+  });
 });
 </script>
+
+
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const startLiveBtn = document.getElementById('startLiveBtn');
+      const stopLiveBtn = document.getElementById('stopLiveBtn');
+      const liveSection = document.getElementById('liveSection');
+      const liveVideo = document.getElementById('liveVideo');
+
+      startLiveBtn.addEventListener('click', async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          liveVideo.srcObject = stream;
+          liveSection.style.display = 'block';
+          startLiveBtn.style.display = 'none';
+          stopLiveBtn.style.display = 'inline-block';
+
+          // Start Live session
+          await fetch('/api/live/start', { method: 'POST' });
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+        }
+      });
+
+      stopLiveBtn.addEventListener('click', () => {
+        liveVideo.srcObject.getTracks().forEach(track => track.stop());
+        liveSection.style.display = 'none';
+        startLiveBtn.style.display = 'inline-block';
+        stopLiveBtn.style.display = 'none';
+
+        // Stop Live session
+        fetch('/api/live/stop', { method: 'POST' });
+      });
+    });
+  </script>
 
 
 

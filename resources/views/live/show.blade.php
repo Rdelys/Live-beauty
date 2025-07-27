@@ -200,39 +200,48 @@
 
   </div>
 
-  <script>
-  async function startLiveView() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      const videoElement = document.getElementById('liveVideo');
-      videoElement.srcObject = stream;
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.2/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.2/dist/peerjs.min.js"></script>
+<script>
+const peer = new Peer(null, {
+  host: 'livebeautyofficial.com',
+  port: 9000,
+  path: '/',
+  secure: true
+});
 
-      @if(!Auth::check())
-        let secondsLeft = 10;
-        const countdownSpan = document.getElementById('countdown');
+const videoElement = document.getElementById('liveVideo');
+const modelePeerId = "modele-{{ $modele->id }}";
 
-        const interval = setInterval(() => {
-          secondsLeft--;
-          countdownSpan.textContent = secondsLeft;
+peer.on('open', id => {
+  console.log("🎥 Viewer ID connecté :", id);
 
-          if (secondsLeft <= 0) {
-            clearInterval(interval);
-            // Stop stream
-            stream.getTracks().forEach(track => track.stop());
-            // Redirect
-            window.location.href = "{{ route('home') }}";
-          }
-        }, 1000);
-      @endif
+  setTimeout(() => {
+    console.log("📞 Tentative d’appel au modèle :", modelePeerId);
+    const call = peer.call(modelePeerId, null);
 
-    } catch (err) {
-      console.error("Erreur caméra :", err);
-      alert("Impossible d'accéder à la webcam.");
+    if (!call || typeof call.on !== 'function') {
+      console.error("❌ Le modèle est probablement hors ligne.");
+      return;
     }
-  }
 
-  startLiveView();
+    call.on('stream', stream => {
+      console.log("✅ Stream reçu.");
+      videoElement.srcObject = stream;
+    });
+
+    call.on('error', err => {
+      console.error("❌ Erreur lors de l’appel :", err);
+    });
+  }, 1500);
+});
+
+peer.on('error', err => {
+  console.error("⚠️ Erreur PeerJS côté viewer :", err);
+});
 </script>
+
+
 
 </body>
 </html>
