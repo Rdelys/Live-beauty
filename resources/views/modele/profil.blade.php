@@ -190,108 +190,115 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const peer = new Peer("modele-{{ $modele->id }}", {
-  host: 'livebeautyofficial.com',
-  port: 9000,
-  path: '/',
-  secure: true
-});
+const startBtn = document.getElementById('startLiveBtn');
+const stopBtn = document.getElementById('stopLiveBtn');
+const liveVideo = document.getElementById('liveVideo');
+const liveSection = document.getElementById('liveSection');
 
-let mediaStream;
+let socket;
+let stream;
+const peerConnections = {};
 
-peer.on('open', id => {
-  console.log("✅ PeerJS Modèle prêt avec ID :", id);
-  document.getElementById('startLiveBtn').disabled = false;
+startBtn.addEventListener('click', async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    liveVideo.srcObject = stream;
+    liveSection.style.display = 'block';
+    startBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-block';
 
-  peer.on('call', call => {
-    console.log("📞 Appel entrant d’un viewer...");
-    if (mediaStream) {
-      call.answer(mediaStream);
-      console.log("✅ Stream envoyé au viewer.");
-    } else {
-      console.warn("⚠️ Stream non prêt, appel rejeté.");
-      call.close();
-    }
-  });
-});
+    // ✅ Lancer socket et broadcaster
+    socket = io("http://localhost:3000", { transports: ["websocket"] });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const startLiveBtn = document.getElementById('startLiveBtn');
-  const stopLiveBtn = document.getElementById('stopLiveBtn');
-  const liveSection = document.getElementById('liveSection');
-  const liveVideo = document.getElementById('liveVideo');
+    socket.on("connect", () => {
+      socket.emit("broadcaster");
+    });
 
-  startLiveBtn.addEventListener('click', async () => {
-    try {
-      mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      liveVideo.srcObject = mediaStream;
-      liveSection.style.display = 'block';
-      startLiveBtn.style.display = 'none';
-      stopLiveBtn.style.display = 'inline-block';
+    socket.on("watcher", id => {
+      const pc = new RTCPeerConnection();
+      peerConnections[id] = pc;
 
-      await fetch('/api/live/start', {
-        method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+      pc.onicecandidate = event => {
+        if (event.candidate) {
+          socket.emit("candidate", id, event.candidate);
         }
-      });
-    } catch (error) {
-      console.error("❌ Erreur d'accès à la caméra :", error);
+      };
+
+      pc.createOffer()
+        .then(offer => pc.setLocalDescription(offer))
+        .then(() => {
+          socket.emit("offer", id, pc.localDescription);
+        });
+    });
+
+    socket.on("answer", (id, description) => {
+      peerConnections[id].setRemoteDescription(description);
+    });
+
+    socket.on("candidate", (id, candidate) => {
+      peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+    });
+
+    socket.on("disconnectPeer", id => {
+      if (peerConnections[id]) {
+        peerConnections[id].close();
+        delete peerConnections[id];
+      }
+    });
+
+    // ✅ Notifier Laravel que le live commence
+    await fetch('/api/live/start', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    });
+
+  } catch (error) {
+    alert("Erreur caméra : " + error.message);
+  }
+});
+
+stopBtn.addEventListener('click', async () => {
+  // Arrêt du flux
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+
+  // Fermeture des connexions WebRTC
+  for (let id in peerConnections) {
+    peerConnections[id].close();
+    delete peerConnections[id];
+  }
+
+  // Déconnexion socket
+  if (socket) socket.disconnect();
+
+  liveVideo.srcObject = null;
+  liveSection.style.display = 'none';
+  startBtn.style.display = 'inline-block';
+  stopBtn.style.display = 'none';
+
+  // ✅ Notifier Laravel que le live s’arrête
+  await fetch('/api/live/stop', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     }
   });
 
-  stopLiveBtn.addEventListener('click', () => {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-    }
-    liveVideo.srcObject = null;
-    liveSection.style.display = 'none';
-    startLiveBtn.style.display = 'inline-block';
-    stopLiveBtn.style.display = 'none';
-
-    fetch('/api/live/stop', { method: 'POST' });
-  });
+  console.log("Live arrêté.");
 });
 </script>
 
-
-
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const startLiveBtn = document.getElementById('startLiveBtn');
-      const stopLiveBtn = document.getElementById('stopLiveBtn');
-      const liveSection = document.getElementById('liveSection');
-      const liveVideo = document.getElementById('liveVideo');
-
-      startLiveBtn.addEventListener('click', async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          liveVideo.srcObject = stream;
-          liveSection.style.display = 'block';
-          startLiveBtn.style.display = 'none';
-          stopLiveBtn.style.display = 'inline-block';
-
-          // Start Live session
-          await fetch('/api/live/start', { method: 'POST' });
-        } catch (error) {
-          console.error('Error accessing camera:', error);
-        }
-      });
-
-      stopLiveBtn.addEventListener('click', () => {
-        liveVideo.srcObject.getTracks().forEach(track => track.stop());
-        liveSection.style.display = 'none';
-        startLiveBtn.style.display = 'inline-block';
-        stopLiveBtn.style.display = 'none';
-
-        // Stop Live session
-        fetch('/api/live/stop', { method: 'POST' });
-      });
-    });
-  </script>
 
 
 

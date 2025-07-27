@@ -200,47 +200,59 @@
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.2/dist/peerjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const peer = new Peer(null, {
-  host: 'livebeautyofficial.com',
-  port: 9000,
-  path: '/',
-  secure: true
-});
+  const socket = io("http://localhost:3000", { transports: ["websocket"] });
+  const video = document.getElementById("liveVideo");
+  const peerConnection = new RTCPeerConnection();
+  let broadcasterId = null;
 
-const videoElement = document.getElementById('liveVideo');
-const modelePeerId = "modele-{{ $modele->id }}";
+  // Quand un flux distant arrive, on l'affiche dans la vidéo
+  peerConnection.ontrack = event => {
+    video.srcObject = event.streams[0];
+  };
 
-peer.on('open', id => {
-  console.log("🎥 Viewer ID connecté :", id);
-
-  setTimeout(() => {
-    console.log("📞 Tentative d’appel au modèle :", modelePeerId);
-    const call = peer.call(modelePeerId, null);
-
-    if (!call || typeof call.on !== 'function') {
-      console.error("❌ Le modèle est probablement hors ligne.");
-      return;
+  // Envoi des candidats ICE au serveur (et au broadcaster)
+  peerConnection.onicecandidate = event => {
+    if (event.candidate && broadcasterId) {
+      socket.emit("candidate", broadcasterId, event.candidate);
     }
+  };
 
-    call.on('stream', stream => {
-      console.log("✅ Stream reçu.");
-      videoElement.srcObject = stream;
-    });
+  // Quand la connexion WebSocket est prête, on s'identifie comme watcher
+  socket.on("connect", () => {
+    socket.emit("watcher");
+  });
 
-    call.on('error', err => {
-      console.error("❌ Erreur lors de l’appel :", err);
-    });
-  }, 1500);
-});
+  // Quand le broadcaster envoie une offre SDP
+  socket.on("offer", (id, description) => {
+    broadcasterId = id;
+    peerConnection.setRemoteDescription(description)
+      .then(() => peerConnection.createAnswer())
+      .then(answer => peerConnection.setLocalDescription(answer))
+      .then(() => {
+        socket.emit("answer", id, peerConnection.localDescription);
+      })
+      .catch(e => console.error("Erreur gestion offre WebRTC :", e));
+  });
 
-peer.on('error', err => {
-  console.error("⚠️ Erreur PeerJS côté viewer :", err);
-});
+  // Quand le broadcaster envoie un candidat ICE
+  socket.on("candidate", (id, candidate) => {
+    peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+      .catch(e => console.error("Erreur ajout candidat ICE :", e));
+  });
+
+  // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
+  socket.on("broadcaster", () => {
+    socket.emit("watcher");
+  });
+
+  // Nettoyage à la fermeture ou rechargement de la page
+  window.onunload = window.onbeforeunload = () => {
+    socket.close();
+    peerConnection.close();
+  };
 </script>
-
 
 
 </body>
