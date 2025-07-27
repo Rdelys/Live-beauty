@@ -200,39 +200,60 @@
 
   </div>
 
-  <script>
-  async function startLiveView() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      const videoElement = document.getElementById('liveVideo');
-      videoElement.srcObject = stream;
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  const socket = io("http://localhost:3000", { transports: ["websocket"] });
+  const video = document.getElementById("liveVideo");
+  const peerConnection = new RTCPeerConnection();
+  let broadcasterId = null;
 
-      @if(!Auth::check())
-        let secondsLeft = 10;
-        const countdownSpan = document.getElementById('countdown');
+  // Quand un flux distant arrive, on l'affiche dans la vidéo
+  peerConnection.ontrack = event => {
+    video.srcObject = event.streams[0];
+  };
 
-        const interval = setInterval(() => {
-          secondsLeft--;
-          countdownSpan.textContent = secondsLeft;
-
-          if (secondsLeft <= 0) {
-            clearInterval(interval);
-            // Stop stream
-            stream.getTracks().forEach(track => track.stop());
-            // Redirect
-            window.location.href = "{{ route('home') }}";
-          }
-        }, 1000);
-      @endif
-
-    } catch (err) {
-      console.error("Erreur caméra :", err);
-      alert("Impossible d'accéder à la webcam.");
+  // Envoi des candidats ICE au serveur (et au broadcaster)
+  peerConnection.onicecandidate = event => {
+    if (event.candidate && broadcasterId) {
+      socket.emit("candidate", broadcasterId, event.candidate);
     }
-  }
+  };
 
-  startLiveView();
+  // Quand la connexion WebSocket est prête, on s'identifie comme watcher
+  socket.on("connect", () => {
+    socket.emit("watcher");
+  });
+
+  // Quand le broadcaster envoie une offre SDP
+  socket.on("offer", (id, description) => {
+    broadcasterId = id;
+    peerConnection.setRemoteDescription(description)
+      .then(() => peerConnection.createAnswer())
+      .then(answer => peerConnection.setLocalDescription(answer))
+      .then(() => {
+        socket.emit("answer", id, peerConnection.localDescription);
+      })
+      .catch(e => console.error("Erreur gestion offre WebRTC :", e));
+  });
+
+  // Quand le broadcaster envoie un candidat ICE
+  socket.on("candidate", (id, candidate) => {
+    peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+      .catch(e => console.error("Erreur ajout candidat ICE :", e));
+  });
+
+  // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
+  socket.on("broadcaster", () => {
+    socket.emit("watcher");
+  });
+
+  // Nettoyage à la fermeture ou rechargement de la page
+  window.onunload = window.onbeforeunload = () => {
+    socket.close();
+    peerConnection.close();
+  };
 </script>
+
 
 </body>
 </html>

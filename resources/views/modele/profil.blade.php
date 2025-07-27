@@ -190,60 +190,115 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
 const startBtn = document.getElementById('startLiveBtn');
 const stopBtn = document.getElementById('stopLiveBtn');
 const liveVideo = document.getElementById('liveVideo');
 const liveSection = document.getElementById('liveSection');
-let mediaStream;
+
+let socket;
+let stream;
+const peerConnections = {};
 
 startBtn.addEventListener('click', async () => {
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    liveVideo.srcObject = mediaStream;
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    liveVideo.srcObject = stream;
     liveSection.style.display = 'block';
     startBtn.style.display = 'none';
     stopBtn.style.display = 'inline-block';
 
-    // Notifier Laravel que le live démarre
-    await fetch('/api/live/start', {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-  }
-});
+    // ✅ Lancer socket et broadcaster
+    socket = io("http://localhost:3000", { transports: ["websocket"] });
 
-    console.log('Live lancé.');
+    socket.on("connect", () => {
+      socket.emit("broadcaster");
+    });
+
+    socket.on("watcher", id => {
+      const pc = new RTCPeerConnection();
+      peerConnections[id] = pc;
+
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+      pc.onicecandidate = event => {
+        if (event.candidate) {
+          socket.emit("candidate", id, event.candidate);
+        }
+      };
+
+      pc.createOffer()
+        .then(offer => pc.setLocalDescription(offer))
+        .then(() => {
+          socket.emit("offer", id, pc.localDescription);
+        });
+    });
+
+    socket.on("answer", (id, description) => {
+      peerConnections[id].setRemoteDescription(description);
+    });
+
+    socket.on("candidate", (id, candidate) => {
+      peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+    });
+
+    socket.on("disconnectPeer", id => {
+      if (peerConnections[id]) {
+        peerConnections[id].close();
+        delete peerConnections[id];
+      }
+    });
+
+    // ✅ Notifier Laravel que le live commence
+    await fetch('/api/live/start', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    });
+
   } catch (error) {
     alert("Erreur caméra : " + error.message);
   }
 });
 
 stopBtn.addEventListener('click', async () => {
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
+  // Arrêt du flux
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
   }
+
+  // Fermeture des connexions WebRTC
+  for (let id in peerConnections) {
+    peerConnections[id].close();
+    delete peerConnections[id];
+  }
+
+  // Déconnexion socket
+  if (socket) socket.disconnect();
 
   liveVideo.srcObject = null;
   liveSection.style.display = 'none';
   startBtn.style.display = 'inline-block';
   stopBtn.style.display = 'none';
 
-  // Notifier Laravel que le live s’arrête
+  // ✅ Notifier Laravel que le live s’arrête
   await fetch('/api/live/stop', {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-  }
-});
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  });
 
-  console.log('Live arrêté.');
+  console.log("Live arrêté.");
 });
 </script>
+
 
 
 
