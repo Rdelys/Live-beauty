@@ -210,7 +210,7 @@ startBtn.addEventListener('click', async () => {
     stopBtn.style.display = 'inline-block';
 
     // ✅ Lancer socket et broadcaster
-    socket = io("http://localhost:3000", { transports: ["websocket"] });
+    socket = io("https://livebeautyofficial.com", { transports: ["websocket"] });
 
     socket.on("connect", () => {
       socket.emit("broadcaster");

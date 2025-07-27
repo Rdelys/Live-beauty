@@ -202,7 +202,7 @@
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:3000", { transports: ["websocket"] });
+  const socket = io("https://livebeautyofficial.com", { transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const peerConnection = new RTCPeerConnection();
   let broadcasterId = null;
