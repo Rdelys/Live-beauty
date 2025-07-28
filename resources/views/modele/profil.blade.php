@@ -222,8 +222,13 @@ socket = io("https://livebeautyofficial.com", {
     socket.on("watcher", id => {
 const pc = new RTCPeerConnection({
   iceServers: [
-    { urls: "stun:stun.l.google.com:19302" }
-  ]
+  { urls: "stun:stun.l.google.com:19302" },
+  {
+    urls: "turn:livebeautyofficial.com:3478",
+    username: "webrtc",
+    credential: "password123"
+  }
+]
 });
       peerConnections[id] = pc;
 
