@@ -13,110 +13,194 @@
     rel="stylesheet"
   />
   <style>
-    body {
+   /* GLOBAL */
+body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #121212;
-  color: #fff;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background-color: #1e1e2f;
+  color: #f1f1f1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* SIDEBAR */
 .sidebar {
-  width: 240px;
-  background-color: #1a1a1a;
-  padding: 1rem;
+  width: 250px;
+  background-color: #28293e;
+  padding: 1.5rem 1rem;
   height: 100vh;
   overflow-y: auto;
-  border-right: 1px solid #333;
-  transition: all 0.3s ease;
   position: fixed;
   top: 0;
   left: 0;
+  border-right: 1px solid #333;
+  transition: all 0.3s ease-in-out;
   z-index: 1000;
 }
 
 .sidebar h5 {
   text-align: center;
+  font-weight: 600;
   margin-bottom: 2rem;
-  font-weight: bold;
-  color: #e53935;
+  color: #e63946;
+  font-size: 1.2rem;
 }
 
 .sidebar a {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0.75rem 1rem;
+  gap: 12px;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
   margin-bottom: 0.5rem;
-  color: #ccc;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background 0.3s ease, transform 0.2s ease;
-  cursor: pointer;
+  color: #dcdcdc;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .sidebar a:hover,
 .sidebar a.active {
-  background-color: #e53935;
-  color: white;
+  background-color: #e63946;
+  color: #fff;
   transform: translateX(5px);
+  box-shadow: 0 4px 10px rgba(230, 57, 70, 0.2);
 }
 
 .submenu {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease-in-out;
+  transition: max-height 0.4s ease;
   padding-left: 1rem;
 }
 
 .submenu.show {
-  max-height: 200px;
+  max-height: 300px;
 }
 
 .submenu a {
-  background-color: #2a2a2a;
-  margin-bottom: 0.25rem;
+  background-color: #32334a;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
 }
 
 /* MAIN CONTENT */
 .content {
-  margin-left: 240px;
-  padding: 2rem;
+  margin-left: 250px;
+  padding: 2rem 2rem 3rem;
   flex-grow: 1;
-  animation: fadeIn 0.6s ease;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 .content h2 {
-  color: #e53935;
+  color: #e63946;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
+/* TABLES */
 .table {
-  color: #fff;
   background-color: #222;
+  color: #f5f5f5;
   border-color: #444;
 }
 
 .table thead {
-  background-color: #e53935;
+  background-color: #e63946;
+  color: white;
 }
 
+/* BUTTONS */
 .btn-primary {
-  background-color: #e53935;
+  background-color: #e63946;
   border: none;
+  transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: #d32f2f;
+  background-color: #d62839;
+}
+
+.btn-danger {
+  background-color: #ff4d4f;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #cc3a3b;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+/* CARDS */
+.card {
+  border-radius: 1rem;
+  border: none;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+/* FORMS */
+.form-control {
+  background-color: #2e2f44;
+  color: #f1f1f1;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+}
+
+.form-control:focus {
+  background-color: #34354f;
+  color: #fff;
+  border-color: #e63946;
+  box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
+}
+
+label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* IMAGES / VIDEOS */
+.zoomable-photo {
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.zoomable-photo:hover {
+  transform: scale(1.1);
+}
+
+video {
+  border-radius: 0.5rem;
 }
 
 /* ANIMATION */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -124,31 +208,28 @@
   }
 }
 
-/* RESPONSIVE MEDIA QUERIES */
+/* RESPONSIVE */
 @media (max-width: 992px) {
   .sidebar {
-    position: fixed;
     width: 100%;
     height: auto;
-    top: 0;
-    left: 0;
+    position: relative;
     border-right: none;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #444;
   }
 
   .content {
     margin-left: 0;
-    margin-top: 220px;
-    padding: 1rem;
+    margin-top: 20px;
+    padding: 1.5rem;
   }
 
   .sidebar h5 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 
   .sidebar a {
     justify-content: center;
-    text-align: center;
   }
 
   .submenu {
@@ -162,16 +243,12 @@
 
 @media (max-width: 576px) {
   .content {
-    margin-top: 260px;
+    padding: 1rem;
   }
 
   .sidebar a {
     font-size: 0.9rem;
     padding: 0.5rem;
-  }
-
-  .btn, .form-control {
-    font-size: 0.9rem;
   }
 
   .table th,
@@ -180,22 +257,37 @@
     padding: 0.5rem;
   }
 
+  .btn,
+  .form-control {
+    font-size: 0.9rem;
+  }
+
   video {
-    width: 80px;
+    width: 100%;
   }
 
   img.zoomable-photo {
-    width: 40px !important;
+    width: 100% !important;
+  }
+
+  .card {
+    margin-bottom: 1rem;
   }
 }
-    .zoomable-photo {
-      cursor: zoom-in;
-      transition: transform 0.2s ease;
-    }
 
-    .zoomable-photo:hover {
-      transform: scale(1.1);
-    }
+/* FOOTER */
+footer {
+  padding: 1rem;
+  background-color: #1e1e2f;
+  font-size: 0.85rem;
+  border-top: 1px solid #333;
+}
+  footer p {
+    margin: 0;
+    color: #ccc;
+  }
+  footer a {
+    color: #e63946;
   </style>
 </head>
 <body>
