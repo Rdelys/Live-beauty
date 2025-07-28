@@ -9,140 +9,148 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: 'Arial', sans-serif;
-        }
-
-        .navbar {
-            background-color: #d6336c;
-        }
-
-        .navbar-brand {
-            font-size: 2.5rem;
-            font-weight: bold;
-            letter-spacing: 3px;
-        }
-
-        .navbar-brand .live {
-            color: white;
-        }
-
-        .navbar-brand .beauty {
-            color: black;
-        }
-
-        .navbar a.nav-link {
-            color: white !important;
-            font-weight: bold;
-        }
-
-        .navbar a.nav-link:hover {
-            color: #ffcccb !important;
-        }
-
-        .sidebar {
-            background-color: #1f1f1f;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-y: auto;
-            border-right: 2px solid #333;
-        }
-
-        .sidebar h5 {
-            color: #ff4d4d;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .sidebar a:hover {
-            color: #ff4d4d;
-            padding-left: 5px;
-        }
-
-        .submenu {
-            display: none;
-        }
-
-        .submenu a {
-            padding-left: 20px;
-            font-size: 0.9rem;
-            border: none;
-        }
-
-        .btn-genre {
-            background-color: #d6336c;
-            color: white;
-            font-weight: bold;
-            margin-bottom: 10px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .btn-genre:hover {
-            background-color: #ff4d4d;
-        }
-
-        .model-card {
-    min-height: 370px; /* pour harmoniser si besoin */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        :root {
+    --primary: #e91e63;
+    --primary-light: #ff80ab;
+    --dark-bg: #121212;
+    --card-bg: #1e1e1e;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-blur: blur(8px);
+    --text-light: #f5f5f5;
+    --accent: gold;
+    --border-radius: 1rem;
 }
 
-
-        .model-card:hover {
-    transform: scale(1.03); /* Légèrement moins agressif */
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-light);
+    font-family: 'Segoe UI', sans-serif;
 }
 
-        .model-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-        }
+/* Navbar */
+.navbar {
+    background: linear-gradient(90deg, var(--primary), #c2185b);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
 
-        .model-name {
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            color: #ff4d4d;
-            font-size: 1.2rem;
-        }
+.navbar-brand {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
 
-        .vip-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: gold;
-            color: black;
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            border-radius: 5px;
-            font-weight: bold;
-        }
+.navbar-brand .live {
+    color: #fff;
+}
+.navbar-brand .beauty {
+    color: #000;
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.nav-link:hover {
+    color: var(--accent) !important;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: #181818;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+    border-right: 1px solid #333;
+    overflow-y: auto;
+}
+
+.sidebar h5 {
+    color: var(--primary-light);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.sidebar a {
+    display: block;
+    color: #ccc;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #292929;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.sidebar a:hover {
+    color: var(--primary-light);
+    padding-left: 8px;
+}
+
+.submenu {
+    display: none;
+}
+.submenu a {
+    padding-left: 20px;
+    font-size: 0.85rem;
+    border: none;
+}
+
+/* Boutons */
+.btn-genre {
+    background-color: var(--primary);
+    color: white;
+    font-weight: bold;
+    width: 100%;
+    border-radius: 0.7rem;
+    transition: background 0.3s ease;
+}
+.btn-genre:hover {
+    background-color: var(--primary-light);
+}
+
+/* Cartes Modèle */
+.model-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.15);
+}
+.model-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+}
+
 .model-img {
     width: 100%;
-    height: 220px;
-    object-fit: contain;
-    background-color: #000; /* Ajoute un fond pour les bandes noires */
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    height: 230px;
+    object-fit: cover;
+    background: #000;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
 }
 
+/* Nom */
+.model-name {
+    text-align: center;
+    padding: 1rem;
+    color: var(--primary-light);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* VIP & Status */
+.vip-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--accent);
+    color: black;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    font-weight: bold;
+}
 .status-indicator {
     position: absolute;
     top: 10px;
@@ -151,121 +159,81 @@
     height: 12px;
     border-radius: 50%;
     border: 2px solid white;
-    z-index: 2;
 }
 .status-online {
-    background-color: #28a745; /* Vert */
+    background-color: #28a745;
 }
 .status-offline {
-    background-color: #dc3545; /* Rouge */
+    background-color: #dc3545;
 }
 
-#modelDetailModal .modal-content {
-    background-color: transparent;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+/* Boutons vidéo/photos */
+.model-card .btn {
+    border-radius: 0.6rem;
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+    margin-top: 0.5rem;
+    transition: 0.3s ease;
 }
 
-#modelDetailModal .modal-body {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    border-radius: 15px;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-}
-
-
-
-#modal-carousel {
-    z-index: 1;
-}
-
-#modal-carousel .carousel-inner {
-    height: 100vh;
-    width: 100%;
-}
-
-#modal-carousel .carousel-item {
-    height: 100%;
-    width: 100%;
-}
-
-#modal-carousel .carousel-item img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover; /* bien cadré sans étirer */
-    filter: blur(4px) brightness(0.4);
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-/* Appliquer à toutes les modales personnalisées */
+/* Modales */
 .modal-content.auth-modal {
-    background-color: #000 !important;
-    color: #fff !important;
-    border-radius: 15px;
-    border: none;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    background-color: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    color: white;
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1.5rem;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
 }
 
-/* Header/Footer */
-.modal-header,
-.modal-footer {
+.modal-header, .modal-footer {
     border: none;
     background: transparent;
 }
 
-.modal-title {
-    color: #fff;
-    font-weight: bold;
-    font-size: 1.5rem;
-}
-
-/* Champs */
 .auth-modal .form-control {
-    background-color: #111 !important;
-    color: #fff !important;
-    border: 1px solid #444 !important;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
+    background-color: #111;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 10px;
 }
-
-.auth-modal .form-control::placeholder {
-    color: #aaa;
-}
-
 .auth-modal .form-control:focus {
     background-color: #181818;
-    color: #fff;
-    border-color: #fff;
+    color: white;
+    border-color: white;
     box-shadow: none;
 }
 
-/* Bouton */
 .auth-modal .btn-submit {
     background-color: #fff;
     color: #000;
-    border: none;
-    border-radius: 10px;
-    padding: 0.7rem 1rem;
     font-weight: bold;
-    width: 100%;
-    transition: background 0.3s ease;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
 }
-
 .auth-modal .btn-submit:hover {
-    background-color: #eaeaea;
+    background-color: #f1f1f1;
 }
 
-/* Liens */
-.auth-modal a {
-    color: #fff;
-    text-decoration: underline;
+/* Carrousel en modal */
+#modelDetailModal .modal-content {
+    background-color: transparent;
+    backdrop-filter: var(--glass-blur);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.08);
 }
 
-.auth-modal .form-check-label {
-    color: #ccc;
-    font-size: 0.9rem;
+#modal-carousel .carousel-item img {
+    filter: blur(5px) brightness(0.4);
+}
+
+#modelDetailContent {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
     </style>

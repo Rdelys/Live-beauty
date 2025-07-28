@@ -8,149 +8,144 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: 'Arial', sans-serif;
-        }
+       :root {
+    --primary: #e91e63;
+    --primary-light: #ff80ab;
+    --dark-bg: #121212;
+    --card-bg: #1e1e1e;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-blur: blur(8px);
+    --text-light: #f5f5f5;
+    --accent: gold;
+    --border-radius: 1rem;
+}
 
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-light);
+    font-family: 'Segoe UI', sans-serif;
+}
         .navbar {
-            background-color: #d6336c;
-        }
-
-        .navbar-brand {
-            font-size: 2.5rem;
-            font-weight: bold;
-            letter-spacing: 3px;
-        }
-
-        .navbar-brand .live {
-            color: white;
-        }
-
-        .navbar-brand .beauty {
-            color: black;
-        }
-
-        .navbar a.nav-link {
-            color: white !important;
-            font-weight: bold;
-        }
-
-        .navbar a.nav-link:hover {
-            color: #ffcccb !important;
-        }
-
-        .sidebar {
-            background-color: #1f1f1f;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-y: auto;
-            border-right: 2px solid #333;
-        }
-
-        .sidebar h5 {
-            color: #ff4d4d;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .sidebar a:hover {
-            color: #ff4d4d;
-            padding-left: 5px;
-        }
-
-        .submenu {
-            display: none;
-        }
-
-        .submenu a {
-            padding-left: 20px;
-            font-size: 0.9rem;
-            border: none;
-        }
-
-        .btn-genre {
-            background-color: #d6336c;
-            color: white;
-            font-weight: bold;
-            margin-bottom: 10px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .btn-genre:hover {
-            background-color: #ff4d4d;
-        }
-
-        .model-card {
-            background-color: #1f1f1f;
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-
-        .model-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-        }
-
-        .model-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-        }
-
-        .model-name {
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            color: #ff4d4d;
-            font-size: 1.2rem;
-        }
-
-        .vip-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: gold;
-            color: black;
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+    background: linear-gradient(90deg, var(--primary), #c2185b);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
-input.form-control:focus {
-  border-color: #ff4d4d !important;
-  box-shadow: 0 0 5px rgba(255, 77, 77, 0.5) !important;
-  background-color: #1a1a1a !important;
+
+.navbar-brand {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 2px;
 }
+
+.navbar-brand .live {
+    color: #fff;
+}
+.navbar-brand .beauty {
+    color: #000;
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.nav-link:hover {
+    color: var(--accent) !important;
+}
+       .sidebar {
+    background-color: #181818;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+    border-right: 1px solid #333;
+    overflow-y: auto;
+}
+
+.sidebar h5 {
+    color: var(--primary-light);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.sidebar a {
+    display: block;
+    color: #ccc;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #292929;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.sidebar a:hover {
+    color: var(--primary-light);
+    padding-left: 8px;
+}
+
+.submenu {
+    display: none;
+}
+.submenu a {
+    padding-left: 20px;
+    font-size: 0.85rem;
+    border: none;
+}
+
+       /* Boutons */
+.btn-genre {
+    background-color: var(--primary);
+    color: white;
+    font-weight: bold;
+    width: 100%;
+    border-radius: 0.7rem;
+    transition: background 0.3s ease;
+}
+.btn-genre:hover {
+    background-color: var(--primary-light);
+}
+
+/* Cartes Modèle */
+.model-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.15);
+}
+.model-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+}
+
 .model-img {
     width: 100%;
-    height: 220px;
-    object-fit: contain;
-    background-color: #000;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    height: 230px;
+    object-fit: cover;
+    background: #000;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
 }
 
+/* Nom */
+.model-name {
+    text-align: center;
+    padding: 1rem;
+    color: var(--primary-light);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* VIP & Status */
+.vip-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--accent);
+    color: black;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    font-weight: bold;
+}
 .status-indicator {
     position: absolute;
     top: 10px;
@@ -159,7 +154,6 @@ input.form-control:focus {
     height: 12px;
     border-radius: 50%;
     border: 2px solid white;
-    z-index: 2;
 }
 .status-online {
     background-color: #28a745;
