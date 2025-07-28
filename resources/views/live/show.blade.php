@@ -204,7 +204,11 @@
 <script>
   const socket = io("https://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
-  const peerConnection = new RTCPeerConnection();
+const peerConnection = new RTCPeerConnection({
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" }
+  ]
+});
   let broadcasterId = null;
 
   // Quand un flux distant arrive, on l'affiche dans la vidéo
