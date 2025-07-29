@@ -134,7 +134,7 @@
     <div class="left-live">
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
-      <video id="liveVideo" autoplay playsinline muted></video>
+<video id="liveVideo" autoplay playsinline controls></video>
       @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
     <p class="text-warning fs-5">
@@ -202,7 +202,7 @@
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("https://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
 const peerConnection = new RTCPeerConnection({
   iceServers: [
