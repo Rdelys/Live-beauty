@@ -191,6 +191,61 @@ label {
     font-size: 1rem;
   }
 }
+.chat-wrapper {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.chat-bubble {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 1rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  animation: fadeOut 4s ease-out forwards;
+  max-width: 80%;
+  word-break: break-word;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+/* MESSAGES - responsive */
+.chat-wrapper {
+  max-width: 100%;
+}
+
+.chat-bubble {
+  max-width: 90%;
+  font-size: 0.95rem;
+}
+
+/* Extra responsive chat-bubbles */
+@media (max-width: 768px) {
+  .chat-bubble {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-bubble {
+    font-size: 0.8rem;
+    max-width: 95%;
+  }
+}
 
   </style>
 </head>
@@ -238,7 +293,7 @@ label {
   <div id="liveSection" style="display: none;">
     <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
     <div id="chat-overlay" class="mt-3" style="position: relative;">
-  <div id="messages" style="position:absolute; bottom:10px; left:10px; width:90%; max-height:200px; overflow-y:auto; color:white; font-size:1rem;"></div>
+<div class="chat-wrapper" id="messages"></div>
 </div>
     <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
   </div>
@@ -332,6 +387,21 @@ socket = io("http://localhost:3000", {
     socket.on("connect", () => {
       socket.emit("broadcaster");
     });
+const messagesDiv = document.getElementById("messages");
+
+  socket.on("chat-message", data => {
+ const bubble = document.createElement("div");
+bubble.className = "chat-bubble";
+bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+bubble.style.backgroundColor = generateColor(data.pseudo);
+messagesDiv.appendChild(bubble);
+
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  setTimeout(() => {
+    bubble.remove();
+  }, 4000); // Retire après 4 secondes
+});
 
     socket.on("watcher", id => {
 const pc = new RTCPeerConnection({
@@ -424,18 +494,15 @@ stopBtn.addEventListener('click', async () => {
   console.log("Live arrêté.");
 });
 
-const messagesDiv = document.getElementById("messages");
+function generateColor(pseudo) {
+  let hash = 0;
+  for (let i = 0; i < pseudo.length; i++) {
+    hash = pseudo.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const color = `hsl(${hash % 360}, 70%, 50%)`;
+  return color;
+}
 
-  socket.on("chat-message", data => {
-    const bubble = document.createElement("div");
-    bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
-    bubble.style.marginBottom = '4px';
-    bubble.style.background = 'rgba(0,0,0,0.5)';
-    bubble.style.padding = '6px 10px';
-    bubble.style.borderRadius = '12px';
-    messagesDiv.appendChild(bubble);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
 </script>
 
 

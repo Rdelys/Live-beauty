@@ -8,123 +8,265 @@
 
   <style>
     body {
-      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 2rem 1rem;
-    }
+  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 2rem 1rem;
+  margin: 0;
+  overflow-x: hidden;
+}
 
-    .container-live {
-      max-width: 1300px;
-      margin: auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-    }
+.container-live {
+  max-width: 1300px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
 
-    .left-live {
-      flex: 2;
-      background-color: #212121;
-      border-radius: 12px;
-      padding: 2rem;
-      min-width: 320px;
-    }
+.left-live {
+  flex: 2;
+  background-color: #212121;
+  border-radius: 12px;
+  padding: 2rem;
+  min-width: 320px;
+}
 
-    .right-jetons {
-      flex: 1;
-      background-color: #212121;
-      border-radius: 12px;
-      padding: 2rem;
-      min-width: 280px;
-    }
+.right-jetons {
+  flex: 1;
+  background-color: #212121;
+  border-radius: 12px;
+  padding: 2rem;
+  min-width: 280px;
+}
 
-    video {
-      width: 100%;
-      max-height: 620px;
-      border: 4px solid #e53935;
-      border-radius: 12px;
-    }
+video {
+  width: 100%;
+  height: auto;
+  max-height: none; /* Supprimer la limite */
+  border: 4px solid #e53935;
+  border-radius: 12px;
+  object-fit: cover; /* Adapté pour plein écran */
+}
 
-    .badge-live {
-      background-color: #e53935;
-      padding: 8px 18px;
-      color: white;
-      font-weight: bold;
-      border-radius: 20px;
-      display: inline-block;
-      margin: 1rem 0;
-      font-size: 1rem;
-      animation: pulse 1.2s infinite;
-    }
 
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
+.badge-live {
+  background-color: #e53935;
+  padding: 8px 18px;
+  color: white;
+  font-weight: bold;
+  border-radius: 20px;
+  display: inline-block;
+  margin: 1rem 0;
+  font-size: 1rem;
+  animation: pulse 1.2s infinite;
+}
 
-    /* Jetons style premium */
-    .jeton-card {
-      background: linear-gradient(145deg, #2f2f2f, #1f1f1f);
-      border: 1px solid #444;
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1.2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: transform 0.2s ease;
-    }
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
 
-    .jeton-card:hover {
-      transform: scale(1.02);
-    }
+/* Jetons stylisés */
+.jeton-card {
+  background: linear-gradient(145deg, #2f2f2f, #1f1f1f);
+  border: 1px solid #444;
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
 
-    .jeton-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+.jeton-card:hover {
+  transform: scale(1.02);
+}
 
-    .jeton-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #f8f8f8;
-    }
+.jeton-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-    .jeton-desc {
-      font-size: 0.85rem;
-      color: #ccc;
-    }
+.jeton-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #f8f8f8;
+}
 
-    .jeton-btn {
-      background-color: #ff1744;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
+.jeton-desc {
+  font-size: 0.85rem;
+  color: #ccc;
+}
 
-    .jeton-btn:hover {
-      background-color: #d50000;
-    }
+.jeton-btn {
+  background-color: #ff1744;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
 
-    .jeton-btn:disabled {
-      background-color: #666;
-      cursor: not-allowed;
-    }
+.jeton-btn:hover {
+  background-color: #d50000;
+}
 
-    @media (max-width: 768px) {
-      .container-live {
-        flex-direction: column;
-      }
+.jeton-btn:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
 
-      .left-live, .right-jetons {
-        padding: 1.5rem;
-      }
-    }
+/* Chat bulles/messages */
+.chat-wrapper {
+  position: absolute;
+  bottom: 80px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.chat-bubble {
+  display: block;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 1rem;
+  animation: fadeOut 2s ease-out forwards;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  max-width: 80%;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Chat Form */
+#chatForm {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  z-index: 1000;
+  background-color: rgba(0,0,0,0.6);
+  padding: 10px;
+  border-radius: 12px;
+  pointer-events: auto;
+  display: flex;
+  gap: 10px;
+  backdrop-filter: blur(5px);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .container-live {
+    flex-direction: column;
+  }
+
+  .left-live, .right-jetons {
+    width: 100%;
+    padding: 1.5rem;
+  }
+
+  .jeton-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  #chatForm {
+    flex-direction: column;
+    padding: 8px;
+  }
+
+  .chat-bubble {
+    font-size: 0.9rem;
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    padding: 1rem 0.5rem;
+  }
+
+  h2, h4, h5 {
+    font-size: 1.2rem;
+  }
+
+  .jeton-name {
+    font-size: 1rem;
+  }
+
+  .jeton-desc {
+    font-size: 0.8rem;
+  }
+
+  .jeton-btn {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+ #chatForm {
+  width: 95%;
+  bottom: 15px;
+}
+
+#chatForm {
+  width: 95%;
+  bottom: 15px;
+}
+
+#chatForm input,
+#chatForm button {
+  font-size: 0.9rem;
+  padding: 0.4rem;
+}
+
+#videoContainer:fullscreen #chatForm,
+#videoContainer:-webkit-full-screen #chatForm {
+  position: absolute;
+  bottom: 20px;
+  width: 95%;
+  max-width: 700px;
+}
+
+}
+#videoContainer:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#videoContainer:-webkit-full-screen { /* pour Safari/Chrome */
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
   </style>
 </head>
 <body>
@@ -134,17 +276,22 @@
     <div class="left-live">
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
-<video id="liveVideo" autoplay playsinline controls></video>
-<div id="chat-overlay" style="position: relative;">
-  <div id="messages" style="position:absolute; bottom:10px; left:10px; width:90%; max-height:200px; overflow-y:auto; color:white; font-size:1rem;"></div>
+      <button id="fullscreenBtn" class="btn btn-secondary mt-2">🖥️ Plein écran</button>
+
+<div id="videoContainer" style="position: relative;">
+  <video id="liveVideo" autoplay playsinline controls></video>
+  <div class="chat-wrapper" id="messages"></div>
 
   @auth
-  <form id="chatForm" class="d-flex mt-2" onsubmit="sendMessage(event)">
-    <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
-    <button type="submit" class="btn btn-danger">Envoyer</button>
-  </form>
+    @if(Auth::user()->role != 'modele') {{-- modèle ne peut pas envoyer --}}
+    <form id="chatForm" class="d-flex" onsubmit="sendMessage(event)">
+      <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
+      <button type="submit" class="btn btn-danger">Envoyer</button>
+    </form>
+    @endif
   @endauth
 </div>
+
       @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
     <p class="text-warning fs-5">
@@ -229,8 +376,14 @@ const peerConnection = new RTCPeerConnection({
 
   // Quand un flux distant arrive, on l'affiche dans la vidéo
   peerConnection.ontrack = event => {
-    video.srcObject = event.streams[0];
-  };
+  video.srcObject = event.streams[0];
+  // 🔁 Forcer la lecture une fois le flux attaché
+  video.muted = true; // Nécessaire pour l'autoplay sans interaction utilisateur
+  video.play().catch(err => {
+    console.warn("Autoplay bloqué :", err);
+  });
+};
+
 
   // Envoi des candidats ICE au serveur (et au broadcaster)
   peerConnection.onicecandidate = event => {
@@ -288,16 +441,45 @@ const peerConnection = new RTCPeerConnection({
     messageInput.value = '';
   }
 
-  socket.on("chat-message", data => {
-    const bubble = document.createElement("div");
-    bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
-    bubble.style.marginBottom = '4px';
-    bubble.style.background = 'rgba(0,0,0,0.5)';
-    bubble.style.padding = '6px 10px';
-    bubble.style.borderRadius = '12px';
-    messagesDiv.appendChild(bubble);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
+const colorsMap = {};
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
+  return color;
+}
+
+socket.on("chat-message", data => {
+  if (!colorsMap[data.pseudo]) {
+    colorsMap[data.pseudo] = getRandomColor();
+  }
+
+  const bubble = document.createElement("div");
+  bubble.className = 'chat-bubble';
+  bubble.style.backgroundColor = colorsMap[data.pseudo] + 'AA'; // transparence
+  bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+  messagesDiv.appendChild(bubble);
+
+  // Auto-suppression après 2 secondes
+  setTimeout(() => {
+    bubble.remove();
+  }, 4000);
+
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+  const container = document.getElementById("videoContainer");
+  if (container.requestFullscreen) {
+    container.requestFullscreen();
+  } else if (container.webkitRequestFullscreen) {
+    container.webkitRequestFullscreen();
+  } else if (container.msRequestFullscreen) {
+    container.msRequestFullscreen();
+  }
+});
+
 </script>
 
 
