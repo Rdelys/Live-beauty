@@ -237,6 +237,9 @@ label {
 
   <div id="liveSection" style="display: none;">
     <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
+    <div id="chat-overlay" class="mt-3" style="position: relative;">
+  <div id="messages" style="position:absolute; bottom:10px; left:10px; width:90%; max-height:200px; overflow-y:auto; color:white; font-size:1rem;"></div>
+</div>
     <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
   </div>
 </div>
@@ -321,7 +324,7 @@ startBtn.addEventListener('click', async () => {
     stopBtn.style.display = 'inline-block';
 
     // ✅ Lancer socket et broadcaster
-socket = io("https://livebeautyofficial.com", {
+socket = io("http://localhost:3000", {
   path: '/socket.io',
   transports: ['websocket']
 });
@@ -420,6 +423,19 @@ stopBtn.addEventListener('click', async () => {
 
   console.log("Live arrêté.");
 });
+
+const messagesDiv = document.getElementById("messages");
+
+  socket.on("chat-message", data => {
+    const bubble = document.createElement("div");
+    bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+    bubble.style.marginBottom = '4px';
+    bubble.style.background = 'rgba(0,0,0,0.5)';
+    bubble.style.padding = '6px 10px';
+    bubble.style.borderRadius = '12px';
+    messagesDiv.appendChild(bubble);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
 </script>
 
 

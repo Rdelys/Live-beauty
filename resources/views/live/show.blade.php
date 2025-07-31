@@ -135,6 +135,16 @@
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
 <video id="liveVideo" autoplay playsinline controls></video>
+<div id="chat-overlay" style="position: relative;">
+  <div id="messages" style="position:absolute; bottom:10px; left:10px; width:90%; max-height:200px; overflow-y:auto; color:white; font-size:1rem;"></div>
+
+  @auth
+  <form id="chatForm" class="d-flex mt-2" onsubmit="sendMessage(event)">
+    <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
+    <button type="submit" class="btn btn-danger">Envoyer</button>
+  </form>
+  @endauth
+</div>
       @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
     <p class="text-warning fs-5">
@@ -202,7 +212,7 @@
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("https://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
 const peerConnection = new RTCPeerConnection({
   iceServers: [
@@ -262,6 +272,32 @@ const peerConnection = new RTCPeerConnection({
     socket.close();
     peerConnection.close();
   };
+
+  
+  const messageInput = document.getElementById("messageInput");
+  const messagesDiv = document.getElementById("messages");
+
+  function sendMessage(e) {
+    e.preventDefault();
+    const msg = messageInput.value.trim();
+    if (msg.length === 0) return;
+    socket.emit("chat-message", {
+      pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+      message: msg
+    });
+    messageInput.value = '';
+  }
+
+  socket.on("chat-message", data => {
+    const bubble = document.createElement("div");
+    bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+    bubble.style.marginBottom = '4px';
+    bubble.style.background = 'rgba(0,0,0,0.5)';
+    bubble.style.padding = '6px 10px';
+    bubble.style.borderRadius = '12px';
+    messagesDiv.appendChild(bubble);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
 </script>
 
 
