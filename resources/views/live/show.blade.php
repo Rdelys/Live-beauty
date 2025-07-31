@@ -302,6 +302,22 @@ video {
     </p>
   </div>
 @endif
+@if(!Auth::check())
+<script>
+  let seconds = 10;
+  const countdownElement = document.getElementById('countdown');
+
+  const countdownInterval = setInterval(() => {
+    seconds--;
+    countdownElement.textContent = seconds;
+
+    if (seconds <= 0) {
+      clearInterval(countdownInterval);
+      window.location.href = "{{ route('home') }}";
+    }
+  }, 1000);
+</script>
+@endif
 
       <p class="mt-3">{{ $modele->description }}</p>
     </div>
@@ -359,7 +375,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:3000", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("https://livebeautyofficial.com/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
 const peerConnection = new RTCPeerConnection({
   iceServers: [
