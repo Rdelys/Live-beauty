@@ -235,6 +235,20 @@ body {
     overflow-y: auto;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 }
+#thumbnailContainer img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 0.6rem;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.3s;
+}
+#thumbnailContainer img:hover,
+#thumbnailContainer img.active {
+    transform: scale(1.05);
+    border-color: var(--accent);
+}
 
     </style>
 </head>
@@ -404,33 +418,37 @@ body {
         </div>
     </div>
 <!-- Modal de Détail du Modèle -->
+<!-- Modal de Détail du Modèle amélioré -->
 <div class="modal fade" id="modelDetailModal" tabindex="-1" aria-hidden="true">
-<div class="modal-dialog modal-fullscreen modal-dialog-centered">
-    <div class="modal-content pmodal--0 border-0 bg-dark text-white position-relative overflow-hidden">
-      <!-- Bouton fermeture -->
-<button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal" aria-label="Fermer">
-    <i class="fas fa-times"></i>
-</button>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-0 rounded-4 shadow-lg">
+      
+      <!-- Fermer -->
+      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal">
+        <i class="fas fa-times"></i>
+      </button>
 
-      <!-- Arrière-plan en carrousel -->
-      <div id="modal-carousel" class="position-absolute top-0 start-0 w-100 h-100 z-n1 carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner" id="modalCarouselInner"></div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#modal-carousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#modal-carousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon"></span>
-        </button>
-      </div>
+      <div class="modal-body p-4">
+        <!-- Grande image -->
+        <div class="text-center mb-4">
+          <img id="mainModelImage" src="" alt="Image principale" class="img-fluid rounded-4 shadow-lg" style="max-height: 500px; object-fit: cover;">
+        </div>
 
-      <!-- Contenu superposé -->
-      <div class="modal-body bg-black bg-opacity-75 p-4 rounded shadow-lg m-4" id="modelDetailContent" style="max-height:80vh; overflow-y:auto;">
-        <!-- Le contenu texte sera injecté ici -->
+        <!-- Miniatures -->
+        <div class="d-flex justify-content-center gap-2 flex-wrap mb-4" id="thumbnailContainer">
+          <!-- Miniatures dynamiques -->
+        </div>
+
+        <!-- Infos détaillées -->
+        <div id="modelDetailContent" class="bg-black bg-opacity-75 p-4 rounded shadow">
+          <!-- Contenu injecté ici -->
+        </div>
       </div>
 
     </div>
   </div>
 </div>
+
 
 
     <!-- Script de changement dynamique -->
@@ -515,33 +533,51 @@ function togglePhotos(id) {
         photos = [];
     }
 
-    // Injecter les images dans le carrousel de fond
-    const carouselInner = document.getElementById('modalCarouselInner');
-    carouselInner.innerHTML = photos.map((photo, index) => `
-        <div class="carousel-item ${index === 0 ? 'active' : ''}">
-            <img src="/storage/${photo}" alt="photo-${index}">
-        </div>
+    const mainImg = document.getElementById('mainModelImage');
+    const thumbnails = document.getElementById('thumbnailContainer');
+
+    // Première image affichée par défaut
+    if (photos.length > 0) {
+        mainImg.src = `/storage/${photos[0]}`;
+    } else {
+        mainImg.src = 'https://via.placeholder.com/500x300?text=Pas+de+photo';
+    }
+
+    // Miniatures
+    thumbnails.innerHTML = photos.map((photo, index) => `
+        <img src="/storage/${photo}" data-index="${index}" class="${index === 0 ? 'active' : ''}">
     `).join('');
 
-    // Injecter les détails dans la zone centrale
+    // Ajouter l'écoute sur les miniatures
+    thumbnails.querySelectorAll('img').forEach(img => {
+        img.addEventListener('click', function () {
+            mainImg.src = this.src;
+            thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Détails
     const contentHTML = `
         <h4 class="text-warning mb-3">Bio de ${modele.prenom}</h4>
         <p><strong>${modele.age || 'Âge inconnu'} ans</strong> — ${modele.genre || 'Genre'} — ${modele.orientation || ''} — ${modele.langues || ''}</p>
         <p>${modele.description || 'Aucune description disponible.'}</p>
         <hr class="bg-light">
-        <h5>Ma bio:</h5>
+        <h5>Ma bio :</h5>
         <ul class="list-unstyled mb-3">
-            <li><strong>Taille:</strong> ${modele.taille || '-'} cm</li>
-            <li><strong>Fesses:</strong> ${modele.fesses || '-'}</li>
-            <li><strong>Poitrine:</strong> ${modele.poitrine || '-'}</li>
+            <li><strong>Taille :</strong> ${modele.taille || '-'} cm</li>
+            <li><strong>Fesses :</strong> ${modele.fesses || '-'}</li>
+            <li><strong>Poitrine :</strong> ${modele.poitrine || '-'}</li>
         </ul>
-        <h5>Voici ce que je propose en Chat Privé :</h5>
+        <h5>Ce que je propose en Chat Privé :</h5>
         <p>${modele.services_prives || 'Non précisé'}</p>
     `;
     document.getElementById('modelDetailContent').innerHTML = contentHTML;
 
+    // Affiche le modal
     new bootstrap.Modal(document.getElementById('modelDetailModal')).show();
 }
+
 
     </script>
 
