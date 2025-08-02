@@ -186,6 +186,21 @@ body {
   left: 0;
 }
 
+#thumbnailContainer img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 0.6rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.3s;
+}
+#thumbnailContainer img:hover,
+#thumbnailContainer img.active {
+  transform: scale(1.05);
+  border-color: var(--accent);
+}
+
     </style>
 </head>
 
@@ -311,9 +326,13 @@ body {
         <div class="position-relative model-card" style="cursor:pointer;" onclick="afficherDetailModele({{ $modele->id }})">
             <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
 
-            @if($modele->en_ligne)
-                <span class="vip-badge">VIP</span>
-            @endif
+<div class="status-label position-absolute top-0 end-0 mt-2 me-2">
+        @if($modele->en_ligne)
+            <span class="badge bg-success">🟢 En ligne</span>
+        @else
+            <span class="badge bg-danger">🔴 Hors ligne</span>
+        @endif
+    </div>
 
             @php
                 $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
@@ -369,31 +388,39 @@ body {
 
         </div>
     </div>
+<!-- Modal Détail Modèle (version améliorée) -->
 <div class="modal fade" id="modelDetailModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-fullscreen modal-dialog-centered">
-    <div class="modal-content border-0 bg-dark text-white position-relative overflow-hidden">
-      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal" aria-label="Fermer">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-0 rounded-4 shadow-lg">
+      
+      <!-- Bouton de fermeture -->
+      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal">
         <i class="fas fa-times"></i>
       </button>
 
-      <!-- Carrousel d'arrière-plan -->
-      <div id="modal-carousel" class="position-absolute top-0 start-0 w-100 h-100 z-n1 carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner" id="modalCarouselInner"></div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#modal-carousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#modal-carousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon"></span>
-        </button>
+      <div class="modal-body p-4">
+        <div class="row g-4">
+          <!-- Colonne gauche : photo + miniatures -->
+          <div class="col-md-6 d-flex flex-column align-items-center">
+            <img id="mainModelImage" src="" alt="Image principale" class="img-fluid rounded-4 shadow-lg mb-3" style="max-height: 500px; object-fit: cover; width: 100%;">
+            <div class="d-flex flex-wrap justify-content-center gap-2" id="thumbnailContainer" style="max-width: 100%;">
+              <!-- Miniatures dynamiques -->
+            </div>
+          </div>
+
+          <!-- Colonne droite : détails -->
+          <div class="col-md-6">
+            <div id="modelDetailContent" class="bg-black bg-opacity-75 p-4 rounded shadow" style="max-height: 80vh; overflow-y: auto;">
+              <!-- Contenu injecté dynamiquement -->
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Contenu superposé -->
-      <div class="modal-body bg-black bg-opacity-75 p-4 rounded shadow-lg m-4" id="modelDetailContent" style="max-height:80vh; overflow-y:auto;">
-        <div class="text-center text-muted">Chargement...</div>
-      </div>
     </div>
   </div>
 </div>
+
 
     <!-- JS -->
     <script>
@@ -457,48 +484,73 @@ function togglePhotos(id) {
 
 function afficherDetailModele(id) {
   const content = document.getElementById('modelDetailContent');
+  const mainImg = document.getElementById('mainModelImage');
+  const thumbnails = document.getElementById('thumbnailContainer');
+
+  // Effacer contenu
   content.innerHTML = `<div class="text-center text-muted">Chargement...</div>`;
+  mainImg.src = "";
+  thumbnails.innerHTML = "";
 
   fetch(`/api/modele/${id}`)
     .then(res => res.json())
     .then(modele => {
       let photos = Array.isArray(modele.photos) ? modele.photos : JSON.parse(modele.photos || '[]');
-      const enLigne = modele.en_ligne;
-      const hasVideo = modele.video_file || modele.video_link;
-      const jetons = modele.prix_jetons || 20;
+      if (!Array.isArray(photos)) photos = [];
 
-      // Injecte les photos dans le carrousel
-      const carouselInner = document.getElementById('modalCarouselInner');
-      carouselInner.innerHTML = photos.map((photo, i) => `
-        <div class="carousel-item ${i === 0 ? 'active' : ''}">
-          <img src="/storage/${photo}" alt="photo-${i}">
-        </div>
+      // Image principale
+      if (photos.length > 0) {
+        mainImg.src = `/storage/${photos[0]}`;
+      } else {
+        mainImg.src = 'https://via.placeholder.com/500x300?text=Pas+de+photo';
+      }
+
+      // Miniatures
+      thumbnails.innerHTML = photos.map((photo, index) => `
+        <img src="/storage/${photo}" data-index="${index}" class="${index === 0 ? 'active' : ''}">
       `).join('');
 
-      // Contenu de la bio
+      thumbnails.querySelectorAll('img').forEach(img => {
+        img.addEventListener('click', function () {
+          mainImg.src = this.src;
+          thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Bio + bouton show privé
       content.innerHTML = `
         <h4 class="text-warning mb-3">Bio de ${modele.prenom}</h4>
         <p><strong>${modele.age || 'Âge inconnu'} ans</strong> — ${modele.genre || 'Genre'} — ${modele.orientation || ''} — ${modele.langues || ''}</p>
         <p>${modele.description || 'Aucune description disponible.'}</p>
         <hr class="bg-light">
-        <h5>Ma bio:</h5>
+        <h5>Ma bio :</h5>
         <ul class="list-unstyled mb-3">
-          <li><strong>Taille:</strong> ${modele.taille || '-'} cm</li>
-          <li><strong>Fesses:</strong> ${modele.fesses || '-'}</li>
-          <li><strong>Poitrine:</strong> ${modele.poitrine || '-'}</li>
+          <li><strong>Taille :</strong> ${modele.taille || '-'} cm</li>
+          <li><strong>Fesses :</strong> ${modele.fesses || '-'}</li>
+          <li><strong>Poitrine :</strong> ${modele.poitrine || '-'}</li>
         </ul>
-        <h5>Voici ce que je propose en Chat Privé :</h5>
+        <h5>Ce que je propose en Chat Privé :</h5>
         <p>${modele.services_prives || 'Non précisé'}</p>
-        ${enLigne ? `<button class="btn btn-success w-100 fw-bold mt-3">🔴 Démarrer session</button>` : `<span class="badge bg-secondary">Hors ligne</span>`}
+
+        <div class="text-center mt-4">
+          ${
+            modele.en_ligne
+              ? `<button class="btn btn-success fw-bold px-4 py-2 rounded-pill">🎥 Prendre Show Privé</button>`
+              : `<span class="badge bg-secondary">Modèle hors ligne</span>`
+          }
+        </div>
       `;
 
+      // Afficher modal
       new bootstrap.Modal(document.getElementById('modelDetailModal')).show();
     })
-    .catch(e => {
-      console.error(e);
+    .catch(err => {
+      console.error(err);
       content.innerHTML = `<div class="text-danger text-center">Erreur de chargement des détails.</div>`;
     });
 }
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

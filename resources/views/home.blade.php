@@ -249,6 +249,15 @@ body {
     transform: scale(1.05);
     border-color: var(--accent);
 }
+#modelDetailContent {
+    max-height: 80vh; /* ou 70vh selon ta préférence */
+    overflow-y: auto;
+}
+.status-label {
+  z-index: 10;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
 
     </style>
 </head>
@@ -356,11 +365,16 @@ body {
                     @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
 <div class="position-relative model-card" style="cursor:pointer;" onclick="afficherDetailModele({{ $modele->id }})">
+
             <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
 
-            @if($modele->en_ligne)
-                <span class="vip-badge">VIP</span>
-            @endif
+<div class="status-label position-absolute top-0 end-0 mt-2 me-2">
+        @if($modele->en_ligne)
+            <span class="badge bg-success">🟢 En ligne</span>
+        @else
+            <span class="badge bg-danger">🔴 Hors ligne</span>
+        @endif
+    </div>
 
             @php
                 $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
@@ -429,21 +443,24 @@ body {
       </button>
 
       <div class="modal-body p-4">
-        <!-- Grande image -->
-        <div class="text-center mb-4">
-          <img id="mainModelImage" src="" alt="Image principale" class="img-fluid rounded-4 shadow-lg" style="max-height: 500px; object-fit: cover;">
-        </div>
-
-        <!-- Miniatures -->
-        <div class="d-flex justify-content-center gap-2 flex-wrap mb-4" id="thumbnailContainer">
-          <!-- Miniatures dynamiques -->
-        </div>
-
-        <!-- Infos détaillées -->
-        <div id="modelDetailContent" class="bg-black bg-opacity-75 p-4 rounded shadow">
-          <!-- Contenu injecté ici -->
-        </div>
+  <div class="row g-4">
+    <!-- Colonne gauche : photo + miniatures -->
+    <div class="col-md-6 d-flex flex-column align-items-center">
+      <img id="mainModelImage" src="" alt="Image principale" class="img-fluid rounded-4 shadow-lg mb-3" style="max-height: 500px; object-fit: cover; width: 100%;">
+      <div class="d-flex flex-wrap justify-content-center gap-2" id="thumbnailContainer" style="max-width: 100%;">
+        <!-- Miniatures dynamiques -->
       </div>
+    </div>
+
+    <!-- Colonne droite : détails -->
+    <div class="col-md-6">
+      <div id="modelDetailContent" class="bg-black bg-opacity-75 p-4 rounded shadow" style="max-height: 80vh; overflow-y: auto;">
+        <!-- Contenu injecté ici -->
+      </div>
+    </div>
+  </div>
+</div>
+
 
     </div>
   </div>
