@@ -292,7 +292,13 @@ label {
 
   <div id="liveSection" style="display: none;">
     <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
-    <div id="chat-overlay" class="mt-3" style="position: relative;">
+<div id="chat-overlay" class="mt-3" style="position: relative;">
+  <div class="chat-wrapper" id="messages"></div>
+  <form id="chatForm" class="d-flex mt-3" onsubmit="sendMessage(event)">
+    <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
+    <button type="submit" class="btn btn-danger">Envoyer</button>
+  </form>
+</div>
 <div class="chat-wrapper" id="messages"></div>
 </div>
     <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
@@ -501,6 +507,19 @@ function generateColor(pseudo) {
   }
   const color = `hsl(${hash % 360}, 70%, 50%)`;
   return color;
+}
+
+function sendMessage(e) {
+  e.preventDefault();
+  const msg = document.getElementById("messageInput").value.trim();
+  if (!msg || !socket) return;
+
+  socket.emit("chat-message", {
+    pseudo: "{{ $modele->prenom ?? 'Modèle' }}", // ou Auth::user()->pseudo si applicable
+    message: msg
+  });
+
+  document.getElementById("messageInput").value = '';
 }
 
 </script>
