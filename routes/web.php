@@ -82,3 +82,19 @@ Route::middleware(['auth.modele'])->group(function () {
     Route::post('/modele/photo-upload', [PhotoController::class, 'upload'])->name('modele.photo.upload');
     Route::delete('/modele/photo-delete/{index}', [PhotoController::class, 'delete'])->name('modele.photo.delete');
 });
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+
+// Affichage du formulaire d'email
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Formulaire de réinitialisation
+Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+
+// Soumission du nouveau mot de passe
+Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+// Page Login factice
+Route::get('/connexion', function () {
+    return redirect('/'); // ou tu peux rediriger vers un layout avec les modales
+})->name('login');

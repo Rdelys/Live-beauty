@@ -618,6 +618,12 @@ function togglePhotos(id) {
           <label class="form-label">Mot de passe</label>
           <input type="password" name="password" class="form-control" required>
         </div>
+        <div class="text-end">
+    <a href="#" class="text-light small" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">
+        Mot de passe oublié ?
+    </a>
+</div>
+
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-submit">Connexion</button>
@@ -625,6 +631,29 @@ function togglePhotos(id) {
     </form>
   </div>
 </div>
+<!-- Modal Mot de passe oublié -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ route('password.email') }}" class="modal-content auth-modal">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title">Réinitialiser le mot de passe</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Adresse Email</label>
+          <input type="email" name="email" class="form-control" required>
+        </div>
+        <p class="small">Vous recevrez un lien pour réinitialiser votre mot de passe.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-submit">Envoyer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 
 <!-- Modal Inscription -->
