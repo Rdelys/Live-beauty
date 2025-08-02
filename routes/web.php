@@ -76,3 +76,9 @@ Route::get('/api/modele/{id}', function ($id) {
     return response()->json($modele);
 });
 
+use App\Http\Controllers\PhotoController;
+
+Route::middleware(['auth.modele'])->group(function () {
+    Route::post('/modele/photo-upload', [PhotoController::class, 'upload'])->name('modele.photo.upload');
+    Route::delete('/modele/photo-delete/{index}', [PhotoController::class, 'delete'])->name('modele.photo.delete');
+});

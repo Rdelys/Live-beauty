@@ -276,6 +276,10 @@ label {
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="jetons-tab" data-bs-toggle="tab" data-bs-target="#jetons" type="button" role="tab">Jetons</button>
   </li>
+  <li class="nav-item" role="presentation">
+  <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab">Photos</button>
+</li>
+
 </ul>
 
 
@@ -348,7 +352,44 @@ label {
       @endif
     </div>
   </div>
+  
 </div>
+<div class="tab-pane fade text-start" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+  <h4 class="text-white mb-3">📸 Gestion de vos photos</h4>
+@php
+  $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos, true) ?? [];
+@endphp
+
+  {{-- Affichage des photos existantes --}}
+@if($photos && count($photos))
+    <div class="row">
+@foreach($photos as $key => $photo)
+        <div class="col-6 col-md-3 mb-4 text-center">
+          <img src="{{ asset('storage/' . $photo) }}" class="img-fluid rounded mb-2 border border-light" style="height: 150px; object-fit: cover;">
+          <form method="POST" action="{{ route('modele.photo.delete', $key) }}">
+            @csrf
+            @method('DELETE')
+            <button class="btn btn-sm btn-danger">Supprimer</button>
+          </form>
+        </div>
+      @endforeach
+    </div>
+  @else
+    <p class="text-muted">Aucune photo enregistrée.</p>
+  @endif
+
+  {{-- Formulaire d’ajout de photos --}}
+  <form action="{{ route('modele.photo.upload') }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    <div class="mb-3">
+      <label for="photos" class="form-label">Ajouter des photos</label>
+      <input type="file" name="photos[]" id="photos" class="form-control" multiple accept="image/*" onchange="previewImages(event)">
+    </div>
+    <div id="preview" class="d-flex flex-wrap gap-2 mb-3"></div>
+    <button type="submit" class="btn btn-success">Ajouter les photos</button>
+  </form>
+</div>
+
 </div>
 
     <form action="{{ route('modele.logout') }}" method="POST" class="mt-4">
@@ -515,6 +556,24 @@ function sendMessage(e) {
   document.getElementById("messageInput").value = '';
 }
 
+function previewImages(event) {
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '';
+
+  const files = event.target.files;
+  for (let i = 0; i < files.length; i++) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'rounded border border-light';
+      img.style.height = '100px';
+      img.style.marginRight = '10px';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(files[i]);
+  }
+}
 </script>
 
 
