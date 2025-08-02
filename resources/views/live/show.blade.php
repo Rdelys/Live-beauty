@@ -279,6 +279,16 @@ video {
       <button id="fullscreenBtn" class="btn btn-secondary mt-2">🖥️ Plein écran</button>
 
 <div id="videoContainer" style="position: relative;">
+  <div id="startOverlay" style="
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8); color: white;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  font-size: 1.5rem;
+  cursor: pointer;
+">
+  ▶️ Cliquez pour démarrer le live avec son
+</div>
   <video id="liveVideo" autoplay playsinline controls></video>
   <div class="chat-wrapper" id="messages"></div>
 
@@ -494,6 +504,17 @@ document.getElementById("fullscreenBtn").addEventListener("click", () => {
   } else if (container.msRequestFullscreen) {
     container.msRequestFullscreen();
   }
+});
+
+// 🎧 Gestion de l'activation audio par clic sur l'overlay
+const overlay = document.getElementById("startOverlay");
+
+overlay.addEventListener("click", () => {
+  overlay.style.display = "none"; // on cache l'overlay
+  video.muted = false;            // on active le son
+  video.play().catch(err => {
+    console.warn("Erreur lecture vidéo :", err);
+  });
 });
 
 </script>
