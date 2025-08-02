@@ -373,14 +373,24 @@ footer {
             @endif
           </td>
           <td>
-            @if($modele->photos)
-              @foreach(json_decode($modele->photos) as $photo)
-<img src="{{ asset('storage/' . $photo) }}" width="50" class="me-1 mb-1 rounded zoomable-photo" style="cursor: zoom-in;" />
-              @endforeach
-            @else
-              Aucune photo
-            @endif
-          </td>
+  @if($modele->photos)
+    @php
+      $photos = is_string($modele->photos) ? json_decode($modele->photos, true) : $modele->photos;
+    @endphp
+
+    @if(!empty($photos))
+      @foreach($photos as $photo)
+        <img src="{{ asset('storage/' . $photo) }}" width="50" class="me-1 mb-1 rounded zoomable-photo" />
+      @endforeach
+    @else
+      Aucune photo
+    @endif
+
+  @else
+    Aucune photo
+  @endif
+</td>
+
           <td>
   <a href="{{ route('modeles.edit', $modele->id) }}" class="btn btn-sm btn-primary">Modifier</a>
 
