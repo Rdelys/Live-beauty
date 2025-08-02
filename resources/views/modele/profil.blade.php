@@ -251,22 +251,22 @@ label {
 </head>
 <body>
 
-  <div class="container text-center">
+<div class="container text-center">
     @if(session('success'))
   <div class="alert alert-success">
       {{ session('success') }}
   </div>
-@endif
+  @endif
 
-@if($errors->any())
+  @if($errors->any())
   <div class="alert alert-danger">
       {{ $errors->first() }}
   </div>
-@endif
+  @endif
 
-    <h2 class="text-danger">Bonjour, {{ $modele->prenom }}</h2>
+  <h2 class="text-danger">Bonjour, {{ $modele->prenom }}</h2>
 
-    <ul class="nav nav-tabs" id="profilTab" role="tablist">
+  <ul class="nav nav-tabs" id="profilTab" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active" id="profil-tab" data-bs-toggle="tab" data-bs-target="#profil" type="button" role="tab">Profil</button>
   </li>
@@ -279,84 +279,77 @@ label {
 </ul>
 
 
-    <div class="tab-content" id="profilTabContent">
-      <div class="tab-pane fade show active text-start" id="profil" role="tabpanel">
-        <p><strong>Nom :</strong> {{ $modele->nom }}</p>
-        <p><strong>Email :</strong> {{ $modele->email }}</p>
-        <p><strong>Description :</strong> {{ $modele->description }}</p>
+<div class="tab-content" id="profilTabContent">
+  <div class="tab-pane fade show active text-start" id="profil" role="tabpanel">
+    <p><strong>Nom :</strong> {{ $modele->nom }}</p>
+    <p><strong>Email :</strong> {{ $modele->email }}</p>
+    <p><strong>Description :</strong> {{ $modele->description }}</p>
+  </div>
+
+  <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
+    <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
+    <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
+    <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
+
+    <div id="liveSection" style="display: none;">
+      <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
+      <div id="chat-overlay" class="mt-3" style="position: relative;">
+        <div class="chat-wrapper" id="messages"></div>
+        <form id="chatForm" class="d-flex mt-3" onsubmit="sendMessage(event)">
+          <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
+          <button type="submit" class="btn btn-danger">Envoyer</button>
+        </form>
       </div>
-      <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
-  <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
-  <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
-  <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
-
-  <div id="liveSection" style="display: none;">
-    <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
-<div id="chat-overlay" class="mt-3" style="position: relative;">
-  <div class="chat-wrapper" id="messages"></div>
-  <form id="chatForm" class="d-flex mt-3" onsubmit="sendMessage(event)">
-    <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
-    <button type="submit" class="btn btn-danger">Envoyer</button>
-  </form>
-</div>
-<div class="chat-wrapper" id="messages"></div>
-</div>
-    <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
-  </div>
-</div>
-
-<div class="tab-pane fade text-start" id="jetons" role="tabpanel" aria-labelledby="jetons-tab">
-  <h4 class="text-white mb-3">💎 Gestion de vos jetons</h4>
-
-  <div class="card bg-dark text-white mb-4 shadow">
-    <div class="card-body">
-      <h5 class="card-title">➕ Créer un jeton personnalisé</h5>
-      <form action="{{ route('jetons.store') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-          <label class="form-label">Nom du jeton</label>
-          <input type="text" name="nom" class="form-control" required placeholder="Ex : Jeton VIP">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Description</label>
-          <textarea name="description" class="form-control" placeholder="Ex : Jeton pour accès spécial"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Quantité</label>
-          <input type="number" name="nombre_de_jetons" class="form-control" required placeholder="Ex : 100">
-        </div>
-        <button type="submit" class="btn btn-success w-100">✅ Créer le jeton</button>
-      </form>
     </div>
+      <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
   </div>
 
-  <div class="card bg-dark text-white shadow">
-    <div class="card-body">
-      <h5 class="card-title">📦 Mes jetons</h5>
-      @if($modele->jetons && count($modele->jetons) > 0)
-        <ul class="list-group list-group-flush">
-          @foreach($modele->jetons as $jeton)
-            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-start text-white border-bottom">
-              <div>
-                <strong>{{ $jeton->nom }}</strong><br>
-                <small class="text-muted">{{ $jeton->description }}</small>
-              </div>
-              <span class="badge bg-info rounded-pill">{{ $jeton->nombre_de_jetons }}</span>
-            </li>
-          @endforeach
-        </ul>
-      @else
+  <div class="tab-pane fade text-start" id="jetons" role="tabpanel" aria-labelledby="jetons-tab">
+    <h4 class="text-white mb-3">💎 Gestion de vos jetons</h4>
+    <div class="card bg-dark text-white mb-4 shadow">
+      <div class="card-body">
+        <h5 class="card-title">➕ Créer un jeton personnalisé</h5>
+          <form action="{{ route('jetons.store') }}" method="POST">
+            @csrf
+            <div class="mb-3">
+              <label class="form-label">Nom du jeton</label>
+              <input type="text" name="nom" class="form-control" required placeholder="Ex : Jeton VIP">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control" placeholder="Ex : Jeton pour accès spécial"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Quantité</label>
+              <input type="number" name="nombre_de_jetons" class="form-control" required placeholder="Ex : 100">
+            </div>
+          <button type="submit" class="btn btn-success w-100">✅ Créer le jeton</button>
+          </form>
+      </div>
+    </div>
+
+    <div class="card bg-dark text-white shadow">
+      <div class="card-body">
+        <h5 class="card-title">📦 Mes jetons</h5>
+          @if($modele->jetons && count($modele->jetons) > 0)
+          <ul class="list-group list-group-flush">
+            @foreach($modele->jetons as $jeton)
+              <li class="list-group-item bg-transparent d-flex justify-content-between align-items-start text-white border-bottom">
+                <div>
+                  <strong>{{ $jeton->nom }}</strong><br>
+                  <small class="text-muted">{{ $jeton->description }}</small>
+                </div>
+                <span class="badge bg-info rounded-pill">{{ $jeton->nombre_de_jetons }}</span>
+              </li>
+            @endforeach
+          </ul>
+          @else
         <p class="text-muted mt-3">Aucun jeton créé pour le moment.</p>
       @endif
     </div>
   </div>
 </div>
-
-
-
-
-
-    </div>
+</div>
 
     <form action="{{ route('modele.logout') }}" method="POST" class="mt-4">
       @csrf
