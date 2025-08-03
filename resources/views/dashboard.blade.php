@@ -128,10 +128,12 @@ body {
 /* Nom */
 .model-name {
     text-align: center;
-    padding: 1rem;
-    color: var(--primary-light);
-    font-weight: 600;
-    font-size: 1.1rem;
+padding: 1rem;
+color: #ffffff; /* Blanc très pur */
+font-weight: bold;
+font-size: 1.1rem;
+text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du texte */
+
 }
 
 /* VIP & Status */
@@ -200,7 +202,64 @@ body {
   transform: scale(1.05);
   border-color: var(--accent);
 }
+.media-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
 
+.model-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.model-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 2;
+  transition: opacity 0.4s ease;
+  pointer-events: none; /* évite le blocage du clic sur la vidéo */
+}
+
+.model-video video,
+.model-video iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-container:hover .model-video {
+  opacity: 1;
+}
+
+.status-name {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  z-index: 3;
+  color: white;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: green;
+}
     </style>
 </head>
 
@@ -219,19 +278,21 @@ body {
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <!-- Menus -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="filleDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Filles</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Cams en Direct</a></li>
-                            <li><a class="dropdown-item" href="#">Nouveaux Modèles</a></li>
-                            <li><a class="dropdown-item" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a></li>
-                            <li><a class="dropdown-item" href="#">Top Modèles</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="#">Club Elite</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Awards</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Meilleurs Membres</a></li>
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                      <li class="nav-item">
+                          <a class="nav-link" href="#">Modèles galeries</a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="#">Nouveaux Modèles</a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="#">Top Modèles</a>
+                      </li>
+                  </ul>
                 </ul>
 
                 <div class="d-flex align-items-center">
@@ -240,12 +301,12 @@ body {
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-envelope"></i></a>
                     
-@if(Auth::check())
-    <div class="me-3 text-white fw-bold">
-        <i class="fas fa-coins text-warning me-1"></i>
-        {{ Auth::user()->jetons }} jetons
-    </div>
-@endif
+                @if(Auth::check())
+                    <div class="me-3 text-white fw-bold">
+                        <i class="fas fa-coins text-warning me-1"></i>
+                        {{ Auth::user()->jetons }} jetons
+                    </div>
+                @endif
                     <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span>
                     
                     <button class="btn btn-danger fw-bold rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#achatJetonsModal">
@@ -272,50 +333,10 @@ body {
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h5>Catégories</h5>
-                <h5>Lives Actifs</h5>
+                <h7>Cams en Direct</h5>
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
-
-                <a href="#" onclick="toggleMenu(this)">En direct</a>
-                <div class="submenu">
-                    <a href="#">- VIP</a>
-                    <a href="#">- Gratuit</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Tags en tendance</a>
-                <div class="submenu">
-                    <a href="#">- Populaire</a>
-                    <a href="#">- Nouveaux</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Type de show</a>
-                <div class="submenu">
-                    <a href="#">- Privé</a>
-                    <a href="#">- Public</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Prix</a>
-                <div class="submenu">
-                    <a href="#">- Moins cher</a>
-                    <a href="#">- Premium</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Fétiches</a>
-                <div class="submenu">
-                    <a href="#">- Pieds</a>
-                    <a href="#">- Cosplay</a>
-                </div>
-
-                <a href="#">Langue</a>
-                <a href="#">Âge</a>
-                <a href="#">Origine</a>
-                <a href="#">Apparence</a>
-                <a href="#">Poitrine</a>
-                <a href="#">Fesses</a>
-                <a href="#">Taille</a>
-                <a href="#">Cheveux</a>
-                <a href="#">Région</a>
             </div>
 
             <!-- Cartes -->
@@ -323,63 +344,53 @@ body {
                 <div class="row g-4">
   @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
-        <div class="position-relative model-card" style="cursor:pointer;" onclick="afficherDetailModele({{ $modele->id }})">
-            <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
+        <div class="model-card">
 
-<div class="status-label position-absolute top-0 end-0 mt-2 me-2">
-        @if($modele->en_ligne)
-            <span class="badge bg-success">🟢 En ligne</span>
-        @else
-            <span class="badge bg-danger">🔴 Hors ligne</span>
-        @endif
+<a href="{{ route('modele.profile', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
+    @php
+      $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+      $photo = $photos[0] ?? null;
+      $hasVideo = $modele->video_file || $modele->video_link;
+    @endphp
+
+    <div class="media-container">
+      {{-- IMAGE PRINCIPALE --}}
+      @if($photo)
+        <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+      @else
+        <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+      @endif
+
+      {{-- VIDÉO AU HOVER --}}
+      @if($hasVideo)
+  <div class="model-video">
+    @if($modele->video_file)
+      <video autoplay muted loop playsinline preload="none">
+        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo.
+      </video>
+    @elseif($modele->video_link)
+      <iframe
+        src="{{ $modele->video_link }}?autoplay=1&mute=1&controls=0&loop=1"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+        style="width: 100%; height: 100%;">
+      </iframe>
+    @endif
+  </div>
+@endif
+
+
+      {{-- STATUT + NOM --}}
+      <div class="status-name">
+        <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
+        <span class="model-name">{{ $modele->prenom }}</span>
+      </div>
     </div>
-
-            @php
-                $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
-                $photos = $photos ?: [];
-                $hasVideo = $modele->video_file || $modele->video_link;
-            @endphp
-
-            <div id="carousel-{{ $modele->id }}" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    @foreach($photos as $index => $photo)
-                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                            <img src="{{ asset('storage/' . $photo) }}" class="d-block w-100 model-img" alt="Photo {{ $index + 1 }}">
-                        </div>
-                    @endforeach
-                </div>
-                @if(count($photos) > 1)
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon"></span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon"></span>
-                    </button>
-                @endif
-            </div>
-
-            @if($hasVideo)
-                <div class="d-grid gap-2 p-2">
-                    <button class="btn btn-outline-warning" onclick="toggleVideo({{ $modele->id }})" id="btn-video-{{ $modele->id }}">🎬 Voir la vidéo</button>
-                    <button class="btn btn-outline-light d-none" onclick="togglePhotos({{ $modele->id }})" id="btn-photos-{{ $modele->id }}">🖼️ Retour aux photos</button>
-                </div>
-            @endif
-
-            <div class="model-name">{{ $modele->prenom }}</div>
-
-            <!-- Vidéo -->
-            <div id="video-{{ $modele->id }}" class="d-none">
-                @if($modele->video_file)
-                    <video controls style="width:100%; height:250px; object-fit:cover;">
-                        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
-                        Votre navigateur ne prend pas en charge la vidéo.
-                    </video>
-                @elseif($modele->video_link)
-                    <iframe width="100%" height="250" src="{{ $modele->video_link }}" frameborder="0" allowfullscreen></iframe>
-                @endif
-            </div>
-        </div>
-    </div>
+</a>
+</div>
+</div>
 @endforeach
 
 
@@ -389,39 +400,6 @@ body {
         </div>
     </div>
 <!-- Modal Détail Modèle (version améliorée) -->
-<div class="modal fade" id="modelDetailModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content bg-dark text-white border-0 rounded-4 shadow-lg">
-      
-      <!-- Bouton de fermeture -->
-      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal">
-        <i class="fas fa-times"></i>
-      </button>
-
-      <div class="modal-body p-4">
-        <div class="row g-4">
-          <!-- Colonne gauche : photo + miniatures -->
-          <div class="col-md-6 d-flex flex-column align-items-center">
-            <img id="mainModelImage" src="" alt="Image principale" class="img-fluid rounded-4 shadow-lg mb-3" style="max-height: 500px; object-fit: cover; width: 100%;">
-            <div class="d-flex flex-wrap justify-content-center gap-2" id="thumbnailContainer" style="max-width: 100%;">
-              <!-- Miniatures dynamiques -->
-            </div>
-          </div>
-
-          <!-- Colonne droite : détails -->
-          <div class="col-md-6">
-            <div id="modelDetailContent" class="bg-black bg-opacity-75 p-4 rounded shadow" style="max-height: 80vh; overflow-y: auto;">
-              <!-- Contenu injecté dynamiquement -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
     <!-- JS -->
     <script>
         function toggleMenu(element) {
@@ -453,104 +431,6 @@ body {
 
         fetchLiveModels();
         setInterval(fetchLiveModels, 15000);
-
-        function toggleVideo(id) {
-    const carousel = document.getElementById(`carousel-${id}`);
-    const video = document.getElementById(`video-${id}`);
-    const btnVideo = document.getElementById(`btn-video-${id}`);
-    const btnPhotos = document.getElementById(`btn-photos-${id}`);
-
-    if (carousel && video) {
-        carousel.classList.add('d-none');
-        video.classList.remove('d-none');
-        btnVideo.classList.add('d-none');
-        btnPhotos.classList.remove('d-none');
-    }
-}
-
-function togglePhotos(id) {
-    const carousel = document.getElementById(`carousel-${id}`);
-    const video = document.getElementById(`video-${id}`);
-    const btnVideo = document.getElementById(`btn-video-${id}`);
-    const btnPhotos = document.getElementById(`btn-photos-${id}`);
-
-    if (carousel && video) {
-        video.classList.add('d-none');
-        carousel.classList.remove('d-none');
-        btnPhotos.classList.add('d-none');
-        btnVideo.classList.remove('d-none');
-    }
-}
-
-function afficherDetailModele(id) {
-  const content = document.getElementById('modelDetailContent');
-  const mainImg = document.getElementById('mainModelImage');
-  const thumbnails = document.getElementById('thumbnailContainer');
-
-  // Effacer contenu
-  content.innerHTML = `<div class="text-center text-muted">Chargement...</div>`;
-  mainImg.src = "";
-  thumbnails.innerHTML = "";
-
-  fetch(`/api/modele/${id}`)
-    .then(res => res.json())
-    .then(modele => {
-      let photos = Array.isArray(modele.photos) ? modele.photos : JSON.parse(modele.photos || '[]');
-      if (!Array.isArray(photos)) photos = [];
-
-      // Image principale
-      if (photos.length > 0) {
-        mainImg.src = `/storage/${photos[0]}`;
-      } else {
-        mainImg.src = 'https://via.placeholder.com/500x300?text=Pas+de+photo';
-      }
-
-      // Miniatures
-      thumbnails.innerHTML = photos.map((photo, index) => `
-        <img src="/storage/${photo}" data-index="${index}" class="${index === 0 ? 'active' : ''}">
-      `).join('');
-
-      thumbnails.querySelectorAll('img').forEach(img => {
-        img.addEventListener('click', function () {
-          mainImg.src = this.src;
-          thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('active'));
-          this.classList.add('active');
-        });
-      });
-
-      // Bio + bouton show privé
-      content.innerHTML = `
-        <h4 class="text-warning mb-3">Bio de ${modele.prenom}</h4>
-        <p><strong>${modele.age || 'Âge inconnu'} ans</strong> — ${modele.genre || 'Genre'} — ${modele.orientation || ''} — ${modele.langues || ''}</p>
-        <p>${modele.description || 'Aucune description disponible.'}</p>
-        <hr class="bg-light">
-        <h5>Ma bio :</h5>
-        <ul class="list-unstyled mb-3">
-          <li><strong>Taille :</strong> ${modele.taille || '-'} cm</li>
-          <li><strong>Fesses :</strong> ${modele.fesses || '-'}</li>
-          <li><strong>Poitrine :</strong> ${modele.poitrine || '-'}</li>
-        </ul>
-        <h5>Ce que je propose en Chat Privé :</h5>
-        <p>${modele.services_prives || 'Non précisé'}</p>
-
-        <div class="text-center mt-4">
-          ${
-            modele.en_ligne
-              ? `<button class="btn btn-success fw-bold px-4 py-2 rounded-pill">🎥 Prendre Show Privé</button>`
-              : `<span class="badge bg-secondary">Modèle hors ligne</span>`
-          }
-        </div>
-      `;
-
-      // Afficher modal
-      new bootstrap.Modal(document.getElementById('modelDetailModal')).show();
-    })
-    .catch(err => {
-      console.error(err);
-      content.innerHTML = `<div class="text-danger text-center">Erreur de chargement des détails.</div>`;
-    });
-}
-
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

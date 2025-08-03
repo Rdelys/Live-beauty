@@ -339,24 +339,19 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                    <!-- Menus -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="filleDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Filles</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Cams en Direct</a></li>
-                            <li><a class="dropdown-item" href="#">Nouveaux Modèles</a></li>
-                            <li><a class="dropdown-item" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a></li>
-                            <li><a class="dropdown-item" href="#">Top Modèles</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item"><a class="nav-link" href="#">Club Elite</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Awards</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Meilleurs Membres</a></li>
-                </ul>
-
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Cams en Direct</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Nouveaux Modèles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Top Modèles</a>
+                </li>
+            </ul>
                 <div class="d-flex align-items-center">
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
@@ -375,50 +370,11 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h5>Catégories</h5>
-                <h5>Lives Actifs</h5>
+                <h7>Cams en Direct</h5>
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
                 <!-- Menu avec sous-menus repliables -->
-                <a href="#" onclick="toggleMenu(this)">En direct</a>
-                <div class="submenu">
-                    <a href="#">- VIP</a>
-                    <a href="#">- Gratuit</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Tags en tendance</a>
-                <div class="submenu">
-                    <a href="#">- Populaire</a>
-                    <a href="#">- Nouveaux</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Type de show</a>
-                <div class="submenu">
-                    <a href="#">- Privé</a>
-                    <a href="#">- Public</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Prix</a>
-                <div class="submenu">
-                    <a href="#">- Moins cher</a>
-                    <a href="#">- Premium</a>
-                </div>
-
-                <a href="#" onclick="toggleMenu(this)">Fétiches</a>
-                <div class="submenu">
-                    <a href="#">- Pieds</a>
-                    <a href="#">- Cosplay</a>
-                </div>
-
-                <a href="#">Langue</a>
-                <a href="#">Âge</a>
-                <a href="#">Origine</a>
-                <a href="#">Apparence</a>
-                <a href="#">Poitrine</a>
-                <a href="#">Fesses</a>
-                <a href="#">Taille</a>
-                <a href="#">Cheveux</a>
-                <a href="#">Région</a>
             </div>
 
             <!-- Cartes -->
@@ -560,95 +516,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
   fetchLiveModels();
   setInterval(fetchLiveModels, 15000); // actualisation toutes les 15 sec
-
-  function toggleVideo(id) {
-    const carousel = document.getElementById(`carousel-${id}`);
-    const video = document.getElementById(`video-${id}`);
-    const btnVideo = document.getElementById(`btn-video-${id}`);
-    const btnPhotos = document.getElementById(`btn-photos-${id}`);
-
-    if (carousel && video) {
-        carousel.classList.add('d-none');
-        video.classList.remove('d-none');
-        btnVideo.classList.add('d-none');
-        btnPhotos.classList.remove('d-none');
-    }
-}
-
-function togglePhotos(id) {
-    const carousel = document.getElementById(`carousel-${id}`);
-    const video = document.getElementById(`video-${id}`);
-    const btnVideo = document.getElementById(`btn-video-${id}`);
-    const btnPhotos = document.getElementById(`btn-photos-${id}`);
-
-    if (carousel && video) {
-        video.classList.add('d-none');
-        carousel.classList.remove('d-none');
-        btnPhotos.classList.add('d-none');
-        btnVideo.classList.remove('d-none');
-    }
-}
-
  const modeles = @json($modeles); // Assure-toi d'avoir passé $modeles depuis le contrôleur
-
-    function afficherDetailModele(id) {
-    const modele = modeles.find(m => m.id === id);
-    if (!modele) return;
-
-    let photos = modele.photos;
-    try {
-        photos = typeof photos === 'string' ? JSON.parse(photos) : photos;
-        if (!Array.isArray(photos)) photos = [];
-    } catch (e) {
-        photos = [];
-    }
-
-    const mainImg = document.getElementById('mainModelImage');
-    const thumbnails = document.getElementById('thumbnailContainer');
-
-    // Première image affichée par défaut
-    if (photos.length > 0) {
-        mainImg.src = `/storage/${photos[0]}`;
-    } else {
-        mainImg.src = 'https://via.placeholder.com/500x300?text=Pas+de+photo';
-    }
-
-    // Miniatures
-    thumbnails.innerHTML = photos.map((photo, index) => `
-        <img src="/storage/${photo}" data-index="${index}" class="${index === 0 ? 'active' : ''}">
-    `).join('');
-
-    // Ajouter l'écoute sur les miniatures
-    thumbnails.querySelectorAll('img').forEach(img => {
-        img.addEventListener('click', function () {
-            mainImg.src = this.src;
-            thumbnails.querySelectorAll('img').forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // Détails
-    const contentHTML = `
-        <h4 class="text-warning mb-3">Bio de ${modele.prenom}</h4>
-        <p><strong>${modele.age || 'Âge inconnu'} ans</strong> — ${modele.genre || 'Genre'} — ${modele.orientation || ''} — ${modele.langues || ''}</p>
-        <p>${modele.description || 'Aucune description disponible.'}</p>
-        <hr class="bg-light">
-        <h5>Ma bio :</h5>
-        <ul class="list-unstyled mb-3">
-            <li><strong>Taille :</strong> ${modele.taille || '-'} cm</li>
-            <li><strong>Fesses :</strong> ${modele.fesses || '-'}</li>
-            <li><strong>Poitrine :</strong> ${modele.poitrine || '-'}</li>
-        </ul>
-        <h5>Ce que je propose en Chat Privé :</h5>
-        <p>${modele.services_prives || 'Non précisé'}</p>
-    `;
-    document.getElementById('modelDetailContent').innerHTML = contentHTML;
-
-    // Affiche le modal
-    new bootstrap.Modal(document.getElementById('modelDetailModal')).show();
-}
-
-
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
