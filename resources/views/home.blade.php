@@ -354,30 +354,37 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
     border-radius: 20px;
 }
 
-.card-photo .open-gallery {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border-radius: 50%;
-    background-color: #f1f1f1;
-    color: black;
+.open-gallery-btn {
+    background: none;
+    border: none;
+    color: white;
     font-weight: bold;
+    font-size: 0.75rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    font-size: 0.8rem;
-    flex-direction: column;
-    text-align: center;
-    gap: 2px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
-.card-photo .open-gallery i {
-    font-size: 0.9rem;
-    margin: 0;
+
+.open-gallery-btn i {
+    font-size: 1rem;
+    margin-bottom: 2px;
 }
+
+.open-gallery-btn span {
+    font-size: 0.65rem;
+    line-height: 1;
+}
+
+.open-gallery-btn:hover {
+    transform: scale(1.1);
+    color: var(--accent);
+}
+
 
 .card-photo .status-name,
 .card-photo .open-gallery {
@@ -511,11 +518,15 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 </div>
 
         <div class="position-absolute bottom-0 end-0 p-2">
-            <button class="btn btn-sm btn-light rounded-pill open-gallery" 
-                    data-photos='@json($photos)' data-bs-toggle="modal" data-bs-target="#photoModal">
-                <i class="fas fa-camera"></i> {{ count($photos) }}
-            </button>
-        </div>
+    <button class="btn btn-sm btn-light rounded-pill open-gallery" 
+            data-photos='@json($photos)' 
+            data-bs-toggle="modal" data-bs-target="#photoModal" 
+            title="Voir les photos">
+        <i class="fas fa-camera"></i>
+        <span>{{ count($photos) }}</span>
+    </button>
+</div>
+
     </div>
 </div>
 @endforeach
