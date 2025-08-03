@@ -11,31 +11,30 @@
 
     .photo-principale-container {
         width: 100%;
-        height: 500px; /* cadre fixe */
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
-        overflow: hidden; /* pour ne pas dépasser */
+        height: 400px;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+        overflow: hidden;
         margin-bottom: 1rem;
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: #222; /* fond sombre derrière l'image */
+        background-color: #222;
     }
 
     .photo-principale {
         max-width: 100%;
         max-height: 100%;
-        object-fit: contain; /* affiche toute l'image sans découpe */
-        border-radius: 8px;
+        object-fit: contain;
+        border-radius: 6px;
         display: block;
     }
 
-    /* Vignettes */
     .photo-vignette {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         object-fit: cover;
-        border-radius: 6px;
+        border-radius: 4px;
         cursor: pointer;
         border: 2px solid transparent;
         transition: border-color 0.3s ease;
@@ -43,19 +42,51 @@
 
     .photo-vignette:hover,
     .photo-vignette.active {
-        border-color: #ffc107;
+        border-color: #28a745;
     }
 
-    h2.text-warning {
-        color: #ffc107 !important;
-        font-weight: 700;
-        text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
+    .btn-private {
+        background-color: transparent;
+        color: #28a745;
+        border: 1px solid #28a745;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-private:hover {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .badge-online {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        background-color: #28a745;
+        color: #fff;
+        border-radius: 12px;
+        margin-left: 0.5rem;
+    }
+
+    .badge-offline {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        background-color: #6c757d;
+        color: #fff;
+        border-radius: 12px;
+        margin-left: 0.5rem;
     }
 
     @media (max-width: 767px) {
         .photo-vignette {
-            width: 60px;
-            height: 60px;
+            width: 48px;
+            height: 48px;
+        }
+
+        .photo-principale-container {
+            height: 300px;
         }
     }
 
@@ -69,7 +100,6 @@
     <div class="row gy-4">
 
         <div class="col-12 col-md-6">
-
             @php
                 $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
                 $firstPhoto = $photos[0] ?? null;
@@ -93,7 +123,19 @@
         </div>
 
         <div class="col-12 col-md-6">
-            <h2 class="text-warning">{{ $modele->prenom }}</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">
+                    {{ $modele->prenom }}
+                    @if ($modele->en_ligne)
+                        <span class="badge-online">En ligne</span>
+                    @else
+                        <span class="badge-offline">Hors ligne</span>
+                    @endif
+                </h2>
+
+                <a href="{{ route('modele.private.show', $modele->id) }}" class="btn-private">Show en privé</a>
+            </div>
+
             <p><strong>{{ $modele->age ?? '-' }} ans</strong> — {{ $modele->genre ?? '-' }} — {{ $modele->orientation ?? '-' }}</p>
             <p>{{ $modele->description ?? 'Aucune description' }}</p>
 
@@ -115,7 +157,6 @@
 <script>
     function changePhoto(img) {
         document.getElementById('photoPrincipale').src = img.src;
-
         document.querySelectorAll('.photo-vignette').forEach(v => v.classList.remove('active'));
         img.classList.add('active');
     }

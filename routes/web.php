@@ -99,7 +99,19 @@ Route::get('/connexion', function () {
     return redirect('/'); // ou tu peux rediriger vers un layout avec les modales
 })->name('login');
 
-Route::get('/modele/{id}', function ($id) {
+Route::get('/modele/{id}/', function ($id) {
     $modele = Modele::findOrFail($id);
-    return view('modele.profile', compact('modele')); // ici profile au lieu de show
+    return view('modele.profile', compact('modele'));
 })->name('modele.profile');
+
+// Profil privé
+Route::get('/modele/{id}/private', function ($id) {
+    $modele = Modele::findOrFail($id);
+    return view('modele.private', compact('modele'));
+})->name('modele.private');
+
+// Show privé (bouton d’action dans la page private.blade.php par exemple)
+Route::get('/modele/{id}/private-show', function ($id) {
+    $modele = Modele::findOrFail($id);
+    return view('modele.private-show', compact('modele'));
+})->name('modele.private.show');
