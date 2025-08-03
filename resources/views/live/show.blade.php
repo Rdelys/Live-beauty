@@ -519,6 +519,65 @@ overlay.addEventListener("click", () => {
 
 </script>
 
+<script>
+// ✅ 1. Masquer le contenu quand l'onglet est inactif
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        document.body.style.display = "none";
+    } else {
+        document.body.style.display = "block";
+    }
+});
+
+// ✅ 2. Flouter le contenu quand la fenêtre perd le focus
+window.addEventListener("blur", () => {
+    document.body.style.filter = "blur(10px)";
+});
+window.addEventListener("focus", () => {
+    document.body.style.filter = "none";
+});
+
+// ✅ 3. Bloquer PrintScreen (tentative)
+document.addEventListener("keydown", (e) => {
+    if (e.key === "PrintScreen") {
+        navigator.clipboard.writeText("Capture désactivée");
+        alert("La capture d’écran est désactivée !");
+        e.preventDefault();
+    }
+});
+
+// ✅ 4. Empêcher les raccourcis clavier sensibles
+document.addEventListener("keydown", (e) => {
+    const forbiddenCombos = [
+        (e.ctrlKey && e.key.toLowerCase() === 'u'), // Ctrl+U (afficher code source)
+        (e.ctrlKey && e.key.toLowerCase() === 's'), // Ctrl+S (sauvegarder)
+        (e.ctrlKey && e.key.toLowerCase() === 'c'), // Ctrl+C (copier)
+        (e.key === 'F12') // Ouvrir les dev tools
+    ];
+
+    if (forbiddenCombos.some(Boolean)) {
+        e.preventDefault();
+        alert("Cette action est désactivée.");
+    }
+});
+</script>
 
 </body>
 </html>
+
+<div id="watermark">
+  Utilisateur : {{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}
+</div>
+
+<style>
+#watermark {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  opacity: 0.3;
+  font-size: 12px;
+  color: white;
+  pointer-events: none;
+  z-index: 9999;
+}
+</style>
