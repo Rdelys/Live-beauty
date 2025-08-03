@@ -322,6 +322,68 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
   margin-right: 8px;
   background-color: green;
 }
+
+.card-photo {
+    position: relative;
+    border-radius: var(--border-radius);
+    background: none; /* retire le fond noir */
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.card-photo img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--border-radius);
+}
+
+
+.card-photo:hover {
+    transform: scale(1.01);
+}
+
+.card-photo .status-name {
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    z-index: 2;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.card-photo .open-gallery {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: #f1f1f1;
+    color: black;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    font-size: 0.8rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 2px;
+}
+.card-photo .open-gallery i {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.card-photo .status-name,
+.card-photo .open-gallery {
+    margin: 0;
+}
+
     </style>
 </head>
 
@@ -340,8 +402,12 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Cams en Direct</a>
-                </li>
+    <a class="nav-link" href="#" data-type="default">Modèles</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="#" data-type="photo">Galerie photo</a>
+</li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="#">Nouveaux Modèles</a>
                 </li>
@@ -383,8 +449,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
                     @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
-        <div class="model-card">
-
+    <div class="model-card card-default">
 <a href="{{ route('modele.profile', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
     @php
       $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
@@ -429,9 +494,30 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
     </div>
 </a>
 </div>
+<div class="model-card card-photo d-none position-relative">
+        @php
+            $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+            $photo = $photos[0] ?? null;
+        @endphp
+
+        @if($photo)
+            <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+        @else
+            <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+        @endif
+<div class="status-name">
+    <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
+    <span class="model-name">{{ $modele->prenom }}</span>
 </div>
 
-
+        <div class="position-absolute bottom-0 end-0 p-2">
+            <button class="btn btn-sm btn-light rounded-pill open-gallery" 
+                    data-photos='@json($photos)' data-bs-toggle="modal" data-bs-target="#photoModal">
+                <i class="fas fa-camera"></i> {{ count($photos) }}
+            </button>
+        </div>
+    </div>
+</div>
 @endforeach
 
 
@@ -517,6 +603,34 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
   fetchLiveModels();
   setInterval(fetchLiveModels, 15000); // actualisation toutes les 15 sec
  const modeles = @json($modeles); // Assure-toi d'avoir passé $modeles depuis le contrôleur
+
+ document.querySelectorAll('.nav-link[data-type]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const type = this.dataset.type;
+
+        document.querySelectorAll('.card-default').forEach(el => el.classList.toggle('d-none', type !== 'default'));
+        document.querySelectorAll('.card-photo').forEach(el => el.classList.toggle('d-none', type !== 'photo'));
+    });
+});
+
+// Ouvrir la modal galerie
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.open-gallery')) {
+        const btn = e.target.closest('.open-gallery');
+        const photos = JSON.parse(btn.dataset.photos || '[]');
+        const container = document.getElementById('carouselInner');
+        container.innerHTML = '';
+
+        photos.forEach((photo, index) => {
+            const active = index === 0 ? 'active' : '';
+            container.innerHTML += `
+                <div class="carousel-item ${active}">
+                    <img src="/storage/${photo}" class="d-block w-100" style="object-fit:cover; height:80vh;">
+                </div>`;
+        });
+    }
+});
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -611,6 +725,30 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         <button type="submit" class="btn btn-submit">Inscription</button>
       </div>
     </form>
+  </div>
+</div>
+<!-- Modal Galerie Photo -->
+<div class="modal fade" id="photoModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 800px; width: 90%;">
+    <div class="modal-content bg-dark text-white border-0 rounded-4 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="fas fa-images me-2"></i> Galerie</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="carouselPhotos" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carouselInner">
+            <!-- Images dynamiques injectées ici -->
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselPhotos" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselPhotos" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
