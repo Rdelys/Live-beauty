@@ -98,3 +98,8 @@ Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name(
 Route::get('/connexion', function () {
     return redirect('/'); // ou tu peux rediriger vers un layout avec les modales
 })->name('login');
+
+Route::get('/modele/{id}', function ($id) {
+    $modele = Modele::findOrFail($id);
+    return view('modele.profile', compact('modele')); // ici profile au lieu de show
+})->name('modele.profile');
