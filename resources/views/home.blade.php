@@ -9,17 +9,20 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root {
-    --primary: #e91e63;
-    --primary-light: #ff80ab;
-    --dark-bg: #121212;
-    --card-bg: #1e1e1e;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-blur: blur(8px);
-    --text-light: #f5f5f5;
-    --accent: gold;
-    --border-radius: 1rem;
-}
+       :root {
+        --primary: #e91e63;
+        --primary-light: #ff80ab;
+        --dark-bg: #121212;
+        --card-bg: #1e1e1e;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-blur: blur(8px);
+        --text-light: #f5f5f5;
+        --accent: gold;
+        --border-radius: 1rem;
+
+        /* Couleur vert très foncé ajoutée */
+        --dark-green: #003300;
+    }
 
 body {
     background-color: var(--dark-bg);
@@ -109,17 +112,17 @@ body {
 
 /* Cartes Modèle */
 .model-card {
-    background-color: var(--card-bg);
     border-radius: var(--border-radius);
-    overflow: hidden;
+    background-color: transparent;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
     position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 0 10px rgba(255, 20, 147, 0.15);
+    overflow: hidden;
+    transition: transform 0.3s ease;
 }
 .model-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+    transform: scale(1.01);
 }
+
 
 .model-img {
     width: 100%;
@@ -133,10 +136,12 @@ body {
 /* Nom */
 .model-name {
     text-align: center;
-    padding: 1rem;
-    color: var(--primary-light);
-    font-weight: 600;
-    font-size: 1.1rem;
+padding: 1rem;
+color: #ffffff; /* Blanc très pur */
+font-weight: bold;
+font-size: 1.1rem;
+text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du texte */
+
 }
 
 /* VIP & Status */
@@ -259,6 +264,64 @@ body {
   font-weight: bold;
 }
 
+.media-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.model-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.model-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 2;
+  transition: opacity 0.4s ease;
+  pointer-events: none; /* évite le blocage du clic sur la vidéo */
+}
+
+.model-video video,
+.model-video iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-container:hover .model-video {
+  opacity: 1;
+}
+
+.status-name {
+  position: absolute;
+  bottom: 5px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  z-index: 3;
+  color: white;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: green;
+}
     </style>
 </head>
 
@@ -364,65 +427,52 @@ body {
 
                     @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
-<div class="position-relative model-card" style="cursor:pointer;" onclick="afficherDetailModele({{ $modele->id }})">
+  <div class="model-card" onclick="afficherDetailModele({{ $modele->id }})" style="cursor: pointer;">
+    @php
+      $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+      $photo = $photos[0] ?? null;
+      $hasVideo = $modele->video_file || $modele->video_link;
+    @endphp
 
-            <span class="status-indicator {{ $modele->en_ligne ? 'status-online' : 'status-offline' }}"></span>
+    <div class="media-container">
+      {{-- IMAGE PRINCIPALE --}}
+      @if($photo)
+        <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+      @else
+        <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+      @endif
 
-<div class="status-label position-absolute top-0 end-0 mt-2 me-2">
-        @if($modele->en_ligne)
-            <span class="badge bg-success">🟢 En ligne</span>
-        @else
-            <span class="badge bg-danger">🔴 Hors ligne</span>
-        @endif
+      {{-- VIDÉO AU HOVER --}}
+      @if($hasVideo)
+  <div class="model-video">
+    @if($modele->video_file)
+      <video autoplay muted loop playsinline preload="none">
+        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo.
+      </video>
+    @elseif($modele->video_link)
+      <iframe
+        src="{{ $modele->video_link }}?autoplay=1&mute=1&controls=0&loop=1"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen
+        style="width: 100%; height: 100%;">
+      </iframe>
+    @endif
+  </div>
+@endif
+
+
+      {{-- STATUT + NOM --}}
+      <div class="status-name">
+        <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
+        <span class="model-name">{{ $modele->prenom }}</span>
+      </div>
     </div>
-
-            @php
-                $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
-    $photos = $photos ?: [];
-                $hasVideo = $modele->video_file || $modele->video_link;
-            @endphp
-
-            <div id="carousel-{{ $modele->id }}" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    @foreach($photos as $index => $photo)
-                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-<img src="{{ asset('storage/' . $photo) }}" class="d-block w-100 model-img" alt="Photo {{ $index + 1 }}">
-                        </div>
-                    @endforeach
-                </div>
-
-                @if(count($photos) > 1)
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon"></span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ $modele->id }}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon"></span>
-                    </button>
-                @endif
-            </div>
-
-            @if($hasVideo)
-<div class="d-grid gap-2 p-2">
-    <button class="btn btn-outline-warning" onclick="toggleVideo({{ $modele->id }})" id="btn-video-{{ $modele->id }}">🎬 Voir la vidéo</button>
-    <button class="btn btn-outline-light d-none" onclick="togglePhotos({{ $modele->id }})" id="btn-photos-{{ $modele->id }}">🖼️ Retour aux photos</button>
+  </div>
 </div>
-            @endif
 
-            <div class="model-name">{{ $modele->prenom }}</div>
 
-            <!-- Vidéo (masquée par défaut) -->
-            <div id="video-{{ $modele->id }}" class="d-none">
-                @if($modele->video_file)
-                    <video controls style="width:100%; height:250px; object-fit:cover;">
-                        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
-                        Votre navigateur ne prend pas en charge la vidéo.
-                    </video>
-                @elseif($modele->video_link)
-                    <iframe width="100%" height="250" src="{{ $modele->video_link }}" frameborder="0" allowfullscreen></iframe>
-                @endif
-            </div>
-        </div>
-    </div>
 @endforeach
 
 
