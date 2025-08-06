@@ -193,31 +193,54 @@ label {
 }
 .chat-wrapper {
   position: absolute;
-  bottom: 10px;
+  bottom: 85px;
   left: 10px;
   right: 10px;
+  max-height: 160px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 0 10px;
-  z-index: 1000;
+  padding: 5px 10px;
+  z-index: 999;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  scrollbar-width: none; /* Firefox */
+}
+.chat-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .chat-bubble {
-  display: block;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 1rem;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.6);
-  animation: fadeOut 4s ease-out forwards;
-  max-width: 80%;
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+  padding: 2px 6px;
+  font-size: 13.5px;
+  color: white;
+  margin-bottom: 4px;
+  width: fit-content;
+  max-width: 90%;
+  line-height: 1.4;
   word-break: break-word;
+  pointer-events: auto;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-@keyframes fadeOut {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+/*@keyframes fadeOut {
   0% { opacity: 1; transform: translateY(0); }
   80% { opacity: 1; }
   100% { opacity: 0; transform: translateY(-10px); }
@@ -429,19 +452,18 @@ socket = io("https://livebeautyofficial.com/", {
     });
 const messagesDiv = document.getElementById("messages");
 
-  socket.on("chat-message", data => {
- const bubble = document.createElement("div");
-bubble.className = "chat-bubble";
-bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
-bubble.style.backgroundColor = generateColor(data.pseudo);
-messagesDiv.appendChild(bubble);
-
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-  setTimeout(() => {
-    bubble.remove();
-  }, 4000); // Retire après 4 secondes
+  socket.on("chat-message", (data) => {
+    const chatWrapper = document.querySelector(".chat-wrapper");
+    if (chatWrapper) {
+        const bubble = document.createElement("div");
+        bubble.classList.add("chat-bubble");
+        bubble.innerHTML = `<strong>${data.user}</strong>: ${data.message}`;
+        chatWrapper.appendChild(bubble);
+        chatWrapper.scrollTop = chatWrapper.scrollHeight;
+    }
 });
+
+
 
     socket.on("watcher", id => {
 const pc = new RTCPeerConnection({

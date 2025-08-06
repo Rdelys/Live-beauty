@@ -124,32 +124,39 @@ video {
 /* Chat bulles/messages */
 .chat-wrapper {
   position: absolute;
-  bottom: 80px;
+  bottom: 100px; /* au-dessus du champ de texte */
   left: 10px;
   right: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: 5px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 0 10px;
-  z-index: 1000;
-  pointer-events: none;
+  gap: 6px;
+  font-size: 0.95rem;
+  z-index: 9999;
+  pointer-events: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.chat-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome */
 }
 
 .chat-bubble {
-  display: block;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 1rem;
-  animation: fadeOut 2s ease-out forwards;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.5);
-  max-width: 80%;
-  word-wrap: break-word;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 400;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* pour bonne lisibilité sur fond vidéo */
+  pointer-events: none;
 }
 
-@keyframes fadeOut {
+
+
+/*@keyframes fadeOut {
   0% { opacity: 1; transform: translateY(0); }
   90% { opacity: 1; }
   100% { opacity: 0; transform: translateY(-20px); }
@@ -158,19 +165,26 @@ video {
 /* Chat Form */
 #chatForm {
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
   max-width: 600px;
   z-index: 1000;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(0,0,0,0.5);
   padding: 10px;
   border-radius: 12px;
-  pointer-events: auto;
   display: flex;
   gap: 10px;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(6px);
+}
+#chatForm input {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
 /* Responsive */
@@ -482,15 +496,14 @@ socket.on("chat-message", data => {
   }
 
   const bubble = document.createElement("div");
-  bubble.className = 'chat-bubble';
-  bubble.style.backgroundColor = colorsMap[data.pseudo] + 'AA'; // transparence
-  bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+  // Ne plus faire disparaître le message
+// Et plus de background
+bubble.className = 'chat-bubble';
+bubble.style.color = colorsMap[data.pseudo] || '#fff';
+bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+
   messagesDiv.appendChild(bubble);
 
-  // Auto-suppression après 2 secondes
-  setTimeout(() => {
-    bubble.remove();
-  }, 4000);
 
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
