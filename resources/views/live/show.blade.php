@@ -404,6 +404,17 @@ video {
   .token-bubble { bottom: 150px; font-size: 0.9rem; padding: 8px 12px; }
 }
 
+#typingIndicator {
+    opacity: 0.7;
+    font-size: 0.9em;
+    animation: pulseTyping 1.5s infinite;
+}
+
+@keyframes pulseTyping {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.5; }
+}
   </style>
 </head>
 <body>
@@ -523,7 +534,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("https://livebeautyofficial.com/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
 const peerConnection = new RTCPeerConnection({
   iceServers: [
@@ -561,6 +572,44 @@ const peerConnection = new RTCPeerConnection({
     socket.emit("watcher");
   });
 
+  // Indicateur "en train d'écrire"
+let typingTimeout;
+const messageInputtest = document.getElementById("messageInput");
+
+messageInputtest.addEventListener('keydown', function() {
+    if (socket) {
+        socket.emit("typing", {
+            pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+            isModel: false
+        });
+    }
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        if (socket) {
+            socket.emit("stopTyping");
+        }
+    }, 1000);
+});
+
+socket.on("typing", (data) => {
+    const typingIndicator = document.getElementById("typingIndicator");
+    if (!typingIndicator) {
+        const indicator = document.createElement("div");
+        indicator.id = "typingIndicator";
+        indicator.className = 'chat-bubble';
+        indicator.innerHTML = `<em>${data.isModel ? "{{ $modele->nom }} {{ $modele->prenom }}" : data.pseudo} : (...)</em>`;
+        document.getElementById("messages").appendChild(indicator);
+        document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+    }
+});
+
+socket.on("stopTyping", () => {
+    const typingIndicator = document.getElementById("typingIndicator");
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+});
   // Quand le broadcaster envoie une offre SDP
   socket.on("offer", (id, description) => {
     broadcasterId = id;

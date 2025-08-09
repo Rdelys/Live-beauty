@@ -270,6 +270,17 @@ label {
   }
 }
 
+#typingIndicator {
+    opacity: 0.7;
+    font-size: 0.9em;
+    animation: pulseTyping 1.5s infinite;
+}
+
+@keyframes pulseTyping {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.5; }
+}
   </style>
 </head>
 <body>
@@ -482,11 +493,49 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("https://livebeautyofficial.com/", {
+socket = io("http://localhost:3000", {
     path: '/socket.io',
     transports: ['websocket']
 });
 
+// Indicateur "en train d'écrire"
+let typingTimeout;
+const messageInput = document.getElementById("messageInput");
+
+messageInput.addEventListener('keydown', function() {
+    if (socket) {
+        socket.emit("typing", {
+            pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+            isModel: true
+        });
+    }
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        if (socket) {
+            socket.emit("stopTyping");
+        }
+    }, 1000);
+});
+
+socket.on("typing", (data) => {
+    const typingIndicator = document.getElementById("typingIndicator");
+    if (!typingIndicator) {
+        const indicator = document.createElement("div");
+        indicator.id = "typingIndicator";
+        indicator.className = 'chat-bubble';
+        indicator.innerHTML = `<em>${data.isModel ? "{{ $modele->nom }} {{ $modele->prenom }}" : data.pseudo} : (...)</em>`;
+        document.getElementById("messages").appendChild(indicator);
+        document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+    }
+});
+
+socket.on("stopTyping", () => {
+    const typingIndicator = document.getElementById("typingIndicator");
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+});
 /* === AFFICHAGE BULLE JETON === */
 function createTokenBubble(text, cost, isGolden) {
     const bubble = document.createElement('div');
