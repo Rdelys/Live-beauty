@@ -428,7 +428,9 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 <div class="d-flex align-items-center">
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-envelope"></i></a>
+<a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
+    <i class="fa-solid fa-envelope"></i>
+</a>
                   <button class="btn btn-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Connexion</button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">Inscription GRATUITE</button>
                 </div>
