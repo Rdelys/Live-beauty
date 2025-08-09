@@ -31,6 +31,10 @@ public function jetons()
 {
     return $this->hasMany(Jeton::class);
 }
+public function favoris()
+{
+    return $this->belongsToMany(User::class, 'favoris');
+}
 
 
 }

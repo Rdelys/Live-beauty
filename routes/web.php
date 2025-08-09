@@ -115,3 +115,9 @@ Route::get('/modele/{id}/private-show', function ($id) {
     $modele = Modele::findOrFail($id);
     return view('modele.private-show', compact('modele'));
 })->name('modele.private.show');
+
+use App\Http\Controllers\FavorisController;
+
+Route::post('/favoris/{modele_id}', [FavorisController::class, 'toggle'])
+    ->middleware('auth')
+    ->name('favoris.toggle');

@@ -409,6 +409,15 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
+                @if(Auth::check() && Auth::user()->favoris->count() > 0)
+    <h5>Mes Favoris</h5>
+    @foreach(Auth::user()->favoris as $fav)
+        <a href="{{ route('modele.profile', $fav->id) }}">
+            ❤️ {{ $fav->prenom }}
+        </a>
+    @endforeach
+@endif
+
             </div>
 
             <!-- Cartes -->
@@ -417,6 +426,17 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
   @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
     <div class="model-card card-default">
+      <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
+    @csrf
+    <button type="submit" class="btn btn-sm {{ Auth::user()->favoris->contains($modele->id) ? 'btn-warning' : 'btn-outline-light' }}">
+        @if(Auth::user()->favoris->contains($modele->id))
+            <i class="fas fa-heart text-danger"></i>
+        @else
+            <i class="far fa-heart text-white"></i>
+        @endif
+    </button>
+</form>
+
 <a href="{{ route('modele.profile', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
     @php
       $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
