@@ -145,15 +145,25 @@ video {
 }
 
 .chat-bubble {
-  background: none;
+  background: none; /* Pas de fond */
   padding: 0;
   border-radius: 0;
-  color: white;
-  font-size: 0.95rem;
-  font-weight: 400;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* pour bonne lisibilité sur fond vidéo */
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700; /* Texte plus épais */
+  text-shadow: 
+    1px 1px 3px rgba(0, 0, 0, 0.8),
+    -1px -1px 2px rgba(0, 0, 0, 0.6); /* Ombre pour lisibilité */
   pointer-events: none;
+  max-width: 90%;
+  word-wrap: break-word;
+  animation: fadeInUp 0.3s ease-out;
 }
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 
 
 
@@ -597,30 +607,40 @@ const peerConnection = new RTCPeerConnection({
 
 const colorsMap = {};
 
-function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
-  return color;
+const presetColors = [
+  "#FF4081", // rose flashy
+  "#00E676", // vert néon
+  "#448AFF", // bleu clair
+  "#FFD740", // jaune lumineux
+  "#FF6D00"  // orange vif
+];
+
+function getRandomColorFromSet() {
+  const index = Math.floor(Math.random() * presetColors.length);
+  return presetColors[index];
 }
+
 
 socket.on("chat-message", data => {
     if (!colorsMap[data.pseudo]) {
-        colorsMap[data.pseudo] = getRandomColor();
+        colorsMap[data.pseudo] = getRandomColorFromSet();
     }
-    const bubble = document.createElement("div");
-    bubble.className = 'chat-bubble';
-    bubble.style.color = colorsMap[data.pseudo] || '#fff';
+    const pseudoColor = colorsMap[data.pseudo];
 
     let displayName = data.pseudo;
     if (data.pseudo === "{{ $modele->prenom ?? '' }}") {
         displayName = "{{ $modele->nom }} {{ $modele->prenom }}";
     }
 
+    const bubble = document.createElement("div");
+    bubble.className = 'chat-bubble';
+    bubble.style.color = pseudoColor;
+
     bubble.innerHTML = `<strong>${displayName}</strong> : ${data.message}`;
     messagesDiv.appendChild(bubble);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+
 
 
 document.getElementById("fullscreenBtn").addEventListener("click", () => {
