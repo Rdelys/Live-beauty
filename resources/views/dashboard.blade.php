@@ -499,13 +499,34 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
         <div class="position-absolute bottom-0 end-0 p-2">
     <button class="btn btn-sm btn-light rounded-pill open-gallery" 
-            data-photos='@json($photos)' 
-            data-bs-toggle="modal" data-bs-target="#photoModal" 
+            data-media='@json($photos)' 
+            data-type="photo"
+            data-bs-toggle="modal" 
+            data-bs-target="#galleryModal" 
             title="Voir les photos">
         <i class="fas fa-camera"></i>
         <span>{{ count($photos) }}</span>
     </button>
+
+    @php
+        $videos = [];
+        if ($modele->video_file) $videos[] = asset('storage/' . $modele->video_file);
+        if ($modele->video_link) $videos[] = $modele->video_link;
+    @endphp
+
+    @if(count($videos) > 0)
+        <button class="btn btn-sm btn-light rounded-pill open-gallery"
+                data-media='@json($videos)'
+                data-type="video"
+                data-bs-toggle="modal" 
+                data-bs-target="#galleryModal"
+                title="Voir les vidéos">
+            <i class="fas fa-video"></i>
+            <span>{{ count($videos) }}</span>
+        </button>
+    @endif
 </div>
+
     </div>
 </div>
 @endforeach
@@ -560,21 +581,35 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
 // Ouvrir la modal galerie
 document.addEventListener('click', function(e) {
-    if (e.target.closest('.open-gallery')) {
-        const btn = e.target.closest('.open-gallery');
-        const photos = JSON.parse(btn.dataset.photos || '[]');
-        const container = document.getElementById('carouselInner');
-        container.innerHTML = '';
+    const btn = e.target.closest('.open-gallery');
+    if (!btn) return;
 
-        photos.forEach((photo, index) => {
-            const active = index === 0 ? 'active' : '';
-            container.innerHTML += `
-                <div class="carousel-item ${active}">
-                    <img src="/storage/${photo}" class="d-block w-100" style="object-fit:cover; height:80vh;">
-                </div>`;
-        });
-    }
+    const media = JSON.parse(btn.dataset.media || '[]');
+    const type = btn.dataset.type;
+    const galleryInner = document.getElementById('galleryInner');
+
+    galleryInner.innerHTML = media.map((item, i) => {
+        let content = '';
+
+        if (type === 'photo') {
+            content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh;">`;
+        } 
+        else if (type === 'video') {
+            if (item.includes('http') && !item.endsWith('.mp4')) {
+                content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
+            } else {
+                content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh;"></video>`;
+            }
+        }
+
+        return `
+            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                ${content}
+            </div>
+        `;
+    }).join('');
 });
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -719,24 +754,24 @@ document.addEventListener('click', function(e) {
       }
     }).render(`#paypal-button-container-${pack.jetons}`);
   });
+
+
 </script>
 
-<div class="modal fade" id="photoModal" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 800px; width: 90%;">
-    <div class="modal-content bg-dark text-white border-0 rounded-4 shadow">
+<div class="modal fade" id="galleryModal" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-black border-0">
       <div class="modal-header border-0">
-        <h5 class="modal-title"><i class="fas fa-images me-2"></i> Galerie</h5>
+        <h5 class="modal-title text-white"><i class="fas fa-images me-2"></i> Galerie</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-0">
-        <div id="carouselPhotos" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner" id="carouselInner">
-            <!-- Images dynamiques injectées ici -->
-          </div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#carouselPhotos" data-bs-slide="prev">
+        <div id="carouselGallery" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="galleryInner"></div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselGallery" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
           </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#carouselPhotos" data-bs-slide="next">
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselGallery" data-bs-slide="next">
             <span class="carousel-control-next-icon"></span>
           </button>
         </div>
@@ -744,5 +779,8 @@ document.addEventListener('click', function(e) {
     </div>
   </div>
 </div>
+
+
+  
 </body>
 </html>
