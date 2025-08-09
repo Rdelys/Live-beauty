@@ -123,3 +123,8 @@ Route::post('/favoris/{modele_id}', [FavorisController::class, 'toggle'])
     ->name('favoris.toggle');
 
 Route::post('/modele/{id}/videos/upload', [ModeleController::class, 'uploadVideos'])->name('modele.video.upload');
+
+// routes/web.php
+Route::post('/use-jeton', [\App\Http\Controllers\JetonController::class, 'useJeton'])
+    ->middleware('auth')
+    ->name('use.jeton');

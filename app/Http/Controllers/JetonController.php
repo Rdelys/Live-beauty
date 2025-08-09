@@ -46,5 +46,30 @@ class JetonController extends Controller
 
     return redirect()->route('admin')->with('success', 'Jetons ajoutés avec succès.');
 }
+public function useJeton(Request $request)
+    {
+        $request->validate([
+            'cost' => 'required|integer|min:1',
+            'name' => 'required|string',
+            'modele_id' => 'required|integer',
+        ]);
 
+        $user = Auth::user();
+
+        if ($user->jetons < $request->cost) {
+            return response()->json(['error' => 'Nombre de jetons insuffisant'], 403);
+        }
+
+        // Déduire
+        $user->jetons -= $request->cost;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'new_balance' => $user->jetons,
+            'name' => $request->name,
+            'cost' => $request->cost,
+            'modele_id' => $request->modele_id
+        ]);
+    }
 }

@@ -5,6 +5,7 @@
   <title>Live de {{ $modele->prenom }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
     body {
@@ -403,6 +404,11 @@ video {
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
       <button id="fullscreenBtn" class="btn btn-secondary mt-2">🖥️ Plein écran</button>
+@auth
+<div class="text-white mb-2">
+    💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
+</div>
+@endauth
 
 <div id="videoContainer" style="position: relative;">
   <div id="startOverlay" style="
@@ -414,6 +420,7 @@ video {
   cursor: pointer;
 ">
   ▶️ Cliquez pour démarrer le live avec son
+  
 </div>
   <video id="liveVideo" autoplay playsinline controls></video>
   <div class="chat-wrapper" id="messages"></div>
@@ -435,9 +442,13 @@ video {
     <div class="menu-title">Jetons standards</div>
     @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
     @foreach($jetonsGlobaux as $jeton)
-      <button class="token-choice" data-name="{{ $jeton->nom }}" data-cost="{{ $jeton->nombre_de_jetons }}">
-        {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} 💠
-      </button>
+     <button class="token-choice"
+    data-name="{{ $jeton->nom }}"
+    data-cost="{{ $jeton->nombre_de_jetons }}"
+    data-description="{{ $jeton->description }}">
+    {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} {{ $jeton->modele_id ? '✨' : '💠' }}
+</button>
+
     @endforeach
   </div>
 
@@ -445,10 +456,14 @@ video {
     <div class="menu-title">Actions de {{ $modele->prenom }}</div>
     @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
     @foreach($jetonsPerso as $jeton)
-      <button class="token-choice" data-name="{{ $jeton->nom }}" data-cost="{{ $jeton->nombre_de_jetons }}">
-        {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
-      </button>
-    @endforeach
+  <button class="token-choice"
+      data-name="{{ $jeton->nom }}"
+      data-cost="{{ $jeton->nombre_de_jetons }}"
+      data-description="{{ $jeton->description }}">
+      {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
+  </button>
+@endforeach
+
   </div>
 </div>
 @endauth
@@ -695,75 +710,109 @@ document.addEventListener("keydown", (e) => {
 }
 </style>
 <script>
-  (function(){
-    // éléments
+(function(){
     const defaultBtn = document.getElementById('defaultTokensBtn');
     const modelBtn = document.getElementById('modelTokensBtn');
     const defaultMenu = document.getElementById('defaultTokenMenu');
     const modelMenu = document.getElementById('modelTokenMenu');
     const videoContainer = document.getElementById('videoContainer');
 
-    // bascule menu (ferme les autres)
     function toggleMenu(menu) {
-      [defaultMenu, modelMenu].forEach(m => {
-        if (m === menu) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-        else m.style.display = 'none';
-      });
+        [defaultMenu, modelMenu].forEach(m => {
+            if (m === menu) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            else m.style.display = 'none';
+        });
     }
 
     defaultBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(defaultMenu); });
     modelBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(modelMenu); });
 
-    // fermer menus si clic en dehors
     document.addEventListener('click', () => {
-      [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+        [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
     });
 
-    // création bulle token
     function createTokenBubble(name, cost, isGolden) {
-      const bubble = document.createElement('div');
-      bubble.className = 'token-bubble' + (isGolden ? ' golden' : '');
-      bubble.innerText = `${name} — ${cost} ${isGolden ? '✨' : '💠'}`;
-
-      // position aléatoire horizontale (entre 10% et 90% du conteneur)
-      const pct = 10 + Math.random() * 80;
-      bubble.style.left = pct + '%';
-
-      // insérer dans videoContainer
-      videoContainer.appendChild(bubble);
-
-      // suppression après animation
-      setTimeout(() => {
-        bubble.remove();
-      }, 2300);
+        const bubble = document.createElement('div');
+        bubble.className = 'token-bubble' + (isGolden ? ' golden' : '');
+        bubble.innerText = `${name} — ${cost} ${isGolden ? '✨' : '💠'}`;
+        const pct = 10 + Math.random() * 80;
+        bubble.style.left = pct + '%';
+        videoContainer.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 2300);
     }
 
-    // quand on clique sur un choix de token
     function onTokenChoiceClick(e, isGolden) {
-      const btn = e.currentTarget;
-      const name = btn.dataset.name || 'Jeton';
-      const cost = btn.dataset.cost || '0';
-      createTokenBubble(name, cost, isGolden);
+    const btn = e.currentTarget;
+    const name = btn.dataset.name || 'Jeton';
+    const cost = parseInt(btn.dataset.cost || '0');
+    const description = btn.dataset.description || '';
+    const modeleId = {{ $modele->id }};
+    const pseudo = "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}";
 
-      // fermer menu si tu veux
-      [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+    fetch("{{ route('use.jeton') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ name, cost, modele_id: modeleId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
 
-      // ici tu peux aussi émettre socket.io ou appeler une route ajax
-      // ex: socket.emit('jeton-sent', { name, cost, modeleId: {{ $modele->id }} });
-    }
+        // bulle locale
+        createTokenBubble(data.name, data.cost, isGolden);
 
-    // attacher listeners aux boutons générés
+        // ✅ inclure pseudo + description
+        if (typeof socket !== 'undefined') {
+           // Juste avant socket.emit("jeton-sent", ...), ajoutez :
+console.log("Envoi jeton-sent:", {
+    name: data.name,
+    cost: data.cost,
+    description: description,
+    pseudo: pseudo,
+    isGolden: isGolden
+});
+
+socket.emit("jeton-sent", {
+    name: data.name,
+    cost: data.cost,
+    description: description,
+    pseudo: pseudo,
+    isGolden: isGolden
+});
+        }
+
+        const soldeElem = document.getElementById("userJetons");
+        if (soldeElem) soldeElem.innerText = data.new_balance;
+    })
+    .catch(err => console.error(err));
+}
+
+
+
     document.querySelectorAll('#defaultTokenMenu .token-choice').forEach(btn => {
-      btn.addEventListener('click', (e) => onTokenChoiceClick(e, false));
+        btn.addEventListener('click', (e) => onTokenChoiceClick(e, false));
     });
     document.querySelectorAll('#modelTokenMenu .token-choice').forEach(btn => {
-      btn.addEventListener('click', (e) => onTokenChoiceClick(e, true));
+        btn.addEventListener('click', (e) => onTokenChoiceClick(e, true));
     });
 
-    // accessibility : fermer menu avec echap
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+        if (e.key === 'Escape') [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
     });
 
-  })();
+    if (typeof socket !== 'undefined') {
+    socket.on("jeton-sent", (data) => {
+        const message = `Jetons - ${data.pseudo || ''} - ${data.description || ''}`;
+        createTokenBubble(message, data.cost, data.isGolden);
+    });
+}
+
+})();
 </script>
+

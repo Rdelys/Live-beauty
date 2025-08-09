@@ -469,35 +469,67 @@ label {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const startBtn = document.getElementById('startLiveBtn');
-const stopBtn = document.getElementById('stopLiveBtn');
-const liveVideo = document.getElementById('liveVideo');
-const liveSection = document.getElementById('liveSection');
+/* === RÉFÉRENCES DOM === */
+const startBtn     = document.getElementById('startLiveBtn');
+const stopBtn      = document.getElementById('stopLiveBtn');
+const liveVideo    = document.getElementById('liveVideo');
+const liveSection  = document.getElementById('liveSection');
+const messagesDiv  = document.getElementById("messages");
 
+/* === VARIABLES GLOBALES === */
 let socket;
 let stream;
 const peerConnections = {};
 
-startBtn.addEventListener('click', async () => {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    liveVideo.srcObject = stream;
-    liveSection.style.display = 'block';
-    startBtn.style.display = 'none';
-    stopBtn.style.display = 'inline-block';
-
-    // ✅ Lancer socket et broadcaster
+/* === CONNEXION SOCKET.IO (unique) === */
 socket = io("https://livebeautyofficial.com/", {
-  path: '/socket.io',
-  transports: ['websocket']
+    path: '/socket.io',
+    transports: ['websocket']
 });
 
-    socket.on("connect", () => {
-      socket.emit("broadcaster");
-    });
-const messagesDiv = document.getElementById("messages");
+/* === AFFICHAGE BULLE JETON === */
+function createTokenBubble(text, cost, isGolden) {
+    const bubble = document.createElement('div');
+    bubble.className = 'token-bubble' + (isGolden ? ' golden' : '');
+    bubble.innerText = `${text} — ${cost} ${isGolden ? '✨' : '💠'}`;
+    bubble.style.position = 'absolute';
+    bubble.style.bottom = '20px';
+    bubble.style.left = (10 + Math.random() * 80) + '%';
+    bubble.style.color = '#fff';
+    bubble.style.fontSize = '16px';
+    bubble.style.fontWeight = 'bold';
+    bubble.style.animation = 'fadeIn 0.5s ease, fadeOut 2s ease 0.5s forwards';
+    const container = liveVideo?.parentElement || document.body;
+    container.appendChild(bubble);
+    setTimeout(() => bubble.remove(), 2500);
+}
 
-  socket.on("chat-message", (data) => {
+
+socket.on("jeton-sent", (data) => {
+    console.log("Données reçues (jeton-sent):", data); // Debug 1
+    
+    const pseudo = data.pseudo || 'Anonyme';
+    const description = data.description || 'Pas de description';
+    const cost = data.cost || 0;
+    const isGolden = data.isGolden || false;
+
+    console.log("Variables extraites:", { pseudo, description, cost, isGolden }); // Debug 2
+
+    const chatWrapper = document.querySelector(".chat-wrapper");
+    if (chatWrapper) {
+        const bubble = document.createElement('div');
+        bubble.classList.add("chat-bubble");
+        bubble.innerHTML = `💎 <strong>${pseudo}</strong>: ${description} (${cost} jetons)`;
+        chatWrapper.appendChild(bubble);
+        chatWrapper.scrollTop = chatWrapper.scrollHeight;
+    }
+
+    createTokenBubble(description, cost, isGolden);
+});
+
+
+
+socket.on("chat-message", (data) => {
     const chatWrapper = document.querySelector(".chat-wrapper");
     if (chatWrapper) {
         const bubble = document.createElement("div");
@@ -508,139 +540,140 @@ const messagesDiv = document.getElementById("messages");
     }
 });
 
+/* === LANCER LE LIVE === */
+startBtn.addEventListener('click', async () => {
+    try {
+        // Caméra + micro
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        liveVideo.srcObject = stream;
+        liveSection.style.display = 'block';
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
 
+        // Informer serveur qu'on est le broadcaster
+        socket.emit("broadcaster");
 
+        // Gestion des watchers
+        socket.on("watcher", id => {
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                    {
+                        urls: "turn:livebeautyofficial.com:3478",
+                        username: "webrtc",
+                        credential: "password123"
+                    }
+                ]
+            });
 
-    socket.on("watcher", id => {
-const pc = new RTCPeerConnection({
-  iceServers: [
-  { urls: "stun:stun.l.google.com:19302" },
-  {
-    urls: "turn:livebeautyofficial.com:3478",
-    username: "webrtc",
-    credential: "password123"
-  }
-]
-});
-      peerConnections[id] = pc;
+            peerConnections[id] = pc;
+            stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+            pc.onicecandidate = event => {
+                if (event.candidate) {
+                    socket.emit("candidate", id, event.candidate);
+                }
+            };
 
-      pc.onicecandidate = event => {
-        if (event.candidate) {
-          socket.emit("candidate", id, event.candidate);
-        }
-      };
-
-      pc.createOffer()
-        .then(offer => pc.setLocalDescription(offer))
-        .then(() => {
-          socket.emit("offer", id, pc.localDescription);
+            pc.createOffer()
+              .then(offer => pc.setLocalDescription(offer))
+              .then(() => {
+                  socket.emit("offer", id, pc.localDescription);
+              });
         });
-    });
 
-    socket.on("answer", (id, description) => {
-      peerConnections[id].setRemoteDescription(description);
-    });
+        socket.on("answer", (id, description) => {
+            peerConnections[id].setRemoteDescription(description);
+        });
 
-    socket.on("candidate", (id, candidate) => {
-      peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
-    });
+        socket.on("candidate", (id, candidate) => {
+            peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+        });
 
-    socket.on("disconnectPeer", id => {
-      if (peerConnections[id]) {
+        socket.on("disconnectPeer", id => {
+            if (peerConnections[id]) {
+                peerConnections[id].close();
+                delete peerConnections[id];
+            }
+        });
+
+        // Notifier Laravel
+        await fetch('/api/live/start', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+    } catch (error) {
+        alert("Erreur caméra : " + error.message);
+    }
+});
+
+/* === ARRÊTER LE LIVE === */
+stopBtn.addEventListener('click', async () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+
+    for (let id in peerConnections) {
         peerConnections[id].close();
         delete peerConnections[id];
-      }
-    });
-
-    // ✅ Notifier Laravel que le live commence
-    await fetch('/api/live/start', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
-    });
-
-  } catch (error) {
-    alert("Erreur caméra : " + error.message);
-  }
-});
-
-stopBtn.addEventListener('click', async () => {
-  // Arrêt du flux
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-  }
-
-  // Fermeture des connexions WebRTC
-  for (let id in peerConnections) {
-    peerConnections[id].close();
-    delete peerConnections[id];
-  }
-
-  // Déconnexion socket
-  if (socket) socket.disconnect();
-
-  liveVideo.srcObject = null;
-  liveSection.style.display = 'none';
-  startBtn.style.display = 'inline-block';
-  stopBtn.style.display = 'none';
-
-  // ✅ Notifier Laravel que le live s’arrête
-  await fetch('/api/live/stop', {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     }
-  });
 
-  console.log("Live arrêté.");
+    if (socket) socket.disconnect();
+
+    liveVideo.srcObject = null;
+    liveSection.style.display = 'none';
+    startBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+
+    await fetch('/api/live/stop', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    });
+
+    console.log("Live arrêté.");
 });
 
-function generateColor(pseudo) {
-  let hash = 0;
-  for (let i = 0; i < pseudo.length; i++) {
-    hash = pseudo.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const color = `hsl(${hash % 360}, 70%, 50%)`;
-  return color;
-}
-
+/* === ENVOI MESSAGE CHAT === */
 function sendMessage(e) {
-  e.preventDefault();
-  const msg = document.getElementById("messageInput").value.trim();
-  if (!msg || !socket) return;
+    e.preventDefault();
+    const msg = document.getElementById("messageInput").value.trim();
+    if (!msg) return;
 
-  socket.emit("chat-message", {
-    pseudo: "{{ $modele->prenom ?? 'Modèle' }}", // ou Auth::user()->pseudo si applicable
-    message: msg
-  });
+    socket.emit("chat-message", {
+        pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+        message: msg
+    });
 
-  document.getElementById("messageInput").value = '';
+    document.getElementById("messageInput").value = '';
 }
 
+/* === PREVIEW IMAGES === */
 function previewImages(event) {
-  const preview = document.getElementById('preview');
-  preview.innerHTML = '';
+    const preview = document.getElementById('preview');
+    preview.innerHTML = '';
 
-  const files = event.target.files;
-  for (let i = 0; i < files.length; i++) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.className = 'rounded border border-light';
-      img.style.height = '100px';
-      img.style.marginRight = '10px';
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(files[i]);
-  }
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'rounded border border-light';
+            img.style.height = '100px';
+            img.style.marginRight = '10px';
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(files[i]);
+    }
 }
 </script>
 
