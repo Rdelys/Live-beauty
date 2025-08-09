@@ -491,22 +491,23 @@ function getRandomColor() {
 }
 
 socket.on("chat-message", data => {
-  if (!colorsMap[data.pseudo]) {
-    colorsMap[data.pseudo] = getRandomColor();
-  }
+    if (!colorsMap[data.pseudo]) {
+        colorsMap[data.pseudo] = getRandomColor();
+    }
+    const bubble = document.createElement("div");
+    bubble.className = 'chat-bubble';
+    bubble.style.color = colorsMap[data.pseudo] || '#fff';
 
-  const bubble = document.createElement("div");
-  // Ne plus faire disparaître le message
-// Et plus de background
-bubble.className = 'chat-bubble';
-bubble.style.color = colorsMap[data.pseudo] || '#fff';
-bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+    let displayName = data.pseudo;
+    if (data.pseudo === "{{ $modele->prenom ?? '' }}") {
+        displayName = "{{ $modele->nom }} {{ $modele->prenom }}";
+    }
 
-  messagesDiv.appendChild(bubble);
-
-
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    bubble.innerHTML = `<strong>${displayName}</strong> : ${data.message}`;
+    messagesDiv.appendChild(bubble);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+
 
 document.getElementById("fullscreenBtn").addEventListener("click", () => {
   const container = document.getElementById("videoContainer");

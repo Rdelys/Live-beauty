@@ -457,11 +457,12 @@ const messagesDiv = document.getElementById("messages");
     if (chatWrapper) {
         const bubble = document.createElement("div");
         bubble.classList.add("chat-bubble");
-        bubble.innerHTML = `<strong>${data.user}</strong>: ${data.message}`;
+        bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
         chatWrapper.appendChild(bubble);
         chatWrapper.scrollTop = chatWrapper.scrollHeight;
     }
 });
+
 
 
 
