@@ -444,8 +444,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
-                <h5>Catégories</h5>
-                <h7>Cams en Direct</h5>
+                <h5>Cams en Direct</h5>
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
