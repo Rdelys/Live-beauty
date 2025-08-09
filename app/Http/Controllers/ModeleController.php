@@ -6,6 +6,7 @@ use App\Models\Modele;
 use Illuminate\Http\Request;
         use Illuminate\Support\Facades\Hash;
 use App\Models\Jeton;
+use App\Models\User;
 
 
 class ModeleController extends Controller
@@ -56,8 +57,11 @@ Modele::create([
     $jetons = Jeton::all();
     $nombreDeModeles = $modeles->count();  // Nombre de modèles
     $nombreDeJetons = $jetons->count();    // Nombre de jetons
+    $nombreDeClients = User::count(); // ✅ total clients
+    $clients = User::select('nom', 'prenoms', 'jetons','pseudo', 'created_at')->get();
 
-    return view('admin', compact('modeles', 'jetons', 'nombreDeModeles', 'nombreDeJetons'));
+    return view('admin', compact('modeles', 'jetons', 'nombreDeModeles', 'nombreDeJetons', 'nombreDeClients',
+        'clients'));
 }
 
 

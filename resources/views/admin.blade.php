@@ -288,6 +288,20 @@ footer {
   }
   footer a {
     color: #e63946;
+    text-decoration: none;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+  footer .text-muted {
+    color: #aaa !important;
+  }
+  footer .text-muted a {
+    color: #e63946;
+  }
+  footer .text-muted a:hover {
+    text-decoration: underline;
+  }
   </style>
 </head>
 <body>
@@ -336,6 +350,17 @@ footer {
         </div>
       </div>
     </div>
+
+    <!-- Card pour Nombre de Clients -->
+<div class="col-md-6 col-lg-4">
+  <div class="card bg-dark text-white">
+    <div class="card-body">
+      <h5 class="card-title">Nombre de Clients</h5>
+      <p class="card-text">{{ $nombreDeClients }}</p>
+    </div>
+  </div>
+</div>
+
   </div>
 </div>
 
@@ -482,9 +507,35 @@ footer {
     </div>
 
     <div id="clients-content" class="content-section d-none">
-      <h2>Clients</h2>
-      <p>Liste des clients enregistrés.</p>
-    </div>
+  <h2>Clients</h2>
+  <p>Liste des clients enregistrés avec leur nombre de jetons.</p>
+
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénoms</th>
+          <th>Pseudo</th>
+          <th>Jetons</th>
+          <th>Date de création</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($clients as $client)
+          <tr>
+            <td>{{ $client->nom }}</td>
+            <td>{{ $client->prenoms }}</td>
+            <td>{{ $client->pseudo }}</td>
+            <td>{{ $client->jetons }}</td>
+            <td>{{ $client->created_at->format('d/m/Y') }}</td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
     <div id="jetons-content" class="content-section d-none">
       <h2>Jetons</h2>
