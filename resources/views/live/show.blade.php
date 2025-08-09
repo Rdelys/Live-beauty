@@ -280,6 +280,118 @@ video {
   justify-content: center;
   align-items: center;
 }
+/* ICONS & MENUS POUR JETONS */
+.video-top-icons {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column; /* ✅ icônes verticales */
+  gap: 8px;
+  z-index: 1100;
+  align-items: center;
+  pointer-events: auto;
+}
+
+
+/* Icones */
+.token-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease;
+}
+.token-icon:active { transform: scale(.96); }
+.token-icon:hover { transform: translateY(-3px); }
+
+/* Gold style for model tokens */
+.golden-icon {
+  background: linear-gradient(135deg,#b8860b,#ffd54f);
+  color: #2b1600;
+  box-shadow: 0 8px 28px rgba(189,137,9,0.25);
+}
+
+/* small popup menu list */
+.token-menu {
+  position: absolute;
+  top: 56px;
+  right: 0;
+  min-width: 220px;
+  background: rgba(10,10,10,0.85);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1150;
+  backdrop-filter: blur(6px);
+}
+.token-menu .menu-title {
+  font-size: 0.85rem;
+  color: #ddd;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  margin-bottom: 6px;
+}
+.token-choice {
+  background: transparent;
+  border: none;
+  color: #fff;
+  text-align: left;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s;
+}
+.token-choice:hover { background: rgba(255,255,255,0.03); }
+
+/* BULLES QUI APPARAISSENT SUR LA VIDEO */
+.token-bubble {
+  position: absolute;
+  bottom: 120px; /* au-dessus du chat */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(40,40,40,0.75);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+  z-index: 1200;
+  pointer-events: none;
+  animation: floatUp 2200ms forwards;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+.token-bubble.golden {
+  background: linear-gradient(90deg,#ffd54f,#ffb300);
+  color: #2b1600;
+  transform-origin: center;
+}
+
+/* position aléatoire horizontal (we will set left via js) */
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  60% { opacity: 1; transform: translateY(-40px) scale(1.02); }
+  100% { opacity: 0; transform: translateY(-110px) scale(.95); }
+}
+
+/* responsive adjustments */
+@media (max-width: 576px) {
+  .video-top-icons { top: 8px; right: 8px; gap: 6px; }
+  .token-icon { width: 38px; height: 38px; font-size: 18px; }
+  .token-menu { right: -6px; min-width: 180px; top: 48px; }
+  .token-bubble { bottom: 150px; font-size: 0.9rem; padding: 8px 12px; }
+}
 
   </style>
 </head>
@@ -305,6 +417,42 @@ video {
 </div>
   <video id="liveVideo" autoplay playsinline controls></video>
   <div class="chat-wrapper" id="messages"></div>
+<!-- ICONES JETONS (INSÉRER DANS #videoContainer, après <video>) -->
+  @auth
+<div class="video-top-icons" aria-hidden="false">
+  <!-- Default tokens icon -->
+  <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
+    💠
+  </button>
+
+  <!-- Model personal tokens icon (gold) -->
+  <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
+    ✨
+  </button>
+
+  <!-- Menus (remplis via Blade) -->
+  <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
+    <div class="menu-title">Jetons standards</div>
+    @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
+    @foreach($jetonsGlobaux as $jeton)
+      <button class="token-choice" data-name="{{ $jeton->nom }}" data-cost="{{ $jeton->nombre_de_jetons }}">
+        {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} 💠
+      </button>
+    @endforeach
+  </div>
+
+  <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
+    <div class="menu-title">Actions de {{ $modele->prenom }}</div>
+    @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
+    @foreach($jetonsPerso as $jeton)
+      <button class="token-choice" data-name="{{ $jeton->nom }}" data-cost="{{ $jeton->nombre_de_jetons }}">
+        {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
+      </button>
+    @endforeach
+  </div>
+</div>
+@endauth
+
 
   @auth
     @if(Auth::user()->role != 'modele') {{-- modèle ne peut pas envoyer --}}
@@ -344,55 +492,6 @@ video {
 @endif
 
       <p class="mt-3">{{ $modele->description }}</p>
-    </div>
-
-    <!-- Jetons Section -->
-    <div class="right-jetons">
-      <h4 class="mb-4">💎 Choisis ton action avec des jetons</h4>
-      @php
-  $jetonsPerso = $jetons->where('modele_id', $modele->id);
-  $jetonsGlobaux = $jetons->whereNull('modele_id');
-@endphp
-
-<!-- Jetons personnalisés du modèle -->
-@if($jetonsPerso->count())
-  <h5 class="text-white">🎯 Actions personnalisées par {{ $modele->prenom }}</h5>
-  @foreach($jetonsPerso as $jeton)
-    <div class="jeton-card">
-      <div class="jeton-info">
-        <span class="jeton-name">{{ $jeton->nom }}</span>
-        <span class="jeton-desc">{{ $jeton->description }}</span>
-      </div>
-      <button class="jeton-btn"
-        {{ !$modele->en_ligne || !Auth::check() ? 'disabled' : '' }}>
-        {{ $jeton->nombre_de_jetons }} jetons
-      </button>
-    </div>
-  @endforeach
-@endif
-
-<!-- Jetons globaux disponibles -->
-@if($jetonsGlobaux->count())
-  <h5 class="text-white mt-4">✨ Jetons standards disponibles</h5>
-  @foreach($jetonsGlobaux as $jeton)
-    <div class="jeton-card">
-      <div class="jeton-info">
-        <span class="jeton-name">{{ $jeton->nom }}</span>
-        <span class="jeton-desc">{{ $jeton->description }}</span>
-      </div>
-      <button class="jeton-btn"
-        {{ !$modele->en_ligne || !Auth::check() ? 'disabled' : '' }}>
-💠 {{ $jeton->nombre_de_jetons }} jetons requis
-      </button>
-    </div>
-  @endforeach
-@endif
-
-@if(!Auth::check())
-  <div class="text-warning mt-2 small">🔒 Connecte-toi pour utiliser des jetons.</div>
-@endif
-
-
     </div>
 
   </div>
@@ -595,3 +694,76 @@ document.addEventListener("keydown", (e) => {
   z-index: 9999;
 }
 </style>
+<script>
+  (function(){
+    // éléments
+    const defaultBtn = document.getElementById('defaultTokensBtn');
+    const modelBtn = document.getElementById('modelTokensBtn');
+    const defaultMenu = document.getElementById('defaultTokenMenu');
+    const modelMenu = document.getElementById('modelTokenMenu');
+    const videoContainer = document.getElementById('videoContainer');
+
+    // bascule menu (ferme les autres)
+    function toggleMenu(menu) {
+      [defaultMenu, modelMenu].forEach(m => {
+        if (m === menu) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        else m.style.display = 'none';
+      });
+    }
+
+    defaultBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(defaultMenu); });
+    modelBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(modelMenu); });
+
+    // fermer menus si clic en dehors
+    document.addEventListener('click', () => {
+      [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+    });
+
+    // création bulle token
+    function createTokenBubble(name, cost, isGolden) {
+      const bubble = document.createElement('div');
+      bubble.className = 'token-bubble' + (isGolden ? ' golden' : '');
+      bubble.innerText = `${name} — ${cost} ${isGolden ? '✨' : '💠'}`;
+
+      // position aléatoire horizontale (entre 10% et 90% du conteneur)
+      const pct = 10 + Math.random() * 80;
+      bubble.style.left = pct + '%';
+
+      // insérer dans videoContainer
+      videoContainer.appendChild(bubble);
+
+      // suppression après animation
+      setTimeout(() => {
+        bubble.remove();
+      }, 2300);
+    }
+
+    // quand on clique sur un choix de token
+    function onTokenChoiceClick(e, isGolden) {
+      const btn = e.currentTarget;
+      const name = btn.dataset.name || 'Jeton';
+      const cost = btn.dataset.cost || '0';
+      createTokenBubble(name, cost, isGolden);
+
+      // fermer menu si tu veux
+      [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+
+      // ici tu peux aussi émettre socket.io ou appeler une route ajax
+      // ex: socket.emit('jeton-sent', { name, cost, modeleId: {{ $modele->id }} });
+    }
+
+    // attacher listeners aux boutons générés
+    document.querySelectorAll('#defaultTokenMenu .token-choice').forEach(btn => {
+      btn.addEventListener('click', (e) => onTokenChoiceClick(e, false));
+    });
+    document.querySelectorAll('#modelTokenMenu .token-choice').forEach(btn => {
+      btn.addEventListener('click', (e) => onTokenChoiceClick(e, true));
+    });
+
+    // accessibility : fermer menu avec echap
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+    });
+
+  })();
+</script>
