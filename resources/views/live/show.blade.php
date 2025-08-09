@@ -567,10 +567,17 @@ const peerConnection = new RTCPeerConnection({
     }
   };
 
-  // Quand la connexion WebSocket est prête, on s'identifie comme watcher
-  socket.on("connect", () => {
-    socket.emit("watcher");
-  });
+  // Dans la partie où vous émettez "watcher"
+socket.on("connect", () => {
+    socket.emit("watcher", {
+        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}"
+    });
+});
+window.onunload = window.onbeforeunload = () => {
+    socket.emit("watcher-disconnected");
+    socket.close();
+    peerConnection.close();
+};
 
   // Indicateur "en train d'écrire"
 let typingTimeout;

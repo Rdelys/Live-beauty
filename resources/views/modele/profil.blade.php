@@ -334,17 +334,28 @@ label {
     <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
 
     <div id="liveSection" style="display: none;">
-      <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
-      <div id="chat-overlay" class="mt-3" style="position: relative;">
-        <div class="chat-wrapper" id="messages"></div>
-        <form id="chatForm" class="d-flex mt-3" onsubmit="sendMessage(event)">
-          <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
-          <button type="submit" class="btn btn-danger">Envoyer</button>
-        </form>
-      </div>
+        <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
+        
+        <!-- Ajoutez cette section pour les viewers -->
+        <div class="card bg-dark text-white mt-3">
+            <div class="card-body">
+                <h5 class="card-title">👥 Spectateurs en direct (<span id="viewersCount">0</span>)</h5>
+                <div id="viewersList" class="d-flex flex-wrap gap-2">
+                    <!-- Les pseudos des viewers apparaîtront ici -->
+                </div>
+            </div>
+        </div>
+        
+        <div id="chat-overlay" class="mt-3" style="position: relative;">
+            <div class="chat-wrapper" id="messages"></div>
+            <form id="chatForm" class="d-flex mt-3" onsubmit="sendMessage(event)">
+                <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
+                <button type="submit" class="btn btn-danger">Envoyer</button>
+            </form>
+        </div>
     </div>
-      <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
-  </div>
+    <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
+</div>
 
   <div class="tab-pane fade text-start" id="jetons" role="tabpanel" aria-labelledby="jetons-tab">
     <h4 class="text-white mb-3">💎 Gestion de vos jetons</h4>
@@ -536,6 +547,45 @@ socket.on("stopTyping", () => {
         typingIndicator.remove();
     }
 });
+
+// Gestion des viewers
+let viewers = {};
+
+socket.on("viewer-connected", (data) => {
+    console.log("Viewer connected:", data);
+    viewers[data.socketId] = data.pseudo;
+    updateViewersDisplay();
+});
+
+socket.on("viewer-disconnected", (socketId) => {
+    console.log("Viewer disconnected:", socketId);
+    delete viewers[socketId];
+    updateViewersDisplay();
+});
+
+socket.on("current-viewers", (currentViewers) => {
+    console.log("Current viewers received:", currentViewers);
+    viewers = currentViewers;
+    updateViewersDisplay();
+});
+
+function updateViewersDisplay() {
+    const viewersList = document.getElementById("viewersList");
+    const viewersCount = document.getElementById("viewersCount");
+    
+    viewersList.innerHTML = '';
+    viewersCount.textContent = Object.keys(viewers).length;
+    
+    // Trier les pseudos par ordre alphabétique
+    const sortedPseudos = Object.values(viewers).sort((a, b) => a.localeCompare(b));
+    
+    sortedPseudos.forEach(pseudo => {
+        const viewerElement = document.createElement("span");
+        viewerElement.className = "badge bg-primary me-1 mb-1";
+        viewerElement.textContent = pseudo;
+        viewersList.appendChild(viewerElement);
+    });
+}
 /* === AFFICHAGE BULLE JETON === */
 function createTokenBubble(text, cost, isGolden) {
     const bubble = document.createElement('div');
@@ -601,6 +651,7 @@ startBtn.addEventListener('click', async () => {
 
         // Informer serveur qu'on est le broadcaster
         socket.emit("broadcaster");
+        socket.emit("request-viewers");
 
         // Gestion des watchers
         socket.on("watcher", id => {
