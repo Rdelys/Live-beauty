@@ -455,20 +455,20 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
       {{-- VIDÉO AU HOVER --}}
       @if($hasVideo)
   <div class="model-video">
-    @if($modele->video_file)
-      <video autoplay muted loop playsinline preload="none">
-        <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
-    @elseif($modele->video_link)
-      <iframe
-        src="{{ $modele->video_link }}?autoplay=1&mute=1&controls=0&loop=1"
-        frameborder="0"
-        allow="autoplay; encrypted-media"
-        allowfullscreen
-        style="width: 100%; height: 100%;">
-      </iframe>
-    @endif
+    @if(!empty($modele->video_file) && is_array($modele->video_file))
+  <video autoplay muted loop playsinline preload="none">
+    <source src="{{ asset('storage/' . $modele->video_file[0]) }}" type="video/mp4">
+    Votre navigateur ne supporte pas la vidéo.
+  </video>
+@elseif(!empty($modele->video_link) && is_array($modele->video_link))
+  <iframe
+    src="{{ $modele->video_link[0] }}?autoplay=1&mute=1&controls=0&loop=1"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+    style="width: 100%; height: 100%;">
+  </iframe>
+@endif
   </div>
 @endif
 
@@ -483,9 +483,21 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 </div>
 <div class="model-card card-photo d-none position-relative">
         @php
-            $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
-            $photo = $photos[0] ?? null;
-        @endphp
+    $videos = [];
+
+    if (!empty($modele->video_file) && is_array($modele->video_file)) {
+        foreach ($modele->video_file as $file) {
+            $videos[] = asset('storage/' . $file);
+        }
+    }
+
+    if (!empty($modele->video_link) && is_array($modele->video_link)) {
+        foreach ($modele->video_link as $link) {
+            $videos[] = $link;
+        }
+    }
+@endphp
+
 
         @if($photo)
             <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
@@ -509,10 +521,21 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
     </button>
 
     @php
-        $videos = [];
-        if ($modele->video_file) $videos[] = asset('storage/' . $modele->video_file);
-        if ($modele->video_link) $videos[] = $modele->video_link;
-    @endphp
+    $videos = [];
+
+    if (!empty($modele->video_file) && is_array($modele->video_file)) {
+        foreach ($modele->video_file as $file) {
+            $videos[] = asset('storage/' . $file);
+        }
+    }
+
+    if (!empty($modele->video_link) && is_array($modele->video_link)) {
+        foreach ($modele->video_link as $link) {
+            $videos[] = $link;
+        }
+    }
+@endphp
+
 
     @if(count($videos) > 0)
         <button class="btn btn-sm btn-light rounded-pill open-gallery"

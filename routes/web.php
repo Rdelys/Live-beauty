@@ -121,3 +121,5 @@ use App\Http\Controllers\FavorisController;
 Route::post('/favoris/{modele_id}', [FavorisController::class, 'toggle'])
     ->middleware('auth')
     ->name('favoris.toggle');
+
+Route::post('/modele/{id}/videos/upload', [ModeleController::class, 'uploadVideos'])->name('modele.video.upload');

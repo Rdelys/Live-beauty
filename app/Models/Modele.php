@@ -10,20 +10,16 @@ class Modele extends Model
     use HasFactory;
 
    protected $fillable = [
-    'nom',
-    'prenom',
-    'description',
-    'video_link',
-    'video_file',
-    'photos',
-    'email',
-    'password',
-    'en_ligne',
-
+    'nom', 'prenom', 'description', 'video_link', 'video_file', 'photos','email', 'password', 'en_ligne'
 ];
-    protected $casts = [
-        'photos' => 'array', // Pour stocker un tableau d'images
-    ];
+
+protected $casts = [
+    'photos' => 'array',
+    'video_link' => 'array',
+    'video_file' => 'array',
+];
+
+
     protected $table = 'modeles'; // Assurez-vous que le nom de la table
 
     // app/Models/Modele.php

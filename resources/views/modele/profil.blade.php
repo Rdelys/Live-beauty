@@ -302,6 +302,10 @@ label {
   <li class="nav-item" role="presentation">
   <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab">Photos</button>
 </li>
+<li class="nav-item" role="presentation">
+  <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Vidéos</button>
+</li>
+
 
 </ul>
 
@@ -412,6 +416,47 @@ label {
     <button type="submit" class="btn btn-success">Ajouter les photos</button>
   </form>
 </div>
+<div class="tab-pane fade text-start" id="videos" role="tabpanel">
+  <h4 class="text-white mb-3">🎬 Gestion de vos vidéos</h4>
+
+  {{-- Liens --}}
+  @if(!empty($modele->video_link))
+    @foreach($modele->video_link as $link)
+      <div class="mb-3 ratio ratio-16x9">
+        <iframe src="{{ $link }}" frameborder="0" allowfullscreen></iframe>
+      </div>
+    @endforeach
+  @endif
+
+  {{-- Fichiers --}}
+  @if(!empty($modele->video_file))
+    <div class="row">
+      @foreach($modele->video_file as $file)
+        <div class="col-md-6 mb-4">
+          <video controls class="w-100 rounded border border-light">
+            <source src="{{ asset('storage/' . $file) }}" type="video/mp4">
+          </video>
+        </div>
+      @endforeach
+    </div>
+  @endif
+
+  {{-- Formulaire --}}
+<form action="{{ route('modele.video.upload', $modele->id) }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    <div class="mb-3">
+      <label class="form-label">Ajouter des liens vidéos</label>
+      <input type="url" name="video_link[]" class="form-control mb-2">
+      <input type="url" name="video_link[]" class="form-control mb-2">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Ajouter des fichiers vidéos</label>
+      <input type="file" name="video_file[]" class="form-control" multiple accept="video/*">
+    </div>
+    <button type="submit" class="btn btn-success">Ajouter</button>
+  </form>
+</div>
+
 
 </div>
 

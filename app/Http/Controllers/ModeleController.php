@@ -112,6 +112,37 @@ public function accueil()
     $modeles = Modele::all();
     return view('home', compact('modeles'));
 }
+public function uploadVideos(Request $request, $id)
+{
+    $request->validate([
+        'video_link.*' => 'nullable|url',
+        'video_file.*' => 'nullable|file|mimetypes:video/mp4,video/webm,video/ogg|max:102400',
+    ]);
+
+    $modele = Modele::findOrFail($id);
+
+    $links = is_array($modele->video_link) ? $modele->video_link : json_decode($modele->video_link ?? '[]', true);
+    $files = is_array($modele->video_file) ? $modele->video_file : json_decode($modele->video_file ?? '[]', true);
+
+    if ($request->has('video_link')) {
+        foreach ($request->video_link as $link) {
+            if (!empty($link)) $links[] = $link;
+        }
+    }
+
+    if ($request->hasFile('video_file')) {
+        foreach ($request->file('video_file') as $video) {
+            $files[] = $video->store('videos', 'public');
+        }
+    }
+
+    $modele->video_link = $links;
+    $modele->video_file = $files;
+    $modele->save();
+
+    return back()->with('success', 'Vidéos ajoutées avec succès.');
+}
+
 
 }
 
