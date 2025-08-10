@@ -534,7 +534,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("https://livebeautyofficial.com/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
 const peerConnection = new RTCPeerConnection({
   iceServers: [
@@ -583,21 +583,24 @@ window.onunload = window.onbeforeunload = () => {
 let typingTimeout;
 const messageInputtest = document.getElementById("messageInput");
 
-messageInputtest.addEventListener('keydown', function() {
+if (messageInputtest) {
+  messageInputtest.addEventListener('keydown', function() {
     if (socket) {
-        socket.emit("typing", {
-            pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
-            isModel: false
-        });
+      socket.emit("typing", {
+        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+        isModel: false
+      });
     }
-    
+
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
-        if (socket) {
-            socket.emit("stopTyping");
-        }
+      if (socket) {
+        socket.emit("stopTyping");
+      }
     }, 1000);
-});
+  });
+}
+
 
 socket.on("typing", (data) => {
     const typingIndicator = document.getElementById("typingIndicator");

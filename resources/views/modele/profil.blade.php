@@ -504,7 +504,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("https://livebeautyofficial.com/", {
+socket = io("wss://livebeautyofficial.com/", {
     path: '/socket.io',
     transports: ['websocket']
 });
