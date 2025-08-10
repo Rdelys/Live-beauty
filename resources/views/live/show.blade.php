@@ -792,15 +792,19 @@ document.addEventListener("keydown", (e) => {
 (function(){
     const defaultBtn = document.getElementById('defaultTokensBtn');
     const modelBtn = document.getElementById('modelTokensBtn');
-    const defaultMenu = document.getElementById('defaultTokenMenu');
-    const modelMenu = document.getElementById('modelTokenMenu');
-    const videoContainer = document.getElementById('videoContainer');
+    const defaultMenu = document.getElementById('defaultTokenMenu') || null;
+const modelMenu = document.getElementById('modelTokenMenu') || null;
+const videoContainer = document.getElementById('videoContainer');
 
     function toggleMenu(menu) {
         [defaultMenu, modelMenu].forEach(m => {
-            if (m === menu) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-            else m.style.display = 'none';
-        });
+    if (m === menu) {
+        if (m) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+    } else {
+        if (m) m.style.display = 'none';
+    }
+});
+
     }
 
     defaultBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(defaultMenu); });
