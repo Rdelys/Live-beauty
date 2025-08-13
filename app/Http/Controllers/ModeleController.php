@@ -58,7 +58,7 @@ Modele::create([
     $nombreDeModeles = $modeles->count();  // Nombre de modèles
     $nombreDeJetons = $jetons->count();    // Nombre de jetons
     $nombreDeClients = User::count(); // ✅ total clients
-    $clients = User::select('nom', 'prenoms', 'jetons','pseudo', 'created_at')->get();
+$clients = User::select('id', 'nom', 'prenoms', 'jetons', 'email', 'pseudo', 'banni', 'created_at')->get();
 
     return view('admin', compact('modeles', 'jetons', 'nombreDeModeles', 'nombreDeJetons', 'nombreDeClients',
         'clients'));

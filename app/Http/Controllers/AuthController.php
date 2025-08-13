@@ -33,14 +33,49 @@ public function register(Request $request) {
     return redirect('/dashboard');
 }
 
-    public function login(Request $request) {
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            return redirect('/dashboard');
+    public function login(Request $request)
+{
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+
+        // Vérifier si banni
+        if ($user->banni) {
+            Auth::logout();
+            return redirect()->route('home')->with('error', 'Votre compte est banni.');
         }
-        return back()->withErrors(['email' => 'Identifiants invalides']);
+
+        return redirect('/dashboard');
     }
 
+    // Mauvais identifiants
+    return redirect()->route('home')->with('error', 'Email ou mot de passe incorrect.');
+}
+
+
+
+public function addTokens(Request $request, $id)
+{
+    $request->validate([
+        'jetons' => 'required|integer|min:1'
+    ]);
+
+    $user = User::findOrFail($id);
+    $user->jetons += $request->jetons;
+    $user->save();
+
+    return back()->with('success', 'Jetons ajoutés avec succès.');
+}
+
+public function toggleBan($id)
+{
+    $user = User::findOrFail($id);
+    $user->banni = $user->banni ? 0 : 1;
+    $user->save();
+
+    return back()->with('success', $user->banni ? 'Utilisateur banni.' : 'Utilisateur débloqué.');
+}
     public function logout() {
         Auth::logout();
         return redirect('/');

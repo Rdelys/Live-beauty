@@ -559,25 +559,47 @@ footer {
   <div class="table-responsive">
     <table class="table table-bordered">
       <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Prénoms</th>
-          <th>Pseudo</th>
-          <th>Jetons</th>
-          <th>Date de création</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($clients as $client)
-          <tr>
-            <td>{{ $client->nom }}</td>
-            <td>{{ $client->prenoms }}</td>
-            <td>{{ $client->pseudo }}</td>
-            <td>{{ $client->jetons }}</td>
-            <td>{{ $client->created_at->format('d/m/Y') }}</td>
-          </tr>
-        @endforeach
-      </tbody>
+    <tr>
+        <th>Nom</th>
+        <th>Prénoms</th>
+        <th>Pseudo</th>
+        <th>Jetons</th>
+        <th>Email</th>
+        <th>Banni</th>
+        <th>Date de création</th>
+        <th>Actions</th>
+    </tr>
+</thead>
+<tbody>
+@foreach($clients as $client)
+    <tr>
+        <td>{{ $client->nom }}</td>
+        <td>{{ $client->prenoms }}</td>
+        <td>{{ $client->pseudo }}</td>
+        <td>{{ $client->jetons }}</td>
+        <td>{{ $client->email }}</td>
+        <td>{{ $client->banni ? 'Oui' : 'Non' }}</td>
+        <td>{{ $client->created_at->format('d/m/Y') }}</td>
+        <td>
+            <!-- Bouton Ajouter Jetons -->
+            <form action="{{ route('admin.clients.addTokens', $client->id) }}" method="POST" style="display:inline-block;">
+                @csrf
+                <input type="number" name="jetons" min="1" class="form-control form-control-sm" style="width:80px;display:inline-block;">
+                <button type="submit" class="btn btn-success btn-sm">+ Jetons</button>
+            </form>
+
+            <!-- Bouton Bannir/Débloquer -->
+            <form action="{{ route('admin.clients.toggleBan', $client->id) }}" method="POST" style="display:inline-block;">
+                @csrf
+                <button type="submit" class="btn btn-{{ $client->banni ? 'warning' : 'danger' }} btn-sm">
+                    {{ $client->banni ? 'Débloquer' : 'Bannir' }}
+                </button>
+            </form>
+        </td>
+    </tr>
+@endforeach
+</tbody>
+
     </table>
   </div>
 </div>

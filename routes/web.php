@@ -128,3 +128,6 @@ Route::post('/modele/{id}/videos/upload', [ModeleController::class, 'uploadVideo
 Route::post('/use-jeton', [\App\Http\Controllers\JetonController::class, 'useJeton'])
     ->middleware('auth')
     ->name('use.jeton');
+
+    Route::post('/admin/clients/{id}/add-tokens', [AuthController::class, 'addTokens'])->name('admin.clients.addTokens');
+Route::post('/admin/clients/{id}/toggle-ban', [AuthController::class, 'toggleBan'])->name('admin.clients.toggleBan');
