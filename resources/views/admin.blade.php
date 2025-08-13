@@ -387,34 +387,80 @@ footer {
           <td>{{ $modele->prenom }}</td>
           <td>{{ $modele->description }}</td>
           <td>
-            @if($modele->video_file)
-              <video width="100" controls>
-                <source src="{{ asset('storage/' . $modele->video_file) }}" type="video/mp4">
-              </video>
-            @elseif($modele->video_link)
-              <a href="{{ $modele->video_link }}" target="_blank">Lien vidéo</a>
-            @else
-              Aucune
-            @endif
-          </td>
-          <td>
-  @if($modele->photos)
     @php
-      $photos = is_string($modele->photos) ? json_decode($modele->photos, true) : $modele->photos;
+        // Normalisation du champ vidéo fichier
+        $videoFiles = $modele->video_file;
+        if (is_string($videoFiles)) {
+            $decoded = json_decode($videoFiles, true);
+            $videoFiles = json_last_error() === JSON_ERROR_NONE ? $decoded : [$videoFiles];
+        }
+        if (!is_array($videoFiles)) {
+            $videoFiles = [$videoFiles];
+        }
+
+        // Normalisation du champ vidéo lien
+        $videoLinks = $modele->video_link;
+        if (is_string($videoLinks)) {
+            $decoded = json_decode($videoLinks, true);
+            $videoLinks = json_last_error() === JSON_ERROR_NONE ? $decoded : [$videoLinks];
+        }
+        if (!is_array($videoLinks)) {
+            $videoLinks = [$videoLinks];
+        }
+    @endphp
+
+    {{-- Affichage fichiers vidéos --}}
+    @if(!empty($videoFiles) && !empty($videoFiles[0]))
+        @foreach($videoFiles as $file)
+            @if(is_string($file) && !empty($file))
+                <video width="100" controls>
+                    <source src="{{ asset('storage/' . $file) }}" type="video/mp4">
+                </video>
+            @endif
+        @endforeach
+
+    {{-- Sinon affichage liens vidéos --}}
+    @elseif(!empty($videoLinks) && !empty($videoLinks[0]))
+        @foreach($videoLinks as $link)
+            @if(is_string($link) && !empty($link))
+                <a href="{{ $link }}" target="_blank">Lien vidéo</a><br>
+            @endif
+        @endforeach
+
+    @else
+        Aucune
+    @endif
+</td>
+
+         <td>
+    @php
+        // Récupérer les photos en tableau
+        $photos = $modele->photos;
+
+        if (is_string($photos)) {
+            $decoded = json_decode($photos, true);
+            $photos = json_last_error() === JSON_ERROR_NONE ? $decoded : [];
+        }
+
+        // S'assurer que c'est bien un tableau
+        $photos = is_array($photos) ? $photos : [];
     @endphp
 
     @if(!empty($photos))
-      @foreach($photos as $photo)
-        <img src="{{ asset('storage/' . $photo) }}" width="50" class="me-1 mb-1 rounded zoomable-photo" />
-      @endforeach
+        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+            @foreach($photos as $photo)
+                @if(is_string($photo) && !empty($photo))
+                    <img src="{{ asset('storage/' . $photo) }}"
+                         alt="Photo"
+                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
+                @endif
+            @endforeach
+        </div>
     @else
-      Aucune photo
+        Aucune photo
     @endif
-
-  @else
-    Aucune photo
-  @endif
 </td>
+
 
           <td>
   <a href="{{ route('modeles.edit', $modele->id) }}" class="btn btn-sm btn-primary">Modifier</a>
