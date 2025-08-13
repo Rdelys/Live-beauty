@@ -711,9 +711,51 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 4000); // Affiché 4 secondes
     });
 });
+
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Auto-ouverture de la modal de vérification si on revient de /register
+  @if(session('showVerifyModal'))
+    const verifyModal = new bootstrap.Modal(document.getElementById('verifyEmailModal'));
+    verifyModal.show();
+  @endif
+
+  // Gestion des 6 inputs
+  const digits = Array.from(document.querySelectorAll('.code-digit'));
+  const fullCode = document.getElementById('fullCode');
+  const submitBtn = document.getElementById('submitCodeBtn');
+
+  function updateCode() {
+    const code = digits.map(i => i.value.replace(/\D/g,'')).join('');
+    fullCode.value = code;
+    submitBtn.disabled = (code.length !== 6);
+  }
+
+  digits.forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g,'').slice(0,1);
+      if (e.target.value && idx < digits.length - 1) {
+        digits[idx + 1].focus();
+      }
+      updateCode();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        digits[idx - 1].focus();
+      }
+    });
+  });
+
+  // Focus sur le premier champ à l'ouverture
+  const verifyEl = document.getElementById('verifyEmailModal');
+  verifyEl.addEventListener('shown.bs.modal', () => digits[0]?.focus());
+});
+</script>
+
     <!-- Modal Connexion -->
 <!-- Modal Connexion -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -807,6 +849,49 @@ document.addEventListener('DOMContentLoaded', function () {
     </form>
   </div>
 </div>
+
+<!-- Modal Vérification Email -->
+<div class="modal fade" id="verifyEmailModal" tabindex="-1" aria-labelledby="verifyEmailLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ route('register.verify') }}" class="modal-content auth-modal">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title" id="verifyEmailLabel">Vérification de votre email</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">
+          Nous avons envoyé un code à 6 chiffres à <strong>{{ session('registration_data.email') }}</strong>.
+          Saisissez-le ci-dessous pour valider votre inscription.
+        </p>
+
+        <div class="d-flex justify-content-between gap-2 mb-3" style="max-width: 360px; margin:auto;">
+          @for($i=1; $i<=6; $i++)
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
+                   class="form-control text-center fs-4 code-digit" id="d{{ $i }}">
+          @endfor
+        </div>
+
+        <input type="hidden" name="code" id="fullCode">
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-submit" id="submitCodeBtn" disabled>Valider</button>
+        </div>
+
+        <!--<div class="text-center mt-3">
+          <form method="POST" action="{{ route('register.resend') }}" class="d-inline">
+    @csrf
+    <button type="submit" class="btn btn-link text-white text-decoration-underline p-0" formnovalidate>
+        Renvoyer le code
+    </button>
+</form>
+
+        </div>-->
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Modal Galerie Photo -->
 <div class="modal fade" id="galleryModal" tabindex="-1">
   <div class="modal-dialog modal-fullscreen">

@@ -52,6 +52,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.su
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth');
+Route::post('/register/verify', [AuthController::class, 'verifyCode'])->name('register.verify');
+Route::post('/register/resend', [AuthController::class, 'resendCode'])->name('register.resend');
 
 // Middleware blocage pays
 Route::middleware(['block.countries'])->group(function () {
