@@ -90,10 +90,14 @@
         <label class="form-label">Mot de passe</label>
         <input type="password" name="password" class="form-control" placeholder="Entrer votre mot de passe" required>
       </div>
+      
       @error('email')
         <div class="alert alert-danger">{{ $message }}</div>
       @enderror
       <button type="submit" class="btn btn-custom w-100 mt-2">Se connecter</button>
+        <a class="d-block text-center mt-3 text-light" href="{{ route('modele.password.request') }}">
+    Mot de passe oublié ?
+  </a>
     </form>
   </div>
 

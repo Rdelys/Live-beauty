@@ -6,6 +6,9 @@ use App\Http\Controllers\JetonController;
 use App\Http\Controllers\ModeleAuthController;
 use App\Http\Controllers\LiveController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ModeleAuth\ForgotPasswordController as ModeleForgotPasswordController;
+use App\Http\Controllers\ModeleAuth\ResetPasswordController as ModeleResetPasswordController;
+
 use App\Models\Modele;
 
 Route::get('/forbidden', function () {
@@ -133,3 +136,23 @@ Route::post('/use-jeton', [\App\Http\Controllers\JetonController::class, 'useJet
 
     Route::post('/admin/clients/{id}/add-tokens', [AuthController::class, 'addTokens'])->name('admin.clients.addTokens');
 Route::post('/admin/clients/{id}/toggle-ban', [AuthController::class, 'toggleBan'])->name('admin.clients.toggleBan');
+
+// routes/web.php
+
+Route::prefix('modele')->name('modele.')->group(function () {
+    // Formulaire: demander le lien de réinitialisation
+    Route::get('/password/request', [ModeleForgotPasswordController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    // Envoi de l’email avec le lien
+    Route::post('/password/email', [ModeleForgotPasswordController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // Formulaire: saisir le nouveau mot de passe
+    Route::get('/password/reset/{token}', [ModeleResetPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    // Soumission du nouveau mot de passe
+    Route::post('/password/reset', [ModeleResetPasswordController::class, 'reset'])
+        ->name('password.update');
+});
