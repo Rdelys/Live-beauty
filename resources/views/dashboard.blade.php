@@ -732,7 +732,7 @@ document.addEventListener('click', function(e) {
 
 
 <!-- PayPal SDK + Script -->
-<script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_SANDBOX_CLIENT_ID') }}&currency=EUR"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_LIVE_CLIENT_ID') }}&currency=EUR"></script>
 <script>
   const packs = [
     { jetons: 30, price: '5.49' },
