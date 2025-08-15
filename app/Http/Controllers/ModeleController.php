@@ -137,8 +137,9 @@ public function accueil()
 public function uploadVideos(Request $request, $id)
 {
     $request->validate([
-        'video_link.*' => 'nullable|url',
-        'video_file.*' => 'nullable|file|mimetypes:video/mp4,video/webm,video/ogg|max:102400',
+        'video_file' => 'nullable',
+'video_file.*' => 'file|mimetypes:video/mp4,video/webm,video/ogg|max:102400',
+
     ]);
 
     $modele = Modele::findOrFail($id);
@@ -153,10 +154,16 @@ public function uploadVideos(Request $request, $id)
     }
 
     if ($request->hasFile('video_file')) {
-        foreach ($request->file('video_file') as $video) {
-            $files[] = $video->store('videos', 'public');
-        }
+    $files = is_array($request->file('video_file'))
+        ? $request->file('video_file')
+        : [$request->file('video_file')];
+
+    foreach ($files as $file) {
+        $path = $file->store('videos', 'public');
+        // Ici, sauvegarde le chemin en base si besoin
     }
+}
+
 
     $modele->video_link = $links;
     $modele->video_file = $files;
