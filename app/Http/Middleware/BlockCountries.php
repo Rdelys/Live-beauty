@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use GeoIP;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class BlockCountries
 {
@@ -14,48 +16,72 @@ class BlockCountries
         'BY', 'KR', 'ID',
     ];
 
+    protected $apiToken = '86f36db5694772'; // Remplacez par votre token ipinfo.io
+
     public function handle(Request $request, Closure $next)
     {
+        if ($request->routeIs('forbidden')) {
+            return $next($request);
+        }
 
-         if ($request->routeIs('forbidden')) {
-        return $next($request);
-    }
         $ip = $request->getClientIp();
 
-        try {
-            $location = GeoIP::getLocation($ip);
+        // Ignore GeoIP pour local
+        if ($ip === '127.0.0.1' || $ip === '::1') {
+            \Log::info("IP locale détectée : $ip, GeoIP ignoré.");
+            return $next($request);
+        }
 
-            $iso = $location->iso_code ?? null;
-            $country = $location->country ?? 'Inconnu';
+        // Vérifier si IP déjà en cache
+        $cached = Cache::get("geoip_$ip");
+        if ($cached) {
+            $iso = $cached['iso'];
+            $country = $cached['country'];
+        } else {
+            $iso = null;
+            $country = 'Inconnu';
 
-            \Log::info("GeoIP - IP : $ip, Pays : $country ($iso)");
-
-            if (!$iso) {
-                \Log::warning("GeoIP - iso_code manquant pour IP : $ip");
+            // 1️⃣ GeoIP locale
+            try {
+                $location = GeoIP::getLocation($ip);
+                $iso = $location->iso_code ?? null;
+                $country = $location->country ?? 'Inconnu';
+            } catch (\Exception $e) {
+                \Log::warning("GeoIP locale a échoué pour IP $ip : ".$e->getMessage());
             }
 
-            if (in_array($iso, $this->blockedCountries)) {
-                \Log::warning("Visiteur BLOQUÉ - IP : $ip, Pays : $iso");
-                
-                // Redirection vers la page 403 personnalisée
-                return redirect()->route('forbidden');
+            // 2️⃣ Si GeoIP local improbable, fallback vers API externe
+            if (!$iso || $iso === 'US') {
+                try {
+                    $response = Http::timeout(2)
+                        ->get("https://ipinfo.io/{$ip}/json?token={$this->apiToken}");
+                    if ($response->ok()) {
+                        $data = $response->json();
+                        $iso = $data['country'] ?? $iso;
+                        $country = $data['country'] ?? $country;
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("API GeoIP a échoué pour IP $ip : ".$e->getMessage());
+                }
             }
 
-            // Injection console log uniquement pour les requêtes HTML (pas API/AJAX)
-            if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
-                app()->terminating(function () use ($ip, $country, $iso) {
-                    echo "<script>console.log('IP: {$ip}, Pays: {$country} ({$iso})');</script>";
-                });
-            }
-        } catch (\Exception $e) {
-            \Log::error("Erreur GeoIP - IP : $ip, message : " . $e->getMessage());
+            // Mettre en cache 24h pour éviter les appels répétés
+            Cache::put("geoip_$ip", ['iso' => $iso, 'country' => $country], 60*24);
+        }
 
-            if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
-                app()->terminating(function () use ($ip, $e) {
-                    $message = addslashes($e->getMessage());
-                    echo "<script>console.error('GeoIP ERROR - IP: {$ip}, Message: {$message}');</script>";
-                });
-            }
+        \Log::info("IP détectée : $ip, Pays : $country ($iso)");
+
+        // Blocage si pays interdit
+        if ($iso && in_array($iso, $this->blockedCountries)) {
+            \Log::warning("Visiteur BLOQUÉ - IP : $ip, Pays : $iso");
+            return redirect()->route('forbidden');
+        }
+
+        // Console log côté client
+        if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
+            app()->terminating(function () use ($ip, $country, $iso) {
+                echo "<script>console.log('IP: {$ip}, Pays: {$country} ({$iso})');</script>";
+            });
         }
 
         return $next($request);
