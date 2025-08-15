@@ -109,11 +109,22 @@ h2, h4, h5 {
 
 /* VIDEO */
 video#liveVideo {
-  max-height: 400px;
+  max-height: 100%;
   border-radius: 12px;
   border: 2px solid #ccc;
   background-color: #000;
 }
+
+/* Plein écran */
+#videoContainer:fullscreen video,
+#videoContainer:-webkit-full-screen video {
+  max-height: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
 
 /* CARDS */
 .card {
@@ -191,8 +202,35 @@ label {
     font-size: 1rem;
   }
 }
+
+#videoContainer {
+    position: relative;
+}
+
+#videoContainer video {
+    display: block;
+    width: 100%;
+}
+
+#videoContainer:fullscreen video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#videoContainer:fullscreen #viewersOverlay,
+#videoContainer:fullscreen #messages,
+#videoContainer:fullscreen #chatForm {
+    position: absolute;
+    z-index: 9999;
+}
+
+#viewersOverlay {
+    font-weight: bold;
+}
+
 .chat-wrapper {
-  position: absolute;
+   position: absolute;
   bottom: 85px;
   left: 10px;
   right: 10px;
@@ -206,9 +244,6 @@ label {
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
   mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
   scrollbar-width: none; /* Firefox */
-}
-.chat-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
 }
 
 .chat-bubble {
@@ -226,6 +261,11 @@ label {
   pointer-events: auto;
   animation: fadeIn 0.3s ease-in-out;
 }
+.chat-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+
 
 @keyframes fadeIn {
   from {
@@ -326,34 +366,40 @@ label {
     <p><strong>Nom :</strong> {{ $modele->nom }}</p>
     <p><strong>Email :</strong> {{ $modele->email }}</p>
     <p><strong>Description :</strong> {{ $modele->description }}</p>
+    <p><strong>Jetons Surprise :</strong> {{ $modele->jetons_surprise}} Jetons</p>
   </div>
 
   <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
     <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
     <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
     <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
+<div id="liveSection" style="display:none;">
 
-    <div id="liveSection" style="display: none;">
-        <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
-        
-        <!-- Ajoutez cette section pour les viewers -->
-        <div class="card bg-dark text-white mt-3">
-            <div class="card-body">
-                <h5 class="card-title">👥 Spectateurs en direct (<span id="viewersCount">0</span>)</h5>
-                <div id="viewersList" class="d-flex flex-wrap gap-2">
-                    <!-- Les pseudos des viewers apparaîtront ici -->
-                </div>
-            </div>
-        </div>
-        
-        <div id="chat-overlay" class="mt-3" style="position: relative;">
-            <div class="chat-wrapper" id="messages"></div>
-            <form id="chatForm" class="d-flex mt-3" onsubmit="sendMessage(event)">
-                <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
-                <button type="submit" class="btn btn-danger">Envoyer</button>
-            </form>
-        </div>
+    <div id="videoContainer" style="position: relative;">
+      <button id="fullscreenBtn" 
+        style="position:absolute;top:10px;right:10px;z-index:10;background:rgba(0,0,0,0.5);border:none;color:white;padding:6px 10px;border-radius:6px;cursor:pointer;">
+    ⛶
+</button>
+    <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
+
+    <!-- Overlay spectateurs -->
+    <div id="viewersOverlay" style="position:absolute;top:10px;left:10px;z-index:10;color:white;">
+        👥 <span id="viewersCount">0</span>
+        <div id="viewersList" style="margin-top:5px;font-size:0.85rem;"></div>
     </div>
+
+    <!-- Overlay messages -->
+    <div class="chat-wrapper" id="messages" style="position:absolute;bottom:70px;left:10px;right:10px;z-index:10;"></div>
+
+    <!-- Overlay formulaire -->
+    <form id="chatForm" onsubmit="sendMessage(event)"
+          style="position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:5px;z-index:10;">
+        <input type="text" id="messageInput" class="form-control" placeholder="Tape ton message..." required>
+        <button type="submit" class="btn btn-danger">Envoyer</button>
+    </form>
+</div>
+</div>
+
     <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
 </div>
 
@@ -491,6 +537,12 @@ label {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
+  document.getElementById("fullscreenBtn")?.addEventListener("click", () => {
+    const container = document.getElementById("videoContainer");
+    if (container.requestFullscreen) container.requestFullscreen();
+    else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+});
+
 /* === RÉFÉRENCES DOM === */
 const startBtn     = document.getElementById('startLiveBtn');
 const stopBtn      = document.getElementById('stopLiveBtn');
@@ -624,6 +676,19 @@ socket.on("jeton-sent", (data) => {
     }
 
     createTokenBubble(description, cost, isGolden);
+});
+
+socket.on("surprise-sent", (data) => {
+    const chatWrapper = document.querySelector(".chat-wrapper");
+    if (chatWrapper) {
+        const bubble = document.createElement("div");
+        bubble.classList.add("chat-bubble");
+        bubble.innerHTML = `🎁 <strong>${data.pseudo}</strong> a envoyé ${data.emoji} (${data.cost} jetons)`;
+        chatWrapper.appendChild(bubble);
+        chatWrapper.scrollTop = chatWrapper.scrollHeight;
+    }
+
+    createTokenBubble(`Surprise ${data.emoji}`, data.cost, false);
 });
 
 

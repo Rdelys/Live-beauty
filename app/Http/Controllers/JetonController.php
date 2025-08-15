@@ -72,4 +72,31 @@ public function useJeton(Request $request)
             'modele_id' => $request->modele_id
         ]);
     }
+
+    public function useSurprise(Request $request)
+{
+    $request->validate([
+        'cost' => 'required|integer|min:1',
+        'modele_id' => 'required|exists:modeles,id'
+    ]);
+
+    $user = auth()->user();
+    if ($user->jetons < $request->cost) {
+        return response()->json(['error' => 'Pas assez de jetons'], 400);
+    }
+
+    // Retirer jetons à l'user
+    $user->jetons -= $request->cost;
+    $user->save();
+
+    // Ajouter au modèle
+    $modele = \App\Models\Modele::find($request->modele_id);
+    $modele->jetons_surprise += $request->cost;
+    $modele->save();
+
+    return response()->json([
+        'new_balance' => $user->jetons
+    ]);
+}
+
 }

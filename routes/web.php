@@ -156,3 +156,4 @@ Route::prefix('modele')->name('modele.')->group(function () {
     Route::post('/password/reset', [ModeleResetPasswordController::class, 'reset'])
         ->name('password.update');
 });
+Route::post('/use-surprise', [JetonController::class, 'useSurprise'])->name('use.surprise');

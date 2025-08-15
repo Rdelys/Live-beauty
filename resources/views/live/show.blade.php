@@ -8,6 +8,15 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
+    .fullscreen-icon {
+  background: linear-gradient(135deg, #263238, #37474f);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+}
+.fullscreen-icon:hover {
+  transform: translateY(-3px);
+}
+
     body {
   background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
   color: #fff;
@@ -519,7 +528,6 @@ video {
     <div class="left-live">
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
-      <button id="fullscreenBtn" class="btn btn-secondary mt-2">🖥️ Plein écran</button>
 @auth
 <div class="text-white mb-2">
     💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
@@ -541,6 +549,10 @@ video {
     <video id="liveVideo" autoplay playsinline controls></video>
     @auth
   <div class="video-top-icons" aria-hidden="false">
+    <button id="fullscreenBtn" class="token-icon fullscreen-icon" title="Plein écran" type="button">
+    ⛶
+</button>
+
       <!-- Default tokens icon -->
       <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
         💠
@@ -811,15 +823,16 @@ socket.on("chat-message", data => {
 
 
 document.getElementById("fullscreenBtn").addEventListener("click", () => {
-  const container = document.getElementById("videoContainer");
-  if (container.requestFullscreen) {
-    container.requestFullscreen();
-  } else if (container.webkitRequestFullscreen) {
-    container.webkitRequestFullscreen();
-  } else if (container.msRequestFullscreen) {
-    container.msRequestFullscreen();
-  }
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else {
+        const container = document.getElementById("videoContainer");
+        if (container.requestFullscreen) container.requestFullscreen();
+        else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+    }
 });
+
 
 // 🎧 Gestion de l'activation audio par clic sur l'overlay
 const overlay = document.getElementById("startOverlay");
@@ -926,8 +939,11 @@ modelSurpriseTokensBtn?.addEventListener('click', (e) => {
 });
 
     document.addEventListener('click', () => {
-        [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
+    [defaultMenu, modelMenu, modelSurpriseTokenMenu].forEach(m => {
+        if (m) m.style.display = 'none';
     });
+});
+
 
     function createTokenBubble(name, cost, isGolden) {
         const bubble = document.createElement('div');
@@ -938,7 +954,46 @@ modelSurpriseTokensBtn?.addEventListener('click', (e) => {
         videoContainer.appendChild(bubble);
         setTimeout(() => bubble.remove(), 2300);
     }
+    
+document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const cost = parseInt(item.getAttribute('data-cost'));
+        const emoji = item.querySelector('.token-emoji').textContent;
+        const modeleId = {{ $modele->id }};
+        const pseudo = "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}";
 
+        fetch("{{ route('use.surprise') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ cost, modele_id: modeleId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Bulle locale
+            createTokenBubble(`Surprise ${emoji}`, cost, false);
+
+            // Événement temps réel
+            socket.emit("surprise-sent", {
+                emoji: emoji,
+                cost: cost,
+                pseudo: pseudo
+            });
+
+            // MAJ solde utilisateur
+            const soldeElem = document.getElementById("userJetons");
+            if (soldeElem) soldeElem.innerText = data.new_balance;
+        })
+        .catch(err => console.error(err));
+    });
+});
     function onTokenChoiceClick(e, isGolden) {
     const btn = e.currentTarget;
     const name = btn.dataset.name || 'Jeton';
@@ -1001,8 +1056,13 @@ socket.emit("jeton-sent", {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
-    });
+    if (e.key === 'Escape') {
+        [defaultMenu, modelMenu, modelSurpriseTokenMenu].forEach(m => {
+            if (m) m.style.display = 'none';
+        });
+    }
+});
+
 
     if (typeof socket !== 'undefined') {
     socket.on("jeton-sent", (data) => {
@@ -1013,13 +1073,7 @@ socket.emit("jeton-sent", {
 
 })();
 // Écoute le clic sur chaque surprise
-document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item => {
-    item.addEventListener('click', () => {
-        const cost = item.getAttribute('data-cost');
-        console.log(`Surprise envoyée, coût : ${cost} jetons`);
-        // Ici tu peux appeler ta fonction pour envoyer la surprise au modèle
-    });
-});
+
 
 </script>
 
