@@ -297,12 +297,31 @@ video {
   top: 12px;
   right: 12px;
   display: flex;
-  flex-direction: column; /* ✅ icônes verticales */
+  flex-direction: column; /* empile les icônes verticalement */
   gap: 8px;
   z-index: 1100;
   align-items: center;
   pointer-events: auto;
 }
+
+/* Adapter pour mobile */
+@media (max-width: 576px) {
+  .video-top-icons {
+    top: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+}
+
+/* Quand on est en plein écran */
+#videoContainer:fullscreen .video-top-icons,
+#videoContainer:-webkit-full-screen .video-top-icons {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 99999; /* Très haut pour passer au-dessus */
+}
+
 
 
 /* Icones */
@@ -439,17 +458,15 @@ video {
   z-index: 1000;
   font-size: 1.5rem;
   cursor: pointer;
-">
+  ">
   ▶️ Cliquez pour démarrer le live avec son
-  
-</div>
+  </div>
+
   <video id="liveVideo" autoplay playsinline controls></video>
-  <div class="chat-wrapper" id="messages"></div>
-<!-- ICONES JETONS (INSÉRER DANS #videoContainer, après <video>) -->
   @auth
-<div class="video-top-icons" aria-hidden="false">
+    <div class="video-top-icons" aria-hidden="false">
   <!-- Default tokens icon -->
-  <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
+   <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
     💠
   </button>
 
@@ -488,6 +505,10 @@ video {
   </div>
 </div>
 @endauth
+
+  <div class="chat-wrapper" id="messages"></div>
+<!-- ICONES JETONS (INSÉRER DANS #videoContainer, après <video>) -->
+  
 
 
   @auth
