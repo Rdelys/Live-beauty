@@ -517,12 +517,12 @@ footer {
 
   <div class="mb-3">
     <label for="video_link" class="form-label">Lien vidéo (optionnel)</label>
-    <input type="url" class="form-control" id="video_link" name="video_link" placeholder="https://..." />
+<input type="url" class="form-control" id="video_link" name="video_link[]" placeholder="https://..." />
   </div>
 
   <div class="mb-3">
     <label for="video_file" class="form-label">Fichier vidéo (MP4, WebM, Ogg)</label>
-    <input type="file" class="form-control" id="video_file" name="video_file" accept="video/mp4,video/webm,video/ogg" />
+<input type="file" class="form-control" id="video_file" name="video_file[]" multiple accept="video/mp4,video/webm,video/ogg" />
   </div>
 
   <div class="row mb-3">
