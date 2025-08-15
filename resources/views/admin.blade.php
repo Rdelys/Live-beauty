@@ -241,6 +241,16 @@ video {
   }
 }
 
+@media (max-width: 992px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+  }
+}
+
+
 @media (max-width: 576px) {
   .content {
     padding: 1rem;
@@ -305,24 +315,35 @@ footer {
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h5><i class="fas fa-user-shield"></i> Admin Panel</h5>
-    <a class="menu-link active"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
-
-    <a class="menu-link has-submenu"><i class="fas fa-images"></i> Modèles</a>
-    <div class="submenu">
-      <a class="menu-link"><i class="fas fa-list"></i> Liste des modeles</a>
-      <a class="menu-link"><i class="fas fa-plus"></i> Ajout modeles</a>
-    </div>
-
-    <a class="menu-link"><i class="fas fa-users"></i> Clients</a>
-
-    <a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
-    <div class="submenu">
-      <a class="menu-link"><i class="fas fa-list-ul"></i> Liste des jetons</a>
-      <a class="menu-link"><i class="fas fa-plus-circle"></i> Ajout de jetons</a>
-    </div>
+  <!-- Bouton Hamburger (visible en mobile) -->
+<nav class="navbar navbar-dark bg-dark d-lg-none">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
   </div>
+</nav>
+
+<!-- Menu latéral transformé en dropdown mobile -->
+<div class="collapse d-lg-block sidebar" id="mobileMenu">
+  <h5><i class="fas fa-user-shield"></i> Admin Panel</h5>
+  <a class="menu-link active"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
+
+  <a class="menu-link has-submenu"><i class="fas fa-images"></i> Modèles</a>
+  <div class="submenu">
+    <a class="menu-link"><i class="fas fa-list"></i> Liste des modeles</a>
+    <a class="menu-link"><i class="fas fa-plus"></i> Ajout modeles</a>
+  </div>
+
+  <a class="menu-link"><i class="fas fa-users"></i> Clients</a>
+
+  <a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
+  <div class="submenu">
+    <a class="menu-link"><i class="fas fa-list-ul"></i> Liste des jetons</a>
+    <a class="menu-link"><i class="fas fa-plus-circle"></i> Ajout de jetons</a>
+  </div>
+</div>
+
 
   <div class="content">
     <div id="dashboard-content" class="content-section">
