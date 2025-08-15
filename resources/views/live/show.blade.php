@@ -174,28 +174,56 @@ video {
 }
 
 /* Chat Form */
-#chatForm {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 600px;
-  z-index: 1000;
-  background-color: rgba(0,0,0,0.5);
-  padding: 10px;
-  border-radius: 12px;
-  display: flex;
-  gap: 10px;
-  backdrop-filter: blur(6px);
+#videoContainer {
+
+    position: relative;
 }
+
+#chatForm {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    width: calc(100% - 40px);
+    max-width: 700px;
+    box-sizing: border-box;
+    z-index: 1000; /* Toujours au-dessus de la vidéo */
+}
+
 #chatForm input {
   flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
   border: none;
-  border-radius: 8px;
-  padding: 8px;
-  background-color: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.15);
   color: #fff;
+}
+
+#chatForm button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #e53935;
+  color: #fff;
+  font-weight: bold;
+}
+
+#chatForm button:hover {
+  background: #d32f2f;
+}
+
+/* En plein écran */
+#videoContainer:fullscreen #chatForm,
+#videoContainer:-webkit-full-screen #chatForm {
+    bottom: 20px;
+    width: calc(100% - 30px);
 }
 
 /* Responsive */
@@ -350,6 +378,12 @@ video {
   box-shadow: 0 8px 28px rgba(189,137,9,0.25);
 }
 
+.surprise-icon {
+  background: linear-gradient(135deg, #6a1b9a, #ba68c8); /* violet -> lavande */
+  color: #fff; /* blanc pour contraste */
+  box-shadow: 0 8px 28px rgba(106, 27, 154, 0.25); /* ombre violette douce */
+}
+
 /* small popup menu list */
 .token-menu {
   position: absolute;
@@ -434,6 +468,48 @@ video {
     50% { opacity: 0.9; }
     100% { opacity: 0.5; }
 }
+
+.token-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 colonnes */
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.token-item {
+    background: #222;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer; /* Cliquable */
+    transition: transform 0.2s, background 0.2s;
+}
+
+.token-item:hover {
+    background: #444;
+    transform: scale(1.05);
+}
+
+.token-emoji {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.token-cost {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+@media screen and (max-width: 768px) {
+    #videoContainer {
+        height: 80vh; /* prend 80% de la hauteur de l'écran */
+    }
+
+    #videoContainer video {
+        height: 100%;
+        width: 100%;
+        object-fit: cover; /* évite les bandes noires */
+    }
+}
   </style>
 </head>
 <body>
@@ -462,64 +538,75 @@ video {
   ▶️ Cliquez pour démarrer le live avec son
   </div>
 
-  <video id="liveVideo" autoplay playsinline controls></video>
-  @auth
-    <div class="video-top-icons" aria-hidden="false">
-  <!-- Default tokens icon -->
-   <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
-    💠
-  </button>
+    <video id="liveVideo" autoplay playsinline controls></video>
+    @auth
+  <div class="video-top-icons" aria-hidden="false">
+      <!-- Default tokens icon -->
+      <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
+        💠
+      </button>
 
-  <!-- Model personal tokens icon (gold) -->
-  <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
-    ✨
-  </button>
+      <!-- Model personal tokens icon (gold) -->
+      <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
+        ✨
+      </button>
 
-  <!-- Menus (remplis via Blade) -->
-  <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
-    <div class="menu-title">Jetons standards</div>
-    @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
-    @foreach($jetonsGlobaux as $jeton)
-     <button class="token-choice"
-    data-name="{{ $jeton->nom }}"
-    data-cost="{{ $jeton->nombre_de_jetons }}"
-    data-description="{{ $jeton->description }}">
-    {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} {{ $jeton->modele_id ? '✨' : '💠' }}
-</button>
+      <button id="modelSurpriseTokensBtn" class="token-icon surprise-icon" title="Surprises" type="button">
+        🎁
+      </button>
 
-    @endforeach
-  </div>
+      <!-- Menus (remplis via Blade) -->
+      <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
+        <div class="menu-title">Jetons standards</div>
+        @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
+        @foreach($jetonsGlobaux as $jeton)
+        <button class="token-choice"
+        data-name="{{ $jeton->nom }}"
+        data-cost="{{ $jeton->nombre_de_jetons }}"
+        data-description="{{ $jeton->description }}">
+        {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} {{ $jeton->modele_id ? '✨' : '💠' }}
+        </button>
+        @endforeach
+      </div>
 
-  <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
-    <div class="menu-title">Actions de {{ $modele->prenom }}</div>
-    @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
-    @foreach($jetonsPerso as $jeton)
-  <button class="token-choice"
-      data-name="{{ $jeton->nom }}"
-      data-cost="{{ $jeton->nombre_de_jetons }}"
-      data-description="{{ $jeton->description }}">
-      {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
-  </button>
-@endforeach
-
-  </div>
+      <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
+        <div class="menu-title">Actions de {{ $modele->prenom }}</div>
+        @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
+        @foreach($jetonsPerso as $jeton)
+        <button class="token-choice"
+            data-name="{{ $jeton->nom }}"
+            data-cost="{{ $jeton->nombre_de_jetons }}"
+            data-description="{{ $jeton->description }}">
+            {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
+        </button>
+        @endforeach
+      </div>
+      <!-- Menu Surprise -->
+      <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
+          <div class="menu-title">Envoyer une Surprise</div>
+          <div class="token-grid">
+              <div class="token-item" data-cost="1"><div class="token-emoji">💋</div><div class="token-cost">1</div></div>
+              <div class="token-item" data-cost="5"><div class="token-emoji">🍸</div><div class="token-cost">5</div></div>
+              <div class="token-item" data-cost="10"><div class="token-emoji">👙</div><div class="token-cost">10</div></div>
+              <div class="token-item" data-cost="25"><div class="token-emoji">💄</div><div class="token-cost">25</div></div>
+              <div class="token-item" data-cost="50"><div class="token-emoji">👠</div><div class="token-cost">50</div></div>
+          </div>
+      </div>
+    </div>
+    @endauth
+    <div class="chat-wrapper" id="messages"></div>
+    <!-- ICONES JETONS (INSÉRER DANS #videoContainer, après <video>) -->
+    @auth
+      @if(Auth::user()->role != 'modele') {{-- modèle ne peut pas envoyer --}}
+      <form id="chatForm" class="d-flex" onsubmit="sendMessage(event)">
+        <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
+        <button type="submit" class="btn btn-danger">Envoyer</button>
+      </form>
+      @endif
+    @endauth
+      </div>
 </div>
-@endauth
 
-  <div class="chat-wrapper" id="messages"></div>
-<!-- ICONES JETONS (INSÉRER DANS #videoContainer, après <video>) -->
-  
-
-
-  @auth
-    @if(Auth::user()->role != 'modele') {{-- modèle ne peut pas envoyer --}}
-    <form id="chatForm" class="d-flex" onsubmit="sendMessage(event)">
-      <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
-      <button type="submit" class="btn btn-danger">Envoyer</button>
-    </form>
-    @endif
-  @endauth
-</div>
 
       @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
@@ -815,21 +902,28 @@ document.addEventListener("keydown", (e) => {
     const modelBtn = document.getElementById('modelTokensBtn');
     const defaultMenu = document.getElementById('defaultTokenMenu') || null;
 const modelMenu = document.getElementById('modelTokenMenu') || null;
+const modelSurpriseTokensBtn = document.getElementById('modelSurpriseTokensBtn') || null;
+const modelSurpriseTokenMenu = document.getElementById('modelSurpriseTokenMenu') || null;
+
 const videoContainer = document.getElementById('videoContainer');
 
-    function toggleMenu(menu) {
-        [defaultMenu, modelMenu].forEach(m => {
-    if (m === menu) {
-        if (m) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-    } else {
-        if (m) m.style.display = 'none';
-    }
-});
+   function toggleMenu(menu) {
+    [defaultMenu, modelMenu, modelSurpriseTokenMenu].forEach(m => {
+        if (m === menu) {
+            if (m) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        } else {
+            if (m) m.style.display = 'none';
+        }
+    });
+}
 
-    }
 
     defaultBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(defaultMenu); });
     modelBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(modelMenu); });
+modelSurpriseTokensBtn?.addEventListener('click', (e) => { 
+    e.stopPropagation(); 
+    toggleMenu(modelSurpriseTokenMenu); 
+});
 
     document.addEventListener('click', () => {
         [defaultMenu, modelMenu].forEach(m => m.style.display = 'none');
@@ -918,5 +1012,14 @@ socket.emit("jeton-sent", {
 }
 
 })();
+// Écoute le clic sur chaque surprise
+document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const cost = item.getAttribute('data-cost');
+        console.log(`Surprise envoyée, coût : ${cost} jetons`);
+        // Ici tu peux appeler ta fonction pour envoyer la surprise au modèle
+    });
+});
+
 </script>
 
