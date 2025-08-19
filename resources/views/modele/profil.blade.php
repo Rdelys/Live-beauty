@@ -382,18 +382,20 @@ label {
     <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
     <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
 <div id="liveSection" style="display:none;">
+<button id="pauseLiveBtn"
+  style="position:absolute;top:10px;right:100px;z-index:10;
+         background:rgba(0,0,0,0.5);border:none;color:white;
+         padding:6px 10px;border-radius:6px;cursor:pointer;">
+  ⏸
+</button>
+
 <button id="toggleMicBtn" 
   style="position:absolute;top:10px;right:50px;z-index:10;
          background:rgba(0,0,0,0.5);border:none;color:white;
          padding:6px 10px;border-radius:6px;cursor:pointer;">
   🎤🔇
 </button>
-<button id="pauseLiveBtn"
-  style="position:absolute;top:10px;right:90px;z-index:10;
-         background:rgba(0,0,0,0.5);border:none;color:white;
-         padding:6px 10px;border-radius:6px;cursor:pointer;">
-  ⏸
-</button>
+
 
     <div id="videoContainer" style="position: relative;">
       <button id="fullscreenBtn" 
