@@ -437,7 +437,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
     </button>
 </form>
 
-<a href="{{ route('modele.profile', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
+<a href="{{ route('modele.private', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
     @php
       $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
       $photo = $photos[0] ?? null;
