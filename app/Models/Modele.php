@@ -22,8 +22,10 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     'email',
     'password',
     'en_ligne',
-    'nombre_jetons_show_privee', // ✅ nouveau champ
+    'nombre_jetons_show_privee',
+    'duree_show_privee',   // ✅ nouveau champ
 ];
+
 
 
     protected $casts = [

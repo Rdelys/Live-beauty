@@ -368,6 +368,7 @@ label {
     <p><strong>Description :</strong> {{ $modele->description }}</p>
     <p><strong>Jetons Surprise :</strong> {{ $modele->jetons_surprise}} Jetons</p>
     <p><strong>Nombre jetons show privée :</strong> {{ $modele->nombre_jetons_show_privee ?? 'Non défini' }}</p>
+<p><strong>Durée show privée :</strong> {{ $modele->duree_show_privee ? $modele->duree_show_privee . ' minutes' : 'Non définie' }}</p>
 
     <!-- Bouton modal -->
     <button class="btn btn-warning mt-3" data-bs-toggle="modal" data-bs-target="#editProfilModal">
@@ -884,6 +885,11 @@ function previewImages(event) {
             <label class="form-label">Nombre de jetons pour show privée</label>
             <input type="number" name="nombre_jetons_show_privee" value="{{ $modele->nombre_jetons_show_privee ?? '' }}" class="form-control">
           </div>
+          <div class="mb-3">
+  <label class="form-label">Durée du show privée (minutes)</label>
+  <input type="number" name="duree_show_privee" value="{{ $modele->duree_show_privee ?? '' }}" class="form-control">
+</div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>

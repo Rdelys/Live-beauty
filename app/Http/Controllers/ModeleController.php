@@ -20,6 +20,7 @@ class ModeleController extends Controller
     'email' => 'required|email|unique:modeles,email',
     'password' => 'required|string|min:6',
     'nombre_jetons_show_privee' => 'nullable|integer|min:0', // ✅
+' durrée_show_privee ' => 'nullable|integer|min:1|max:240',
 
     'video_link'   => 'nullable|array',
     'video_link.*' => 'nullable|url',
@@ -61,6 +62,7 @@ class ModeleController extends Controller
         'video_file'  => $videoFiles,
         'photos'      => $photoPaths,
         'nombre_jetons_show_privee' => $validated['nombre_jetons_show_privee'] ?? null, // ✅
+    'duree_show_privee'         => $validated['duree_show_privee'] ?? null, // ✅
 
     ]);
 
@@ -97,6 +99,7 @@ public function update(Request $request, $id)
     $modele->video_link = $request->video_link;
     $modele->email = $request->email;
     $modele->nombre_jetons_show_privee = $request->nombre_jetons_show_privee;
+$modele->duree_show_privee = $request->duree_show_privee;
 
     if ($request->hasFile('video_file')) {
         $newFiles = [];
