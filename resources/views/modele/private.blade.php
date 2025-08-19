@@ -133,8 +133,18 @@
                     @endif
                 </h2>
 
-                <a href="{{ route('modele.private.show', $modele->id) }}" class="btn-private">Show en privé</a>
+                <button class="btn-private"
+                        data-bs-toggle="modal"
+                        data-bs-target="#showPriveeModal"
+                        data-modeleid="{{ $modele->id }}"
+                        data-prix="{{ $modele->nombre_jetons_show_privee ?? 0 }}">
+                    🔒 Show en privé
+                </button>
+                <span class="badge bg-warning text-dark ms-2">
+                    {{ $modele->nombre_jetons_show_privee ?? 'ND' }} jetons / 30min
+                </span>
             </div>
+
 
             <p><strong>{{ $modele->age ?? '-' }} ans</strong> — {{ $modele->genre ?? '-' }} — {{ $modele->orientation ?? '-' }}</p>
             <p>{{ $modele->description ?? 'Aucune description' }}</p>
@@ -166,4 +176,96 @@
         if (firstVignette) firstVignette.classList.add('active');
     });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  let prixPar30min = 0;
+
+  // Quand on ouvre la modal
+  const showPriveeModal = document.getElementById("showPriveeModal");
+  showPriveeModal.addEventListener("show.bs.modal", event => {
+    const button = event.relatedTarget;
+    const modeleId = button.getAttribute("data-modeleid");
+    prixPar30min = parseInt(button.getAttribute("data-prix")) || 0;
+
+    document.getElementById("modeleId").value = modeleId;
+    document.getElementById("coutTotal").value = "0 jetons";
+  });
+
+  // Calcul automatique
+  function calculerCout() {
+    const debut = document.getElementById("heureDebut").value;
+    const fin = document.getElementById("heureFin").value;
+
+    if (debut && fin) {
+      const [h1, m1] = debut.split(":").map(Number);
+      const [h2, m2] = fin.split(":").map(Number);
+
+      const start = h1 * 60 + m1;
+      const end = h2 * 60 + m2;
+      const dureeMinutes = end - start;
+
+      if (dureeMinutes > 0) {
+        const tranches = Math.ceil(dureeMinutes / 30);
+        const total = tranches * prixPar30min;
+        document.getElementById("coutTotal").value = total + " jetons";
+      } else {
+        document.getElementById("coutTotal").value = "Erreur: fin < début";
+      }
+    }
+  }
+
+  document.getElementById("heureDebut").addEventListener("change", calculerCout);
+  document.getElementById("heureFin").addEventListener("change", calculerCout);
+
+  // Soumission du formulaire
+  document.getElementById("showPriveeForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    alert("Réservation envoyée ✅ Total: " + document.getElementById("coutTotal").value);
+    // Tu peux remplacer par un fetch POST vers Laravel si tu veux enregistrer
+  });
+});
+</script>
+
+<!-- Modal Show Privée -->
+<div class="modal fade" id="showPriveeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Réserver un Show Privée</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="showPriveeForm">
+          <input type="hidden" id="modeleId" name="modele_id">
+
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" id="dateShow" name="date" required>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <label class="form-label">Heure début</label>
+              <input type="time" class="form-control" id="heureDebut" required>
+            </div>
+            <div class="col">
+              <label class="form-label">Heure fin</label>
+              <input type="time" class="form-control" id="heureFin" required>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label">Coût total</label>
+            <input type="text" class="form-control" id="coutTotal" readonly>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" form="showPriveeForm" class="btn btn-success">Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
