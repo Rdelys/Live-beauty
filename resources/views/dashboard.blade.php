@@ -612,25 +612,25 @@ document.addEventListener('click', function(e) {
     const galleryInner = document.getElementById('galleryInner');
 
     galleryInner.innerHTML = media.map((item, i) => {
-        let content = '';
+    let content = '';
 
-        if (type === 'photo') {
-            content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh;">`;
-        } 
-        else if (type === 'video') {
-            if (item.includes('http') && !item.endsWith('.mp4')) {
-                content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
-            } else {
-                content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh;"></video>`;
-            }
+    if (type === 'photo') {
+        content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)">`;
+    } 
+    else if (type === 'video') {
+        if (item.includes('http') && !item.endsWith('.mp4')) {
+            content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+            content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)"></video>`;
         }
+    }
 
-        return `
-            <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                ${content}
-            </div>
-        `;
-    }).join('');
+    return `
+        <div class="carousel-item ${i === 0 ? 'active' : ''}">
+            ${content}
+        </div>
+    `;
+}).join('');
 });
 
     </script>
@@ -803,6 +803,17 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 
+<script>
+function openFullscreen(element) {
+    if (element.requestFullscreen) {
+        element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) { // Safari
+        element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) { // IE11
+        element.msRequestFullscreen();
+    }
+}
+</script>
 
   
 </body>
