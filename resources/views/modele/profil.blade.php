@@ -382,6 +382,18 @@ label {
     <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
     <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
 <div id="liveSection" style="display:none;">
+<button id="toggleMicBtn" 
+  style="position:absolute;top:10px;right:50px;z-index:10;
+         background:rgba(0,0,0,0.5);border:none;color:white;
+         padding:6px 10px;border-radius:6px;cursor:pointer;">
+  🎤🔇
+</button>
+<button id="pauseLiveBtn"
+  style="position:absolute;top:10px;right:90px;z-index:10;
+         background:rgba(0,0,0,0.5);border:none;color:white;
+         padding:6px 10px;border-radius:6px;cursor:pointer;">
+  ⏸
+</button>
 
     <div id="videoContainer" style="position: relative;">
       <button id="fullscreenBtn" 
@@ -712,6 +724,54 @@ socket.on("chat-message", (data) => {
     }
 });
 
+const toggleMicBtn = document.getElementById("toggleMicBtn");
+let isMicMuted = false;
+
+toggleMicBtn?.addEventListener("click", () => {
+    if (!stream) return;
+
+    // On récupère la track audio du flux
+    const audioTrack = stream.getAudioTracks()[0];
+    if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled; // toggle mute/unmute
+        isMicMuted = !audioTrack.enabled;
+
+        // Change l’icône du bouton
+        toggleMicBtn.textContent = isMicMuted ? "🎤🔇" : "🎤✅";
+
+        // 🔴 Envoi automatique d'un message au chat
+        socket.emit("chat-message", {
+            pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+            message: isMicMuted 
+                ? "🎤 Le modèle a coupé son micro." 
+                : "🎤 Le modèle a réactivé son micro."
+        });
+    }
+});
+
+const pauseLiveBtn = document.getElementById("pauseLiveBtn");
+let isPaused = false;
+
+pauseLiveBtn?.addEventListener("click", () => {
+    if (!stream) return;
+
+    // On coupe ou réactive toutes les tracks (vidéo + audio)
+    stream.getTracks().forEach(track => track.enabled = isPaused);
+
+    isPaused = !isPaused;
+
+    // Change l’icône
+    pauseLiveBtn.textContent = isPaused ? "▶️" : "⏸";
+
+    // Envoi automatique au chat
+    socket.emit("chat-message", {
+        pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+        message: isPaused 
+            ? "⏸ Le modèle a mis le live en pause." 
+            : "▶️ Le modèle a repris le live."
+    });
+});
+
 /* === LANCER LE LIVE === */
 startBtn.addEventListener('click', async () => {
     try {
@@ -848,6 +908,8 @@ function previewImages(event) {
         reader.readAsDataURL(files[i]);
     }
 }
+
+
 </script>
 
 
