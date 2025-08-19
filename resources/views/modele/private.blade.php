@@ -227,11 +227,12 @@ function calculerCout() {
   document.getElementById("heureFin").addEventListener("change", calculerCout);
 
   // Soumission du formulaire
-  document.getElementById("showPriveeForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    alert("Réservation envoyée ✅ Total: " + document.getElementById("coutTotal").value);
-    // Tu peux remplacer par un fetch POST vers Laravel si tu veux enregistrer
-  });
+  // On ne bloque plus la soumission, on laisse Laravel gérer
+document.getElementById("showPriveeForm").addEventListener("submit", function() {
+  // On peut mettre un petit loader ou un message si tu veux
+  console.log("Envoi en cours...");
+});
+
 });
 </script>
 
@@ -244,29 +245,33 @@ function calculerCout() {
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="showPriveeForm">
-          <input type="hidden" id="modeleId" name="modele_id">
+        <form id="showPriveeForm" method="POST" action="{{ route('show.prive.reserver') }}">
+            @csrf
+            <input type="hidden" id="modeleId" name="modele_id">
 
-          <div class="mb-3">
-            <label class="form-label">Date</label>
-            <input type="date" class="form-control" id="dateShow" name="date" required>
-          </div>
-
-          <div class="row">
-            <div class="col">
-              <label class="form-label">Heure début</label>
-              <input type="time" class="form-control" id="heureDebut" required>
+            <div class="mb-3">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-control" id="dateShow" name="date" required>
             </div>
-            <div class="col">
-              <label class="form-label">Heure fin</label>
-              <input type="time" class="form-control" id="heureFin" required>
-            </div>
-          </div>
 
-          <div class="mt-3">
-            <label class="form-label">Coût total</label>
-            <input type="text" class="form-control" id="coutTotal" readonly>
-          </div>
+            <div class="row">
+                <div class="col">
+                    <label class="form-label">Heure début</label>
+                    <input type="time" class="form-control" id="heureDebut" name="debut" required>
+                </div>
+                <div class="col">
+                    <label class="form-label">Heure fin</label>
+                    <input type="time" class="form-control" id="heureFin" name="fin" required>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <label class="form-label">Coût total</label>
+                <input type="text" class="form-control" id="coutTotal" readonly>
+                <!-- champs cachés envoyés au serveur -->
+                <input type="hidden" id="coutTotalHidden" name="jetons_total">
+                <input type="hidden" id="dureeHidden" name="duree">
+            </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -276,5 +281,6 @@ function calculerCout() {
     </div>
   </div>
 </div>
+
 
 @endsection

@@ -158,3 +158,8 @@ Route::prefix('modele')->name('modele.')->group(function () {
 });
 Route::post('/use-surprise', [JetonController::class, 'useSurprise'])->name('use.surprise');
 Route::put('/modele/{id}/update', [App\Http\Controllers\ModeleController::class, 'update'])->name('modele.update');
+
+// routes/web.php
+use App\Http\Controllers\ShowPriveController;
+
+Route::post('/show-prive/reserver', [ShowPriveController::class, 'reserver'])->name('show.prive.reserver');
