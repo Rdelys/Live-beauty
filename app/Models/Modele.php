@@ -13,16 +13,18 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     use HasFactory, Notifiable, CanResetPassword;
 
     protected $fillable = [
-        'nom',
-        'prenom',
-        'description',
-        'video_link',
-        'video_file',
-        'photos',
-        'email',
-        'password',
-        'en_ligne'
-    ];
+    'nom',
+    'prenom',
+    'description',
+    'video_link',
+    'video_file',
+    'photos',
+    'email',
+    'password',
+    'en_ligne',
+    'nombre_jetons_show_privee', // ✅ nouveau champ
+];
+
 
     protected $casts = [
         'photos'     => 'array',

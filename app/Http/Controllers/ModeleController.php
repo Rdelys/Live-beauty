@@ -19,6 +19,7 @@ class ModeleController extends Controller
     'description' => 'required|string',
     'email' => 'required|email|unique:modeles,email',
     'password' => 'required|string|min:6',
+    'nombre_jetons_show_privee' => 'nullable|integer|min:0', // ✅
 
     'video_link'   => 'nullable|array',
     'video_link.*' => 'nullable|url',
@@ -59,6 +60,8 @@ class ModeleController extends Controller
         'video_link'  => $videoLinks,
         'video_file'  => $videoFiles,
         'photos'      => $photoPaths,
+        'nombre_jetons_show_privee' => $validated['nombre_jetons_show_privee'] ?? null, // ✅
+
     ]);
 
     return redirect()->back()->with('success', 'Modèle ajouté avec succès !');
@@ -87,21 +90,25 @@ public function edit($id)
 public function update(Request $request, $id)
 {
     $modele = Modele::findOrFail($id);
+
     $modele->nom = $request->nom;
     $modele->prenom = $request->prenom;
     $modele->description = $request->description;
     $modele->video_link = $request->video_link;
+    $modele->email = $request->email;
+    $modele->nombre_jetons_show_privee = $request->nombre_jetons_show_privee;
 
     if ($request->hasFile('video_file')) {
-    $newFiles = [];
-    foreach ($request->file('video_file') as $file) {
-        $newFiles[] = $file->store('videos', 'public');
+        $newFiles = [];
+        foreach ($request->file('video_file') as $file) {
+            $newFiles[] = $file->store('videos', 'public');
+        }
+        $modele->video_file = array_merge((array)$modele->video_file, $newFiles);
     }
-    $modele->video_file = array_merge((array)$modele->video_file, $newFiles);
-}
+
     if ($request->has('video_link')) {
-$currentLinks = is_array($modele->video_link) ? $modele->video_link : (json_decode($modele->video_link, true) ?: []);
-$modele->video_link = array_merge($currentLinks, $request->video_link ?? []);
+        $currentLinks = is_array($modele->video_link) ? $modele->video_link : (json_decode($modele->video_link, true) ?: []);
+        $modele->video_link = array_merge($currentLinks, $request->video_link ?? []);
     }
 
     if ($request->hasFile('photos')) {
@@ -109,13 +116,15 @@ $modele->video_link = array_merge($currentLinks, $request->video_link ?? []);
         foreach ($request->file('photos') as $photo) {
             $photosPaths[] = $photo->store('photos', 'public');
         }
-$modele->photos = $photosPaths;
+        $modele->photos = $photosPaths;
     }
 
     $modele->save();
 
-    return redirect()->route('admin')->with('success', 'Modèle mis à jour.');
+    // ✅ Ici on redirige vers le profil et non plus vers admin
+    return redirect()->back()->with('success', 'Mise à jour avec succès !');
 }
+
 public function destroy($id)
 {
     $modele = Modele::findOrFail($id);

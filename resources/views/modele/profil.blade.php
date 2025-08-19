@@ -367,7 +367,14 @@ label {
     <p><strong>Email :</strong> {{ $modele->email }}</p>
     <p><strong>Description :</strong> {{ $modele->description }}</p>
     <p><strong>Jetons Surprise :</strong> {{ $modele->jetons_surprise}} Jetons</p>
-  </div>
+    <p><strong>Nombre jetons show privée :</strong> {{ $modele->nombre_jetons_show_privee ?? 'Non défini' }}</p>
+
+    <!-- Bouton modal -->
+    <button class="btn btn-warning mt-3" data-bs-toggle="modal" data-bs-target="#editProfilModal">
+        ✏️ Modifier mes infos
+    </button>
+</div>
+
 
   <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
     <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
@@ -845,6 +852,47 @@ function previewImages(event) {
 
 
 
+<!-- Modal Modification Profil -->
+<div class="modal fade" id="editProfilModal" tabindex="-1" aria-labelledby="editProfilModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProfilModalLabel">Modifier mes informations</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <form method="POST" action="{{ route('modele.update', $modele->id) }}">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nom</label>
+            <input type="text" name="nom" value="{{ $modele->nom }}" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Prénom</label>
+            <input type="text" name="prenom" value="{{ $modele->prenom }}" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control">{{ $modele->description }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" value="{{ $modele->email }}" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nombre de jetons pour show privée</label>
+            <input type="number" name="nombre_jetons_show_privee" value="{{ $modele->nombre_jetons_show_privee ?? '' }}" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
