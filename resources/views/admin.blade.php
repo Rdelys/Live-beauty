@@ -576,6 +576,26 @@ footer {
     <div id="clients-content" class="content-section d-none">
   <h2>Clients</h2>
   <p>Liste des clients enregistrés avec leur nombre de jetons.</p>
+<div class="row mb-3" style="color: #ccc !important;">
+  <div class="col-md-2">
+    <input type="text" id="filterNom" class="form-control" placeholder="Nom">
+  </div>
+  <div class="col-md-2">
+    <input type="text" id="filterPrenoms" class="form-control" placeholder="Prénom">
+  </div>
+  <div class="col-md-2">
+    <input type="text" id="filterPseudo" class="form-control" placeholder="Pseudo">
+  </div>
+  <div class="col-md-2">
+    <input type="number" id="filterJetons" class="form-control" placeholder="Jetons">
+  </div>
+  <div class="col-md-2">
+    <input type="date" id="filterDate" class="form-control">
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-secondary w-100" onclick="resetFilters()">Réinitialiser</button>
+  </div>
+</div>
 
   <div class="table-responsive">
     <table class="table table-bordered">
@@ -607,6 +627,12 @@ footer {
                 @csrf
                 <input type="number" name="jetons" min="1" class="form-control form-control-sm" style="width:80px;display:inline-block;">
                 <button type="submit" class="btn btn-success btn-sm">+ Jetons</button>
+            </form>
+            <!-- Bouton Retirer Jetons -->
+            <form action="{{ route('admin.clients.removeTokens', $client->id) }}" method="POST" style="display:inline-block;">
+                @csrf
+                <input type="number" name="jetons" min="1" class="form-control form-control-sm" style="width:80px;display:inline-block;">
+                <button type="submit" class="btn btn-danger btn-sm">- Jetons</button>
             </form>
 
             <!-- Bouton Bannir/Débloquer -->
@@ -753,14 +779,57 @@ document.addEventListener("click", function(e) {
     modal.show();
   }
 });
+document.addEventListener("DOMContentLoaded", () => {
+  const rows = document.querySelectorAll("#clients-content tbody tr");
+
+  function filterTable() {
+    const nom = document.getElementById("filterNom").value.toLowerCase();
+    const prenoms = document.getElementById("filterPrenoms").value.toLowerCase();
+    const pseudo = document.getElementById("filterPseudo").value.toLowerCase();
+    const jetons = document.getElementById("filterJetons").value;
+    const date = document.getElementById("filterDate").value;
+
+    rows.forEach(row => {
+      const tdNom = row.cells[0].innerText.toLowerCase();
+      const tdPrenoms = row.cells[1].innerText.toLowerCase();
+      const tdPseudo = row.cells[2].innerText.toLowerCase();
+      const tdJetons = row.cells[3].innerText;
+      const tdDate = row.cells[6].innerText.split("/").reverse().join("-"); // transforme en yyyy-mm-dd
+
+      let visible = true;
+
+      if (nom && !tdNom.includes(nom)) visible = false;
+      if (prenoms && !tdPrenoms.includes(prenoms)) visible = false;
+      if (pseudo && !tdPseudo.includes(pseudo)) visible = false;
+      if (jetons && tdJetons != jetons) visible = false;
+      if (date && tdDate !== date) visible = false;
+
+      row.style.display = visible ? "" : "none";
+    });
+  }
+
+  // écouteurs sur les inputs
+  ["filterNom","filterPrenoms","filterPseudo","filterJetons","filterDate"].forEach(id => {
+    document.getElementById(id).addEventListener("input", filterTable);
+  });
+
+  // bouton reset
+  window.resetFilters = () => {
+    ["filterNom","filterPrenoms","filterPseudo","filterJetons","filterDate"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    filterTable();
+  };
+});
 
   </script>
 </div>
 </div>
 </div>
-<footer class="text-center text-muted mt-4">  
-  &copy; 2023 Live Beauty. Tous droits réservés.
+<footer class="text-center text-muted mt-4" style="color: #ccc !important;">  
+  &copy; {{ date('Y') }} Live Beauty. Tous droits réservés.
 </footer>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>

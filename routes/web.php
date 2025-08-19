@@ -134,8 +134,9 @@ Route::post('/use-jeton', [\App\Http\Controllers\JetonController::class, 'useJet
     ->middleware('auth')
     ->name('use.jeton');
 
-    Route::post('/admin/clients/{id}/add-tokens', [AuthController::class, 'addTokens'])->name('admin.clients.addTokens');
-Route::post('/admin/clients/{id}/toggle-ban', [AuthController::class, 'toggleBan'])->name('admin.clients.toggleBan');
+    Route::post('/admin/clients/{id}/add-tokens', [App\Http\Controllers\Admin\ClientController::class, 'addTokens'])->name('admin.clients.addTokens');
+Route::post('/admin/clients/{id}/remove-tokens', [App\Http\Controllers\Admin\ClientController::class, 'removeTokens'])->name('admin.clients.removeTokens');
+Route::post('/admin/clients/{id}/toggle-ban', [App\Http\Controllers\Admin\ClientController::class, 'toggleBan'])->name('admin.clients.toggleBan');
 
 // routes/web.php
 
