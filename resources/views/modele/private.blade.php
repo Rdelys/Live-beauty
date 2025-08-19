@@ -137,11 +137,13 @@
                         data-bs-toggle="modal"
                         data-bs-target="#showPriveeModal"
                         data-modeleid="{{ $modele->id }}"
-                        data-prix="{{ $modele->nombre_jetons_show_privee ?? 0 }}">
-                    🔒 Show en privé
+                        data-prix="{{ $modele->nombre_jetons_show_privee ?? 0 }}"
+                        data-duree="{{ $modele->duree_show_privee ?? 30 }}">
+                     Show en privé
                 </button>
+
                 <span class="badge bg-warning text-dark ms-2">
-                    {{ $modele->nombre_jetons_show_privee ?? 'ND' }} jetons / 30min
+    {{ $modele->nombre_jetons_show_privee ?? 'ND' }} jetons / {{ $modele->duree_show_privee ?? 'ND' }} min
                 </span>
             </div>
 
@@ -178,41 +180,48 @@
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  let prixPar30min = 0;
+  let prixParTranche = 0;
+let dureeTranche = 30;
 
-  // Quand on ouvre la modal
-  const showPriveeModal = document.getElementById("showPriveeModal");
-  showPriveeModal.addEventListener("show.bs.modal", event => {
-    const button = event.relatedTarget;
-    const modeleId = button.getAttribute("data-modeleid");
-    prixPar30min = parseInt(button.getAttribute("data-prix")) || 0;
+const showPriveeModal = document.getElementById("showPriveeModal");
+showPriveeModal.addEventListener("show.bs.modal", event => {
+  const button = event.relatedTarget;
+  const modeleId = button.getAttribute("data-modeleid");
+  prixParTranche = parseInt(button.getAttribute("data-prix")) || 0;
+  dureeTranche = parseInt(button.getAttribute("data-duree")) || 30;
 
-    document.getElementById("modeleId").value = modeleId;
-    document.getElementById("coutTotal").value = "0 jetons";
-  });
+  document.getElementById("modeleId").value = modeleId;
+  document.getElementById("coutTotal").value = "0 jetons";
+});
 
-  // Calcul automatique
-  function calculerCout() {
-    const debut = document.getElementById("heureDebut").value;
-    const fin = document.getElementById("heureFin").value;
+function calculerCout() {
+  const debut = document.getElementById("heureDebut").value;
+  const fin = document.getElementById("heureFin").value;
 
-    if (debut && fin) {
-      const [h1, m1] = debut.split(":").map(Number);
-      const [h2, m2] = fin.split(":").map(Number);
+  if (debut && fin) {
+    const [h1, m1] = debut.split(":").map(Number);
+    const [h2, m2] = fin.split(":").map(Number);
 
-      const start = h1 * 60 + m1;
-      const end = h2 * 60 + m2;
-      const dureeMinutes = end - start;
+    let start = h1 * 60 + m1;
+    let end = h2 * 60 + m2;
 
-      if (dureeMinutes > 0) {
-        const tranches = Math.ceil(dureeMinutes / 30);
-        const total = tranches * prixPar30min;
-        document.getElementById("coutTotal").value = total + " jetons";
-      } else {
-        document.getElementById("coutTotal").value = "Erreur: fin < début";
-      }
+    // 👉 Cas spécial : si l'heure de fin est <= début, on considère que ça passe après minuit
+    if (end <= start) {
+      end += 24 * 60; // ajoute 24h en minutes
+    }
+
+    const dureeMinutes = end - start;
+
+    if (dureeMinutes > 0) {
+      const tranches = Math.ceil(dureeMinutes / dureeTranche);
+      const total = tranches * prixParTranche;
+      document.getElementById("coutTotal").value = total + " jetons";
+    } else {
+      document.getElementById("coutTotal").value = "Erreur: durée invalide";
     }
   }
+}
+
 
   document.getElementById("heureDebut").addEventListener("change", calculerCout);
   document.getElementById("heureFin").addEventListener("change", calculerCout);
