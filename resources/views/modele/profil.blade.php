@@ -7,6 +7,10 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <audio id="soundMessage" src="{{ asset('sounds/notificationAction.mp3') }}" preload="auto"></audio>
+  <audio id="soundSurprise" src="{{ asset('sounds/cadeau.mp3') }}" preload="auto"></audio>
+  <audio id="soundEnter" src="{{ asset('sounds/rentreShow.mp3') }}" preload="auto"></audio>
+
   <style>
     body {
   background: linear-gradient(135deg, #1e1e2f, #2d2e45);
@@ -571,7 +575,9 @@ const stopBtn      = document.getElementById('stopLiveBtn');
 const liveVideo    = document.getElementById('liveVideo');
 const liveSection  = document.getElementById('liveSection');
 const messagesDiv  = document.getElementById("messages");
-
+const soundMessage  = document.getElementById("soundMessage");
+const soundSurprise = document.getElementById("soundSurprise");
+const soundEnter    = document.getElementById("soundEnter");
 /* === VARIABLES GLOBALES === */
 let socket;
 let stream;
@@ -624,12 +630,31 @@ socket.on("stopTyping", () => {
 
 // Gestion des viewers
 let viewers = {};
+let lastEnterTime = 0;
 
 socket.on("viewer-connected", (data) => {
     console.log("Viewer connected:", data);
     viewers[data.socketId] = data.pseudo;
+
+    // mémorise l'heure de l'entrée
+    lastEnterTime = Date.now();
+
+    // stoppe les autres sons
+    if (soundSurprise) {
+        soundSurprise.pause();
+        soundSurprise.currentTime = 0;
+    }
+    if (soundMessage) {
+        soundMessage.pause();
+        soundMessage.currentTime = 0;
+    }
+
+    // joue uniquement le son d'entrée
+    if (soundEnter) soundEnter.play().catch(() => {});
+
     updateViewersDisplay();
 });
+
 
 socket.on("viewer-disconnected", (socketId) => {
     console.log("Viewer disconnected:", socketId);
@@ -696,7 +721,7 @@ socket.on("jeton-sent", (data) => {
         chatWrapper.appendChild(bubble);
         chatWrapper.scrollTop = chatWrapper.scrollHeight;
     }
-
+    if (soundMessage) soundMessage.play().catch(() => {});
     createTokenBubble(description, cost, isGolden);
 });
 
@@ -710,9 +735,13 @@ socket.on("surprise-sent", (data) => {
         chatWrapper.scrollTop = chatWrapper.scrollHeight;
     }
 
+    // si le dernier "enter" date de moins d'1 seconde → pas de son cadeau
+    if (Date.now() - lastEnterTime > 1000) {
+        if (soundSurprise) soundSurprise.play().catch(() => {});
+    }
+
     createTokenBubble(`Surprise ${data.emoji}`, data.cost, false);
 });
-
 
 
 socket.on("chat-message", (data) => {
@@ -724,6 +753,7 @@ socket.on("chat-message", (data) => {
         chatWrapper.appendChild(bubble);
         chatWrapper.scrollTop = chatWrapper.scrollHeight;
     }
+    if (soundMessage) soundMessage.play().catch(() => {});
 });
 
 const toggleMicBtn = document.getElementById("toggleMicBtn");

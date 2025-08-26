@@ -5,6 +5,9 @@
   <title>Live de {{ $modele->prenom }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <audio id="soundMessage" src="{{ asset('sounds/notificationAction.mp3') }}" preload="auto"></audio>
+  <audio id="soundSurprise" src="{{ asset('sounds/cadeau.mp3') }}" preload="auto"></audio>
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
@@ -656,6 +659,8 @@ video {
 <script>
   const socket = io("wss://livebeautyofficial.com/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
+  const soundMessage = document.getElementById("soundMessage");
+const soundSurprise = document.getElementById("soundSurprise")
 const peerConnection = new RTCPeerConnection({
   iceServers: [
   { urls: "stun:stun.l.google.com:19302" },
@@ -818,6 +823,8 @@ socket.on("chat-message", data => {
     bubble.innerHTML = `<strong>${displayName}</strong> : ${data.message}`;
     messagesDiv.appendChild(bubble);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        if (soundMessage) soundMessage.play().catch(() => {});
+
 });
 
 
@@ -993,6 +1000,8 @@ document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item =>
         })
         .catch(err => console.error(err));
     });
+        if (soundSurprise) soundSurprise.play().catch(() => {});
+
 });
     function onTokenChoiceClick(e, isGolden) {
     const btn = e.currentTarget;
@@ -1068,6 +1077,8 @@ socket.emit("jeton-sent", {
     socket.on("jeton-sent", (data) => {
         const message = `Jetons - ${data.pseudo || ''} - ${data.description || ''}`;
         createTokenBubble(message, data.cost, data.isGolden);
+            if (soundMessage) soundMessage.play().catch(() => {});
+
     });
 }
 
