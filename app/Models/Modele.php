@@ -45,4 +45,10 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     {
         return $this->belongsToMany(User::class, 'favoris');
     }
+
+    public function showPrives()
+{
+    return $this->hasMany(ShowPrive::class, 'modele_id');
+}
+
 }

@@ -360,6 +360,11 @@ label {
 <li class="nav-item" role="presentation">
   <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Vidéos</button>
 </li>
+<li class="nav-item" role="presentation">
+  <button class="nav-link" id="showprive-tab" data-bs-toggle="tab" data-bs-target="#showprive" type="button" role="tab">
+    Show Privée
+  </button>
+</li>
 
 
 </ul>
@@ -549,6 +554,48 @@ label {
     </div>
     <button type="submit" class="btn btn-success">Ajouter</button>
   </form>
+</div>
+<div class="tab-pane fade text-start" id="showprive" role="tabpanel" aria-labelledby="showprive-tab">
+  <h4 class="text-white mb-3">🔒 Shows Privés</h4>
+
+  {{-- Bouton démarrer un live privé (statique pour l’instant) --}}
+  <button class="btn btn-danger mb-3">▶️ Démarrer Live Privée</button>
+
+  {{-- Liste des shows privés liés au modèle --}}
+  @if(isset($modele->showPrives) && $modele->showPrives->count() > 0)
+    <div class="table-responsive">
+      <table class="table table-dark table-striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Durée (min)</th>
+            <th>Jetons</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach($modele->showPrives as $show)
+            <tr>
+              <td>{{ $show->date }}</td>
+              <td>{{ $show->debut }}</td>
+              <td>{{ $show->fin }}</td>
+              <td>{{ $show->duree }}</td>
+              <td>{{ $show->jetons_total }}</td>
+              <td>
+                <span class="badge bg-{{ $show->etat == 'valide' ? 'success' : ($show->etat == 'en_attente' ? 'warning' : 'secondary') }}">
+                  {{ ucfirst($show->etat) }}
+                </span>
+              </td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  @else
+    <p class="text-muted">Aucun show privé enregistré pour le moment.</p>
+  @endif
 </div>
 
 
