@@ -11,10 +11,17 @@ use Illuminate\Support\Facades\Cache;
 class BlockCountries
 {
     protected $blockedCountries = [
-        'IR', 'SA', 'AF', 'BN', 'MY',
-        'PK', 'IN', 'CN', 'RU', 'TR',
-        'BY', 'KR', 'ID',
-    ];
+    // Afrique
+    'DZ','AO','BJ','BW','BF','BI','CM','CV','CF','TD','KM',
+    'CG','CD','CI','DJ','EG','GQ','ER','SZ','ET','GA','GM',
+    'GH','GN','GW','KE','LS','LR','LY','MG','MW','ML','MR',
+    'MU','MA','MZ','NA','NE','NG','RW','ST','SN','SC','SL',
+    'SO','ZA','SS','SD','TZ','TG','TN','UG','EH','ZM','ZW',
+
+    // Pays ajoutés hors Afrique
+    'IR','SA','AF','BN','MY','PK','IN','CN','RU','TR','BY','KR','ID',
+];
+
 
     protected $apiToken = '86f36db5694772'; // Remplacez par votre token ipinfo.io
 
