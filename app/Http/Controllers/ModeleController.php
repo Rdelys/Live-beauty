@@ -109,6 +109,14 @@ public function update(Request $request, $id)
     $modele->nom = $request->nom;
     $modele->prenom = $request->prenom;
     $modele->description = $request->description;
+    $modele->age = $request->age;
+$modele->taille = $request->taille;
+$modele->silhouette = $request->silhouette;
+$modele->poitrine = $request->poitrine;
+$modele->fesse = $request->fesse;
+$modele->langue = $request->langue;
+$modele->services = $request->services;
+
     $modele->video_link = $request->video_link;
     $modele->email = $request->email;
     $modele->nombre_jetons_show_privee = $request->nombre_jetons_show_privee;

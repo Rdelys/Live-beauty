@@ -375,6 +375,14 @@ label {
     <p><strong>Nom :</strong> {{ $modele->nom }}</p>
     <p><strong>Email :</strong> {{ $modele->email }}</p>
     <p><strong>Description :</strong> {{ $modele->description }}</p>
+        <p><strong>Âge :</strong> {{ $modele->age ?? 'Non défini' }}</p>
+    <p><strong>Taille :</strong> {{ $modele->taille ?? 'Non définie' }}</p>
+    <p><strong>Silhouette :</strong> {{ $modele->silhouette ?? 'Non définie' }}</p>
+    <p><strong>Poitrine :</strong> {{ $modele->poitrine ?? 'Non définie' }}</p>
+    <p><strong>Fesse :</strong> {{ $modele->fesse ?? 'Non définie' }}</p>
+    <p><strong>Langues parlées :</strong> {!! $modele->langue ?? 'Non défini' !!}</p>
+    <p><strong>Ce qu’elle propose :</strong> {{ $modele->services ?? 'Non défini' }}</p>
+
     <p><strong>Jetons Surprise :</strong> {{ $modele->jetons_surprise}} Jetons</p>
     <p><strong>Nombre jetons show privée :</strong> {{ $modele->nombre_jetons_show_privee ?? 'Non défini' }}</p>
 <p><strong>Durée show privée :</strong> {{ $modele->duree_show_privee ? $modele->duree_show_privee . ' minutes' : 'Non définie' }}</p>
@@ -1018,6 +1026,41 @@ function previewImages(event) {
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control">{{ $modele->description }}</textarea>
           </div>
+          <div class="mb-3">
+  <label class="form-label">Âge</label>
+  <input type="number" name="age" value="{{ $modele->age ?? '' }}" class="form-control" min="18" max="99">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Taille (cm)</label>
+  <input type="text" name="taille" value="{{ $modele->taille ?? '' }}" class="form-control">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Silhouette</label>
+  <input type="text" name="silhouette" value="{{ $modele->silhouette ?? '' }}" class="form-control">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Poitrine</label>
+  <input type="text" name="poitrine" value="{{ $modele->poitrine ?? '' }}" class="form-control">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Fesse</label>
+  <input type="text" name="fesse" value="{{ $modele->fesse ?? '' }}" class="form-control">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Langues parlées</label>
+  <input type="text" name="langue" value="{{ $modele->langue ?? '' }}" class="form-control" placeholder="🇫🇷 Français, 🇬🇧 Anglais">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Ce qu’elle propose</label>
+  <textarea name="services" class="form-control" rows="3">{{ $modele->services ?? '' }}</textarea>
+</div>
+
           <div class="mb-3">
             <label class="form-label">Email</label>
             <input type="email" name="email" value="{{ $modele->email }}" class="form-control">
