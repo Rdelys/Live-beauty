@@ -119,6 +119,39 @@
                 <h5 class="mt-3">Ce que je propose :</h5>
                 <p>{{ $modele->services }}</p>
             @endif
+            @php
+    $flags = [
+        'FR' => '🇫🇷 Français',
+        'EN' => '🇬🇧 Anglais',
+        'ES' => '🇪🇸 Espagnol',
+        'IT' => '🇮🇹 Italien',
+        'DE' => '🇩🇪 Allemand',
+        'PT' => '🇵🇹 Portugais',
+        'AR' => '🇸🇦 Arabe',
+        'RU' => '🇷🇺 Russe',
+        'ZH' => '🇨🇳 Chinois',
+        'JP' => '🇯🇵 Japonais'
+    ];
+
+    $langues = $modele->langue 
+        ? array_map('trim', explode(',', strtoupper($modele->langue))) 
+        : [];
+@endphp
+
+@if(!empty($langues))
+    <h5 class="mt-3">Langues parlées :</h5>
+    <ul class="list-unstyled">
+        @foreach($langues as $code)
+            @if(isset($flags[$code]))
+                <li>{!! $flags[$code] !!}</li>
+            @else
+                <li>{{ $code }}</li>
+            @endif
+        @endforeach
+    </ul>
+@endif
+
+
         </div>
     </div>
 </div>
