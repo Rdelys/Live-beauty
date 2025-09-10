@@ -94,20 +94,31 @@
 
         <div class="col-12 col-md-6">
             <h2 class="text-warning">{{ $modele->prenom }}</h2>
-            <p><strong>{{ $modele->age ?? '-' }} ans</strong> — {{ $modele->genre ?? '-' }} — {{ $modele->orientation ?? '-' }}</p>
-            <p>{{ $modele->description ?? 'Aucune description' }}</p>
+             @if($modele->age || $modele->taille)
+                <p>
+                    @if($modele->age)<strong>{{ $modele->age }} ans</strong>@endif
+                </p>
+            @endif
+
+            @if($modele->description)
+                <p>{{ $modele->description }}</p>
+            @endif
 
             <hr class="bg-light">
 
-            <h5>Bio :</h5>
-            <ul class="list-unstyled">
-                <li><strong>Taille :</strong> {{ $modele->taille ?? '-' }} cm</li>
-                <li><strong>Fesses :</strong> {{ $modele->fesses ?? '-' }}</li>
-                <li><strong>Poitrine :</strong> {{ $modele->poitrine ?? '-' }}</li>
-            </ul>
+            @if($modele->taille || $modele->fesse || $modele->poitrine)
+                <h5>Bio :</h5>
+                <ul class="list-unstyled">
+                    @if($modele->taille)<li><strong>Taille :</strong> {{ $modele->taille }} cm</li>@endif
+                    @if($modele->fesse)<li><strong>Fesses :</strong> {{ $modele->fesse }}</li>@endif
+                    @if($modele->poitrine)<li><strong>Poitrine :</strong> {{ $modele->poitrine }}</li>@endif
+                </ul>
+            @endif
 
-            <h5 class="mt-3">Ce que je propose :</h5>
-            <p>{{ $modele->services_prives ?? 'Non précisé' }}</p>
+            @if($modele->services)
+                <h5 class="mt-3">Ce que je propose :</h5>
+                <p>{{ $modele->services }}</p>
+            @endif
         </div>
     </div>
 </div>
