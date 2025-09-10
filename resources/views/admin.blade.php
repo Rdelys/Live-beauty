@@ -536,6 +536,43 @@ footer {
     <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
   </div>
 
+  <div class="row mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Âge</label>
+    <input type="number" name="age" class="form-control" min="18" max="99">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Taille (cm)</label>
+    <input type="text" name="taille" class="form-control">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Silhouette</label>
+    <input type="text" name="silhouette" class="form-control">
+  </div>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-6">
+    <label class="form-label">Poitrine</label>
+    <input type="text" name="poitrine" class="form-control">
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Fesse</label>
+    <input type="text" name="fesse" class="form-control">
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Langues parlées</label>
+  <input type="text" name="langue" class="form-control" placeholder="ex: 🇫🇷 Français, 🇬🇧 Anglais">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Ce qu’elle propose</label>
+  <textarea name="services" class="form-control" rows="4" placeholder="Décris ce qu’elle propose..."></textarea>
+</div>
+
+
   <div class="mb-3">
     <label for="video_link" class="form-label">Lien vidéo (optionnel)</label>
 <input type="url" class="form-control" id="video_link" name="video_link[]" placeholder="https://..." />

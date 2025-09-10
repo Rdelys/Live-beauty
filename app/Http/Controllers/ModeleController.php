@@ -21,7 +21,13 @@ class ModeleController extends Controller
     'password' => 'required|string|min:6',
     'nombre_jetons_show_privee' => 'nullable|integer|min:0', // ✅
 ' durrée_show_privee ' => 'nullable|integer|min:1|max:240',
-
+'age' => 'nullable|integer|min:18|max:99',
+    'taille' => 'nullable|string|max:10',
+    'silhouette' => 'nullable|string|max:50',
+    'poitrine' => 'nullable|string|max:50',
+    'fesse' => 'nullable|string|max:50',
+    'langue' => 'nullable|string|max:255',
+'services' => 'nullable|string',
     'video_link'   => 'nullable|array',
     'video_link.*' => 'nullable|url',
 
@@ -58,6 +64,13 @@ class ModeleController extends Controller
         'description' => $validated['description'],
         'email'       => $validated['email'],
         'password'    => Hash::make($validated['password']),
+        'age' => $validated['age'] ?? null,
+    'taille' => $validated['taille'] ?? null,
+    'silhouette' => $validated['silhouette'] ?? null,
+    'poitrine' => $validated['poitrine'] ?? null,
+    'fesse' => $validated['fesse'] ?? null,
+    'langue' => $validated['langue'] ?? null,
+'services' => $validated['services'] ?? null,
         'video_link'  => $videoLinks,
         'video_file'  => $videoFiles,
         'photos'      => $photoPaths,

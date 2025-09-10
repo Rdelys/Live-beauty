@@ -23,16 +23,22 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     'password',
     'en_ligne',
     'nombre_jetons_show_privee',
-    'duree_show_privee',   // ✅ nouveau champ
+    'duree_show_privee',
+    'age',
+    'taille',
+    'silhouette',
+    'poitrine',
+    'fesse',
+    'langue',
+    'services'
 ];
 
+protected $casts = [
+    'photos'     => 'array',
+    'video_link' => 'array',
+    'video_file' => 'array',
+];
 
-
-    protected $casts = [
-        'photos'     => 'array',
-        'video_link' => 'array',
-        'video_file' => 'array',
-    ];
 
     protected $table = 'modeles';
 
