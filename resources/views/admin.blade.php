@@ -637,17 +637,51 @@ footer {
   <div class="table-responsive">
     <table class="table table-bordered">
       <thead>
-    <tr>
-        <th>Nom</th>
-        <th>Prénoms</th>
-        <th>Pseudo</th>
-        <th>Jetons</th>
-        <th>Email</th>
-        <th>Banni</th>
-        <th>Date de création</th>
-        <th>Actions</th>
-    </tr>
+<tr>
+    <th>
+      Nom
+      <div class="dropdown d-inline">
+        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="fas fa-sort"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" onclick="sortTable(0,'string','asc')">A → Z</a></li>
+          <li><a class="dropdown-item" href="#" onclick="sortTable(0,'string','desc')">Z → A</a></li>
+        </ul>
+      </div>
+    </th>
+    <th>Prénoms</th>
+    <th>Pseudo</th>
+    <th>
+      Jetons
+      <div class="dropdown d-inline">
+        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="fas fa-sort"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" onclick="sortTable(3,'number','asc')">Moins → Plus</a></li>
+          <li><a class="dropdown-item" href="#" onclick="sortTable(3,'number','desc')">Plus → Moins</a></li>
+        </ul>
+      </div>
+    </th>
+    <th>Email</th>
+    <th>Banni</th>
+    <th>
+      Date de création
+      <div class="dropdown d-inline">
+        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="fas fa-sort"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#" onclick="sortTable(6,'date','asc')">Ancien → Récent</a></li>
+          <li><a class="dropdown-item" href="#" onclick="sortTable(6,'date','desc')">Récent → Ancien</a></li>
+        </ul>
+      </div>
+    </th>
+    <th>Actions</th>
+</tr>
 </thead>
+
 <tbody>
 @foreach($clients as $client)
     <tr>
@@ -858,6 +892,33 @@ document.addEventListener("DOMContentLoaded", () => {
     filterTable();
   };
 });
+
+function sortTable(colIndex, type = 'string', dir = 'asc') {
+  const table = document.querySelector("#clients-content table tbody");
+  const rows = Array.from(table.querySelectorAll("tr")).filter(r => r.style.display !== "none");
+
+  rows.sort((a, b) => {
+    let A = a.cells[colIndex].innerText.trim();
+    let B = b.cells[colIndex].innerText.trim();
+
+    if (type === 'number') {
+      A = parseFloat(A) || 0;
+      B = parseFloat(B) || 0;
+    } else if (type === 'date') {
+      A = new Date(A.split("/").reverse().join("-"));
+      B = new Date(B.split("/").reverse().join("-"));
+    } else {
+      A = A.toLowerCase();
+      B = B.toLowerCase();
+    }
+
+    if (A < B) return dir === 'asc' ? -1 : 1;
+    if (A > B) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  rows.forEach(row => table.appendChild(row));
+}
 
   </script>
 </div>
