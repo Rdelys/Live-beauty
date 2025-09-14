@@ -57,4 +57,17 @@ protected $casts = [
     return $this->hasMany(ShowPrive::class, 'modele_id');
 }
 
+protected static function booted()
+{
+    static::updated(function ($modele) {
+        if ($modele->isDirty('en_ligne') && $modele->en_ligne == 1) {
+            \App\Models\ModeleHistorique::create([
+                'modele_id' => $modele->id,
+                'jour'      => now()->toDateString(),
+            ]);
+        }
+    });
+}
+
+
 }

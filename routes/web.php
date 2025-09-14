@@ -164,3 +164,12 @@ Route::put('/modele/{id}/update', [App\Http\Controllers\ModeleController::class,
 use App\Http\Controllers\ShowPriveController;
 
 Route::post('/show-prive/reserver', [ShowPriveController::class, 'reserver'])->name('show.prive.reserver');
+
+use App\Http\Controllers\Admin\AnalyticsController;
+
+Route::prefix('admin')->group(function () {
+    Route::get('/api/model-connections', [AnalyticsController::class, 'modelConnections']);
+    Route::get('/api/tokens-purchased', [AnalyticsController::class, 'tokensPurchased']);
+    Route::get('/api/shows-per-day', [AnalyticsController::class, 'showsPerDay']);
+});
+

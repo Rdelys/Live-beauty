@@ -381,6 +381,29 @@ footer {
     </div>
   </div>
 </div>
+<!-- === Charts Row === -->
+<div class="row mt-4">
+  <div class="col-lg-4 mb-3">
+    <div class="card bg-dark text-white p-3">
+      <h5 class="card-title">Connexions des modèles (par jour)</h5>
+      <canvas id="chart-connections" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-4 mb-3">
+    <div class="card bg-dark text-white p-3">
+      <h5 class="card-title">Jetons achetés (par jour)</h5>
+      <canvas id="chart-tokens" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-4 mb-3">
+    <div class="card bg-dark text-white p-3">
+      <h5 class="card-title">Shows privés (par jour)</h5>
+      <canvas id="chart-shows" height="200"></canvas>
+    </div>
+  </div>
+</div>
 
   </div>
 </div>
@@ -921,6 +944,58 @@ function sortTable(colIndex, type = 'string', dir = 'asc') {
 }
 
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  async function fetchJson(url) {
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    return res.json();
+  }
+
+  function renderLineChart(ctx, labels, data, label) {
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: label,
+          data: data,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        }]
+      },
+      options: {
+        scales: {
+          x: { display: true, title: { display: false } },
+          y: { beginAtZero: true }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // endpoints (adapte si tu as prefix/middleware)
+    const base = '/admin';
+    // Connexions
+    const conn = await fetchJson(base + '/api/model-connections?days=30');
+    const ctxConn = document.getElementById('chart-connections').getContext('2d');
+    renderLineChart(ctxConn, conn.labels, conn.data, 'Connexions/jour');
+
+    // Jetons achetés
+    const tokens = await fetchJson(base + '/api/tokens-purchased?days=30');
+    const ctxTokens = document.getElementById('chart-tokens').getContext('2d');
+    renderLineChart(ctxTokens, tokens.labels, tokens.data, 'Jetons achetés/jour');
+
+    // Shows
+    const shows = await fetchJson(base + '/api/shows-per-day?days=30');
+    const ctxShows = document.getElementById('chart-shows').getContext('2d');
+    renderLineChart(ctxShows, shows.labels, shows.data, 'Shows/jour');
+  });
+</script>
+
 </div>
 </div>
 </div>
