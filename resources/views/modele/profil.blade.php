@@ -365,6 +365,12 @@ label {
     Show Privée
   </button>
 </li>
+<li class="nav-item" role="presentation">
+  <button class="nav-link" id="workspaceprive-tab" data-bs-toggle="tab" data-bs-target="#workspaceprive" type="button" role="tab">
+    WorkSpace Privée
+  </button>
+</li>
+
 
 
 </ul>
@@ -604,6 +610,72 @@ label {
   @else
     <p class="text-muted">Aucun show privé enregistré pour le moment.</p>
   @endif
+</div>
+<div class="tab-pane fade text-start" id="workspaceprive" role="tabpanel">
+  <h5 class="text-white mb-3">🎥 Lancer une session Live Privée</h5>
+
+  <!-- Sélection du show privé -->
+  @if(isset($modele->showPrives) && $modele->showPrives->count() > 0)
+    <form id="startPrivateForm" class="mb-3">
+      <label class="form-label text-white">Choisir un show privé programmé :</label>
+      <select id="showPriveId" class="form-control" required>
+        <option value="">-- Sélectionner --</option>
+        @foreach($modele->showPrives as $show)
+          @if($show->etat == 'valide' || $show->etat == 'en_attente')
+            <option value="{{ $show->id }}">
+              📅 {{ $show->date }} ({{ $show->debut }} - {{ $show->fin }})
+            </option>
+          @endif
+        @endforeach
+      </select>
+      <button type="submit" class="btn btn-danger mt-2">🚀 Démarrer le Live Privé</button>
+    </form>
+  @else
+    <p class="text-muted">Aucun show privé programmé disponible.</p>
+  @endif
+
+  <button class="btn btn-secondary mb-2" id="stopPrivateBtn" style="display: none;">Arrêter le Live Privé</button>
+
+  <div id="privateLiveSection" style="display:none; position: relative;">
+    <!-- Boutons overlay -->
+    <button id="pausePrivateBtn"
+      style="position:absolute;top:10px;right:100px;z-index:10;
+            background:rgba(0,0,0,0.5);border:none;color:white;
+            padding:6px 10px;border-radius:6px;cursor:pointer;">
+      ⏸
+    </button>
+    <button id="togglePrivateMicBtn" 
+      style="position:absolute;top:10px;right:50px;z-index:10;
+            background:rgba(0,0,0,0.5);border:none;color:white;
+            padding:6px 10px;border-radius:6px;cursor:pointer;">
+      🎤🔇
+    </button>
+    <button id="fullscreenPrivateBtn" 
+      style="position:absolute;top:10px;right:10px;z-index:10;
+            background:rgba(0,0,0,0.5);border:none;color:white;
+            padding:6px 10px;border-radius:6px;cursor:pointer;">
+      ⛶
+    </button>
+
+    <!-- Vidéo -->
+    <video id="privateLiveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
+
+    <!-- Overlay spectateurs -->
+    <div id="privateViewersOverlay" style="position:absolute;top:10px;left:10px;z-index:10;color:white;">
+      👥 <span id="privateViewersCount">0</span>
+      <div id="privateViewersList" style="margin-top:5px;font-size:0.85rem;"></div>
+    </div>
+
+    <!-- Chat privé -->
+    <div class="chat-wrapper" id="privateMessages" style="position:absolute;bottom:70px;left:10px;right:10px;z-index:10;"></div>
+
+    <form id="privateChatForm" style="position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:5px;z-index:10;">
+      <input type="text" id="privateMessageInput" class="form-control" placeholder="Tape ton message..." required>
+      <button type="submit" class="btn btn-danger">Envoyer</button>
+    </form>
+  </div>
+
+  <p class="mt-2 text-warning">🔒 En direct - Visible uniquement par le client sélectionné</p>
 </div>
 
 
@@ -996,6 +1068,159 @@ function previewImages(event) {
     }
 }
 
+/* =========================
+   WORKSPACE PRIVÉ
+========================= */
+const startPrivateForm = document.getElementById("startPrivateForm");
+const stopPrivateBtn   = document.getElementById("stopPrivateBtn");
+const privateLiveVideo = document.getElementById("privateLiveVideo");
+const privateLiveSection = document.getElementById("privateLiveSection");
+const privateMessagesDiv = document.getElementById("privateMessages");
+const privateMessageInput = document.getElementById("privateMessageInput");
+
+let privateSocket;
+let privateStream;
+let privatePeerConnections = {};
+let currentShowPriveId = null;
+let privateViewers = {};
+
+// === LANCER LIVE PRIVÉ ===
+startPrivateForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  currentShowPriveId = document.getElementById("showPriveId").value;
+  if(!currentShowPriveId) return alert("Sélectionnez un show privé.");
+
+  try {
+    privateStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    privateLiveVideo.srcObject = privateStream;
+    privateLiveSection.style.display = 'block';
+    startPrivateForm.style.display = 'none';
+    stopPrivateBtn.style.display = 'inline-block';
+
+    privateSocket = io("http://localhost:3000", {
+      path: "/socket.io",
+      transports: ["websocket"]
+    });
+
+    // Déclare comme broadcaster privé
+    privateSocket.emit("broadcaster", { showPriveId: currentShowPriveId });
+
+    // Gestion viewers privés
+    privateSocket.on("watcher", id => {
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "turn:localhost:3478", username: "webrtc", credential: "password123" }
+        ]
+      });
+      privatePeerConnections[id] = pc;
+      privateStream.getTracks().forEach(track => pc.addTrack(track, privateStream));
+      pc.onicecandidate = event => {
+        if (event.candidate) privateSocket.emit("candidate", id, event.candidate);
+      };
+      pc.createOffer()
+        .then(offer => pc.setLocalDescription(offer))
+        .then(() => privateSocket.emit("offer", id, pc.localDescription));
+    });
+
+    privateSocket.on("answer", (id, desc) => {
+      privatePeerConnections[id].setRemoteDescription(desc);
+    });
+    privateSocket.on("candidate", (id, candidate) => {
+      privatePeerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+    });
+    privateSocket.on("disconnectPeer", id => {
+      if(privatePeerConnections[id]){
+        privatePeerConnections[id].close();
+        delete privatePeerConnections[id];
+      }
+    });
+
+    /* CHAT PRIVÉ */
+    document.getElementById("privateChatForm").addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const msg = privateMessageInput.value.trim();
+      if (!msg) return;
+      privateSocket.emit("chat-message", {
+        showPriveId: currentShowPriveId,
+        pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+        message: msg
+      });
+      privateMessageInput.value = "";
+    });
+
+    privateSocket.on("chat-message", (data) => {
+      const bubble = document.createElement("div");
+      bubble.classList.add("chat-bubble");
+      bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+      privateMessagesDiv.appendChild(bubble);
+      privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+      soundMessage.play().catch(()=>{});
+    });
+
+    /* JETONS */
+    privateSocket.on("jeton-sent", (data) => {
+      const bubble = document.createElement("div");
+      bubble.classList.add("chat-bubble");
+      bubble.innerHTML = `💎 <strong>${data.pseudo}</strong>: ${data.description} (${data.cost} jetons)`;
+      privateMessagesDiv.appendChild(bubble);
+      privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+      soundMessage.play().catch(()=>{});
+      createTokenBubble(data.description, data.cost, data.isGolden);
+    });
+
+    /* SURPRISES */
+    privateSocket.on("surprise-sent", (data) => {
+      const bubble = document.createElement("div");
+      bubble.classList.add("chat-bubble");
+      bubble.innerHTML = `🎁 <strong>${data.pseudo}</strong> a envoyé ${data.emoji} (${data.cost} jetons)`;
+      privateMessagesDiv.appendChild(bubble);
+      privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+      soundSurprise.play().catch(()=>{});
+      createTokenBubble(`Surprise ${data.emoji}`, data.cost, false);
+    });
+
+    /* VIEWERS */
+    privateSocket.on("viewer-connected", (data) => {
+      privateViewers[data.socketId] = data.pseudo;
+      updatePrivateViewers();
+      soundEnter.play().catch(()=>{});
+    });
+    privateSocket.on("viewer-disconnected", (socketId) => {
+      delete privateViewers[socketId];
+      updatePrivateViewers();
+    });
+
+    function updatePrivateViewers() {
+      document.getElementById("privateViewersCount").textContent = Object.keys(privateViewers).length;
+      const list = document.getElementById("privateViewersList");
+      list.innerHTML = "";
+      Object.values(privateViewers).forEach(pseudo => {
+        const el = document.createElement("span");
+        el.className = "badge bg-primary me-1 mb-1";
+        el.textContent = pseudo;
+        list.appendChild(el);
+      });
+    }
+
+  } catch(err){
+    alert("Erreur caméra : " + err.message);
+  }
+});
+
+// === STOP LIVE PRIVÉ ===
+stopPrivateBtn?.addEventListener("click", () => {
+  if(privateStream) privateStream.getTracks().forEach(t => t.stop());
+  for (let id in privatePeerConnections){
+    privatePeerConnections[id].close();
+    delete privatePeerConnections[id];
+  }
+  if(privateSocket) privateSocket.disconnect();
+  privateLiveVideo.srcObject = null;
+  privateLiveSection.style.display = 'none';
+  startPrivateForm.style.display = 'block';
+  stopPrivateBtn.style.display = 'none';
+});
 
 </script>
 
