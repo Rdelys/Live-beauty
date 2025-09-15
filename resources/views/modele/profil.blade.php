@@ -47,20 +47,37 @@ h2, h4, h5 {
 
 .nav-tabs .nav-link {
   border: none;
-  border-radius: 50px;
-  padding: 0.6rem 1.5rem;
-  margin: 0.3rem;
-  font-weight: 500;
-  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  margin: 0.2rem;
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  transition: all 0.3s ease-in-out;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-tabs .nav-link.active {
   background-color: #f44336;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  color: white;
+  box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
 }
+
+.tab-counter {
+  background: #ffc107;
+  color: #000;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  margin-left: 5px;
+}
+
+
 
 .tab-content {
   background-color: rgba(255, 255, 255, 0.05);
@@ -352,6 +369,13 @@ label {
     <button class="nav-link" id="workspace-tab" data-bs-toggle="tab" data-bs-target="#workspace" type="button" role="tab">WorkSpace</button>
   </li>
   <li class="nav-item" role="presentation">
+    <button class="nav-link" id="workspaceprive-tab" data-bs-toggle="tab" data-bs-target="#workspaceprive" type="button" role="tab">
+      WorkSpace pour show privée
+    @if(isset($modele->showPrives) && $modele->showPrives->count() > 0)
+      <span class="tab-counter">{{ $modele->showPrives->count() }}</span>
+    @endif    </button>
+  </li>
+  <li class="nav-item" role="presentation">
     <button class="nav-link" id="jetons-tab" data-bs-toggle="tab" data-bs-target="#jetons" type="button" role="tab">Jetons</button>
   </li>
   <li class="nav-item" role="presentation">
@@ -360,16 +384,8 @@ label {
 <li class="nav-item" role="presentation">
   <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Vidéos</button>
 </li>
-<li class="nav-item" role="presentation">
-  <button class="nav-link" id="showprive-tab" data-bs-toggle="tab" data-bs-target="#showprive" type="button" role="tab">
-    Show Privée
-  </button>
-</li>
-<li class="nav-item" role="presentation">
-  <button class="nav-link" id="workspaceprive-tab" data-bs-toggle="tab" data-bs-target="#workspaceprive" type="button" role="tab">
-    WorkSpace Privée
-  </button>
-</li>
+
+
 
 
 
@@ -570,10 +586,10 @@ label {
   </form>
 </div>
 <div class="tab-pane fade text-start" id="showprive" role="tabpanel" aria-labelledby="showprive-tab">
-  <h4 class="text-white mb-3">🔒 Shows Privés</h4>
-
-  {{-- Bouton démarrer un live privé (statique pour l’instant) --}}
-  <button class="btn btn-danger mb-3">▶️ Démarrer Live Privée</button>
+  
+</div>
+<div class="tab-pane fade text-start" id="workspaceprive" role="tabpanel">
+  <h4 class="text-white mb-3">Mes Shows Privés</h4>
 
   {{-- Liste des shows privés liés au modèle --}}
   @if(isset($modele->showPrives) && $modele->showPrives->count() > 0)
@@ -610,8 +626,6 @@ label {
   @else
     <p class="text-muted">Aucun show privé enregistré pour le moment.</p>
   @endif
-</div>
-<div class="tab-pane fade text-start" id="workspaceprive" role="tabpanel">
   <h5 class="text-white mb-3">🎥 Lancer une session Live Privée</h5>
 
   <!-- Sélection du show privé -->
@@ -1097,7 +1111,7 @@ startPrivateForm?.addEventListener("submit", async (e) => {
     startPrivateForm.style.display = 'none';
     stopPrivateBtn.style.display = 'inline-block';
 
-    privateSocket = io("http://localhost:3000", {
+    privateSocket = io("wss://livebeautyofficial.com/", {
       path: "/socket.io",
       transports: ["websocket"]
     });
@@ -1110,7 +1124,7 @@ startPrivateForm?.addEventListener("submit", async (e) => {
       const pc = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
-          { urls: "turn:localhost:3478", username: "webrtc", credential: "password123" }
+          { urls: "turn:livebeautyofficial.com:3478", username: "webrtc", credential: "password123" }
         ]
       });
       privatePeerConnections[id] = pc;
