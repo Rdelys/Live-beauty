@@ -657,7 +657,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -696,8 +696,12 @@ const peerConnection = new RTCPeerConnection({
 socket.on("connect", () => {
     socket.emit("watcher", {
         pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}"
+        @if(isset($showPriveId))
+        , showPriveId: "{{ $showPriveId }}"
+        @endif
     });
 });
+
 window.onunload = window.onbeforeunload = () => {
     socket.emit("watcher-disconnected");
     socket.close();

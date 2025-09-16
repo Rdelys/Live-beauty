@@ -725,7 +725,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com/", {
+socket = io("http://localhost:3000", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1111,7 +1111,7 @@ startPrivateForm?.addEventListener("submit", async (e) => {
     startPrivateForm.style.display = 'none';
     stopPrivateBtn.style.display = 'inline-block';
 
-    privateSocket = io("wss://livebeautyofficial.com/", {
+    privateSocket = io("http://localhost:3000", {
       path: "/socket.io",
       transports: ["websocket"]
     });

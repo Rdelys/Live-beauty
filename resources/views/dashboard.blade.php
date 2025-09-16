@@ -408,6 +408,9 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
+                <h5>Mes Lives Privés</h5>
+<div id="privateLives"></div>
+
                 <br>
                 @if(Auth::check() && Auth::user()->favoris->count() > 0)
     <h5>Mes Favoris</h5>
@@ -813,6 +816,36 @@ function openFullscreen(element) {
         element.msRequestFullscreen();
     }
 }
+const privateLiveUrlTemplate = "{{ route('live.private.show', ['modeleId' => ':modeleId', 'showPriveId' => ':showPriveId']) }}";
+async function fetchPrivateLives() {
+    try {
+        const response = await fetch('/api/live/private');
+        const lives = await response.json();
+
+        const liveContainer = document.getElementById('privateLives');
+        liveContainer.innerHTML = '';
+
+        lives.forEach(show => {
+            // Génération de l'URL Laravel correcte
+            const url = privateLiveUrlTemplate
+                .replace(':modeleId', show.modele.id)
+                .replace(':showPriveId', show.id);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.textContent = `🔒 ${show.modele.prenom}`;
+            link.classList.add('d-block', 'mb-1');
+            liveContainer.appendChild(link);
+        });
+    } catch (e) {
+        console.error("Erreur de chargement des lives privés", e);
+    }
+}
+
+
+fetchPrivateLives();
+setInterval(fetchPrivateLives, 15000);
+
 </script>
 
   

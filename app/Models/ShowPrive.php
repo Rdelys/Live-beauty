@@ -18,4 +18,6 @@ class ShowPrive extends Model
     public function modele() {
         return $this->belongsTo(Modele::class);
     }
+
+    
 }

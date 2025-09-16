@@ -44,7 +44,13 @@ Route::get('/live/{id}', [LiveController::class, 'show'])->name('live.show'); //
 Route::get('/live/active', [LiveController::class, 'active']);
 Route::post('/live/start', [LiveController::class, 'start']);
 Route::post('/live/stop', [LiveController::class, 'stop']);
+Route::get('/api/live/private', [LiveController::class, 'activePrivate'])
+    ->middleware('auth');
 
+    Route::middleware('auth')->group(function () {
+    Route::get('/live/{modeleId}/{showPriveId}', [LiveController::class, 'showPrivate'])
+        ->name('live.private.show');
+});
 // API publique
 Route::get('/api/live/active', [LiveController::class, 'active']);
 Route::post('/api/live/start', [LiveController::class, 'start']);
