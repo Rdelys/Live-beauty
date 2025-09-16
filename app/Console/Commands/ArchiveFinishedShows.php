@@ -4,20 +4,29 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
-class ArchiveExpiredShowPrives extends Command
+class ArchiveFinishedShows extends Command
 {
-    protected $signature = 'showprive:archive-expired';
-    protected $description = 'Archiver et supprimer les shows privés expirés';
+    protected $signature = 'shows:archive-finished';
+    protected $description = 'Archive et supprime les shows privés terminés';
 
     public function handle()
     {
-        $expiredShows = DB::table('show_prives')
-            ->whereRaw("STR_TO_DATE(CONCAT(`date`, ' ', `fin`), '%Y-%m-%d %H:%i:%s') < NOW()")
+        $now = Carbon::now();
+
+        $finishedShows = DB::table('show_prives')
+            ->where(function ($query) use ($now) {
+                $query->where('date', '<', $now->toDateString())
+                      ->orWhere(function($q) use ($now) {
+                          $q->where('date', $now->toDateString())
+                            ->where('fin', '<=', $now->toTimeString());
+                      });
+            })
             ->get();
 
-        foreach ($expiredShows as $show) {
-            // Archiver
+        foreach ($finishedShows as $show) {
+            // Copier dans l'historique
             DB::table('historique_show_prives')->insert([
                 'show_prive_id' => $show->id,
                 'user_id' => $show->user_id,
@@ -34,14 +43,14 @@ class ArchiveExpiredShowPrives extends Command
                 'access_token' => $show->access_token,
                 'socket_room' => $show->socket_room,
                 'broadcaster_socket_id' => $show->broadcaster_socket_id,
-                'created_at' => $show->created_at,
-                'updated_at' => $show->updated_at
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
-            // Supprimer le show original
+            // Supprimer le show
             DB::table('show_prives')->where('id', $show->id)->delete();
         }
 
-        $this->info('✅ Shows expirés archivés et supprimés.');
+        $this->info("✅ " . count($finishedShows) . " shows archivés et supprimés.");
     }
 }
