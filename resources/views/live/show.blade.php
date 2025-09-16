@@ -657,7 +657,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:3000", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -715,20 +715,29 @@ const messageInputtest = document.getElementById("messageInput");
 if (messageInputtest) {
   messageInputtest.addEventListener('keydown', function() {
     if (socket) {
-      socket.emit("typing", {
+      const payload = {
         pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
         isModel: false
-      });
+      };
+      @if(isset($showPriveId))
+        payload.showPriveId = "{{ $showPriveId }}";
+      @endif
+      socket.emit("typing", payload);
     }
 
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
       if (socket) {
-        socket.emit("stopTyping");
+        const stopPayload = {};
+        @if(isset($showPriveId))
+          stopPayload.showPriveId = "{{ $showPriveId }}";
+        @endif
+        socket.emit("stopTyping", stopPayload);
       }
     }, 1000);
   });
 }
+
 
 
 socket.on("typing", (data) => {
@@ -785,13 +794,17 @@ socket.on("stopTyping", () => {
   function sendMessage(e) {
     e.preventDefault();
     const msg = messageInput.value.trim();
-    if (msg.length === 0) return;
+    if (!msg.length) return;
+
     socket.emit("chat-message", {
-      pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
-      message: msg
+        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+        message: msg,
+        showPriveId: "{{ $showPriveId ?? '' }}"
     });
+
     messageInput.value = '';
-  }
+}
+
 
 const colorsMap = {};
 
@@ -995,7 +1008,9 @@ document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item =>
             socket.emit("surprise-sent", {
                 emoji: emoji,
                 cost: cost,
-                pseudo: pseudo
+                pseudo: pseudo,
+                showPriveId: "{{ $showPriveId ?? '' }}"
+
             });
 
             // MAJ solde utilisateur
@@ -1049,7 +1064,8 @@ socket.emit("jeton-sent", {
     cost: data.cost,
     description: description,
     pseudo: pseudo,
-    isGolden: isGolden
+    isGolden: isGolden,
+    showPriveId: "{{ $showPriveId ?? '' }}"
 });
         }
 
