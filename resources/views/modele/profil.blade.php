@@ -1235,6 +1235,52 @@ stopPrivateBtn?.addEventListener("click", () => {
   startPrivateForm.style.display = 'block';
   stopPrivateBtn.style.display = 'none';
 });
+/* === CONTROLES LIVE PRIVÉ === */
+const pausePrivateBtn = document.getElementById("pausePrivateBtn");
+const togglePrivateMicBtn = document.getElementById("togglePrivateMicBtn");
+
+let isPrivatePaused = false;
+let isPrivateMicMuted = false;
+
+// Bouton pause vidéo privée
+pausePrivateBtn?.addEventListener("click", () => {
+    if (!privateStream) return;
+
+    privateStream.getVideoTracks().forEach(track => track.enabled = isPrivatePaused);
+
+    isPrivatePaused = !isPrivatePaused;
+
+    pausePrivateBtn.textContent = isPrivatePaused ? "▶️" : "⏸";
+
+    privateSocket?.emit("chat-message", {
+        showPriveId: currentShowPriveId,
+        pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+        message: isPrivatePaused 
+            ? "⏸ Le modèle a mis le live privé en pause." 
+            : "▶️ Le modèle a repris le live privé."
+    });
+});
+
+// Bouton mute micro privé
+togglePrivateMicBtn?.addEventListener("click", () => {
+    if (!privateStream) return;
+
+    const audioTrack = privateStream.getAudioTracks()[0];
+    if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        isPrivateMicMuted = !audioTrack.enabled;
+
+        togglePrivateMicBtn.textContent = isPrivateMicMuted ? "🎤🔇" : "🎤✅";
+
+        privateSocket?.emit("chat-message", {
+            showPriveId: currentShowPriveId,
+            pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+            message: isPrivateMicMuted 
+                ? "🎤 Le modèle a coupé son micro en privé." 
+                : "🎤 Le modèle a réactivé son micro en privé."
+        });
+    }
+});
 
 </script>
 
