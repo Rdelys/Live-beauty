@@ -536,8 +536,11 @@ video {
     💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
 </div>
 @endauth
-
+<div id="chrono" style="font-weight:bold;font-size:20px;color:#fff;">
+  00:00
+</div>
 <div id="videoContainer" style="position: relative;">
+  
   <div id="startOverlay" style="
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.8); color: white;
@@ -654,10 +657,11 @@ video {
     </div>
 
   </div>
+  <!--wss://livebeautyofficial.com -->
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -775,6 +779,33 @@ socket.on("stopTyping", () => {
     peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
       .catch(e => console.error("Erreur ajout candidat ICE :", e));
   });
+
+    const chrono = document.getElementById("chrono");
+let chronoInterval;
+
+socket.on("show-time", (data) => {
+  if (data.showPriveId !== "{{ $showPriveId ?? '' }}") return;
+
+  const end = data.endTimestamp; // timestamp en ms envoyé par le serveur
+
+  function updateChrono() {
+    const diffMs = end - Date.now();
+    if (diffMs <= 0) {
+      clearInterval(chronoInterval);
+      chrono.textContent = "⏰ Terminé";
+      return;
+    }
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const m = String(Math.floor(diffSeconds / 60)).padStart(2,'0');
+    const s = String(diffSeconds % 60).padStart(2,'0');
+    chrono.textContent = `${m}:${s}`;
+  }
+
+  clearInterval(chronoInterval);
+  updateChrono();
+  chronoInterval = setInterval(updateChrono, 1000);
+});
+
 
   // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
   socket.on("broadcaster", () => {
@@ -1107,4 +1138,3 @@ socket.emit("jeton-sent", {
 
 
 </script>
-

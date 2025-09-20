@@ -1155,13 +1155,17 @@ startPrivateForm?.addEventListener("submit", async (e) => {
       clearInterval(timerInterval);
       startTimer(diffSeconds);
     }
-    privateSocket = io("wss://livebeautyofficial.com", {
+    privateSocket = io("http://localhost:3000/", {
       path: "/socket.io",
       transports: ["websocket"]
     });
 
     // Déclare comme broadcaster privé
-    privateSocket.emit("broadcaster", { showPriveId: currentShowPriveId });
+privateSocket.emit("broadcaster", { 
+  showPriveId: currentShowPriveId,
+  startTime: startTime,
+  endTime: endTime
+});
 
     // Gestion viewers privés
     privateSocket.on("watcher", id => {
@@ -1276,7 +1280,7 @@ stopPrivateBtn?.addEventListener("click", () => {
   }
   if(privateSocket) privateSocket.disconnect();
 
-  // 🔴 Réinitialise la vidéo
+  // 🔴 Réinitialise la vidéoJ
   privateLiveVideo.srcObject = null;
   privateLiveSection.style.display = 'none';
   startPrivateForm.style.display = 'block';
