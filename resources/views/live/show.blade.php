@@ -19,6 +19,11 @@
 .fullscreen-icon:hover {
   transform: translateY(-3px);
 }
+@keyframes pulseFinished {
+  0%   { transform: scale(1); opacity: 1; }
+  50%  { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
     body {
   background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
@@ -563,9 +568,16 @@ video {
     💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
 </div>
 @endauth
-<div id="chrono" style="font-weight:bold;font-size:20px;color:#fff;">
-  00:00
+<!-- Chrono privé -->
+<div id="privateTimer"
+     style="position:absolute;top:10px;left:50%;transform:translateX(-50%);
+            background:rgba(0,0,0,0.6);color:#fff;
+            padding:6px 12px;border-radius:6px;
+            font-weight:bold;z-index:10;">
+    00:00
 </div>
+
+
 <div id="videoContainer" style="position: relative;">
   
   <div id="startOverlay" style="
@@ -807,37 +819,53 @@ socket.on("stopTyping", () => {
       .catch(e => console.error("Erreur ajout candidat ICE :", e));
   });
 
-    const chrono = document.getElementById("chrono");
-let chronoInterval;
-
 socket.on("show-time", (data) => {
-  if (data.showPriveId !== "{{ $showPriveId ?? '' }}") return;
+      console.log("📡 show-time reçu côté client:", data);
 
-  const end = data.endTimestamp; // timestamp en ms envoyé par le serveur
+    if (!data || !data.endTimestamp) return;
 
-  function updateChrono() {
-    const diffMs = end - Date.now();
-    if (diffMs <= 0) {
-      clearInterval(chronoInterval);
-      chrono.textContent = "⏰ Terminé";
-      return;
+    const timerDiv = document.getElementById("privateTimer");
+    if (!timerDiv) return;
+
+    timerDiv.style.display = "block";
+
+    let remaining = Math.floor((data.endTimestamp - Date.now()) / 1000);
+
+    function updateTimer() {
+    if (remaining <= 0) {
+        clearInterval(timerInterval);
+        timerDiv.textContent = "⏱️ Terminé";
+        timerDiv.style.color = "#ff4d4d";   // rouge vif
+        timerDiv.style.fontSize = "1.3rem"; // un peu plus gros
+        timerDiv.style.fontWeight = "bold";
+        timerDiv.style.textShadow = "0 0 8px rgba(255,0,0,0.8)";
+        timerDiv.style.animation = "pulseFinished 1s infinite"; // animation
+        return;
     }
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const m = String(Math.floor(diffSeconds / 60)).padStart(2,'0');
-    const s = String(diffSeconds % 60).padStart(2,'0');
-    chrono.textContent = `${m}:${s}`;
-  }
+    const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const seconds = String(remaining % 60).padStart(2, '0');
+    timerDiv.textContent = `${minutes}:${seconds}`;
+    remaining--;
+}
 
-  clearInterval(chronoInterval);
-  updateChrono();
-  chronoInterval = setInterval(updateChrono, 1000);
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
 });
 
 
   // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
-  socket.on("broadcaster", () => {
-    socket.emit("watcher");
-  });
+  // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
+socket.on("broadcaster", () => {
+  const payload = {
+    pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}"
+  };
+  @if(isset($showPriveId))
+    payload.showPriveId = "{{ $showPriveId }}";
+  @endif
+  socket.emit("watcher", payload);
+});
+
 
   // Nettoyage à la fermeture ou rechargement de la page
   window.onunload = window.onbeforeunload = () => {

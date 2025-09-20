@@ -632,10 +632,12 @@ label {
         @foreach($modele->showPrives as $show)
           @if($show->etat == 'valide' || $show->etat == 'en_attente')
             <option value="{{ $show->id }}" 
+                    data-date="{{ $show->date }}"
                     data-start="{{ $show->debut }}" 
                     data-end="{{ $show->fin }}">
               📅 {{ $show->date }} ({{ $show->debut }} - {{ $show->fin }})
             </option>
+
 
           @endif
         @endforeach
@@ -1131,7 +1133,6 @@ document.getElementById("privateTimer").textContent = "00:00";
 startPrivateForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   currentShowPriveId = document.getElementById("showPriveId").value;
-  
   if(!currentShowPriveId) return alert("Sélectionnez un show privé.");
 
   try {
@@ -1142,18 +1143,22 @@ startPrivateForm?.addEventListener("submit", async (e) => {
     stopPrivateBtn.style.display = 'inline-block';
 
     const selectedOption = document.getElementById("showPriveId").selectedOptions[0];
+    const dateShow = selectedOption.textContent.match(/\d{4}-\d{2}-\d{2}/)?.[0] || ""; // récupère la date ex: 2025-09-20
     const startTime = selectedOption.dataset.start;
     const endTime   = selectedOption.dataset.end;
 
-    // calcule la durée en secondes (si format HH:MM:SS ou HH:MM)
-    let diffSeconds = 0;
-    if (startTime && endTime) {
-      diffSeconds = (new Date(`1970-01-01T${endTime}`) - new Date(`1970-01-01T${startTime}`)) / 1000;
-    }
+    // ⚡ On calcule l'heure réelle de fin
+    const endDateTime   = new Date(`${dateShow}T${endTime}`);
+    const now           = new Date();
+
+    let diffSeconds = Math.floor((endDateTime - now) / 1000);
 
     if (diffSeconds > 0) {
       clearInterval(timerInterval);
       startTimer(diffSeconds);
+    } else {
+      document.getElementById("privateTimer").textContent = "00:00";
+      alert("⚠️ Ce show est déjà terminé.");
     }
     privateSocket = io("http://localhost:3000/", {
       path: "/socket.io",
@@ -1161,11 +1166,16 @@ startPrivateForm?.addEventListener("submit", async (e) => {
     });
 
     // Déclare comme broadcaster privé
+const endTimestamp = new Date(`1970-01-01T${endTime}`).getTime();
+
 privateSocket.emit("broadcaster", { 
   showPriveId: currentShowPriveId,
+  date: dateShow,          // 👈 ajouté
   startTime: startTime,
   endTime: endTime
 });
+
+
 
     // Gestion viewers privés
     privateSocket.on("watcher", id => {
