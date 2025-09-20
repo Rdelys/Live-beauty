@@ -121,7 +121,7 @@
             @endif
             @php
     $flags = [
-        'FR' => '🇫🇷 Français',
+        'FR' => '🇫🇷 Francais',
         'EN' => '🇬🇧 Anglais',
         'ES' => '🇪🇸 Espagnol',
         'IT' => '🇮🇹 Italien',
