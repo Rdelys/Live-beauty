@@ -384,11 +384,6 @@ label {
 <li class="nav-item" role="presentation">
   <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Vidéos</button>
 </li>
-
-
-
-
-
 </ul>
 
 
@@ -636,9 +631,12 @@ label {
         <option value="">-- Sélectionner --</option>
         @foreach($modele->showPrives as $show)
           @if($show->etat == 'valide' || $show->etat == 'en_attente')
-            <option value="{{ $show->id }}">
+            <option value="{{ $show->id }}" 
+                    data-start="{{ $show->debut }}" 
+                    data-end="{{ $show->fin }}">
               📅 {{ $show->date }} ({{ $show->debut }} - {{ $show->fin }})
             </option>
+
           @endif
         @endforeach
       </select>
@@ -647,6 +645,13 @@ label {
   @else
     <p class="text-muted">Aucun show privé programmé disponible.</p>
   @endif
+<!-- Chrono -->
+<div id="privateTimer" 
+     style="position:absolute;top:10px;left:50%;transform:translateX(-50%);
+            background:rgba(0,0,0,0.6);color:#fff;padding:6px 12px;
+            border-radius:6px;font-weight:bold;z-index:10;">
+    00:00
+</div>
 
   <button class="btn btn-secondary mb-2" id="stopPrivateBtn" style="display: none;">Arrêter le Live Privé</button>
 
@@ -1097,11 +1102,36 @@ let privateStream;
 let privatePeerConnections = {};
 let currentShowPriveId = null;
 let privateViewers = {};
+let timerInterval; // ✅ global
+
+function startTimer(durationSeconds) {
+  const display = document.getElementById("privateTimer");
+  let remaining = durationSeconds;
+
+  function updateTimer() {
+    const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const seconds = String(remaining % 60).padStart(2, '0');
+    display.textContent = `${minutes}:${seconds}`;
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      stopPrivateBtn.click(); // 🔴 stoppe automatiquement le live
+    }
+    remaining--;
+  }
+
+  updateTimer(); // premier affichage
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+clearInterval(timerInterval);
+document.getElementById("privateTimer").textContent = "00:00";
 
 // === LANCER LIVE PRIVÉ ===
 startPrivateForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   currentShowPriveId = document.getElementById("showPriveId").value;
+  
   if(!currentShowPriveId) return alert("Sélectionnez un show privé.");
 
   try {
@@ -1111,6 +1141,20 @@ startPrivateForm?.addEventListener("submit", async (e) => {
     startPrivateForm.style.display = 'none';
     stopPrivateBtn.style.display = 'inline-block';
 
+    const selectedOption = document.getElementById("showPriveId").selectedOptions[0];
+    const startTime = selectedOption.dataset.start;
+    const endTime   = selectedOption.dataset.end;
+
+    // calcule la durée en secondes (si format HH:MM:SS ou HH:MM)
+    let diffSeconds = 0;
+    if (startTime && endTime) {
+      diffSeconds = (new Date(`1970-01-01T${endTime}`) - new Date(`1970-01-01T${startTime}`)) / 1000;
+    }
+
+    if (diffSeconds > 0) {
+      clearInterval(timerInterval);
+      startTimer(diffSeconds);
+    }
     privateSocket = io("wss://livebeautyofficial.com", {
       path: "/socket.io",
       transports: ["websocket"]
@@ -1224,17 +1268,25 @@ startPrivateForm?.addEventListener("submit", async (e) => {
 
 // === STOP LIVE PRIVÉ ===
 stopPrivateBtn?.addEventListener("click", () => {
+  // 🔴 Stoppe flux et connexions
   if(privateStream) privateStream.getTracks().forEach(t => t.stop());
   for (let id in privatePeerConnections){
     privatePeerConnections[id].close();
     delete privatePeerConnections[id];
   }
   if(privateSocket) privateSocket.disconnect();
+
+  // 🔴 Réinitialise la vidéo
   privateLiveVideo.srcObject = null;
   privateLiveSection.style.display = 'none';
   startPrivateForm.style.display = 'block';
   stopPrivateBtn.style.display = 'none';
+
+  // ✅ Réinitialise le chrono
+  clearInterval(timerInterval);
+  document.getElementById("privateTimer").textContent = "00:00";
 });
+
 /* === CONTROLES LIVE PRIVÉ === */
 const pausePrivateBtn = document.getElementById("pausePrivateBtn");
 const togglePrivateMicBtn = document.getElementById("togglePrivateMicBtn");
