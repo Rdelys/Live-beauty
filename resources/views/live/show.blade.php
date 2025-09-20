@@ -522,13 +522,40 @@ video {
         object-fit: cover; /* évite les bandes noires */
     }
 }
+
+#backBtn {
+  background: linear-gradient(135deg, #ff1744, #d50000); /* Rouge dégradé */
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#backBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+#backBtn:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
   </style>
 </head>
 <body>
   <div class="container-live">
+  
 
     <!-- LIVE Section -->
     <div class="left-live">
+      <button id="backBtn" class="btn btn-secondary mb-3">
+          ← Retour
+      </button>
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
       <div class="badge-live">🔴 EN DIRECT</div>
 @auth
@@ -1135,6 +1162,9 @@ socket.emit("jeton-sent", {
 
 })();
 // Écoute le clic sur chaque surprise
-
+document.getElementById("backBtn").addEventListener("click", function() {
+    // Retourne à la page précédente
+    window.history.back();
+});
 
 </script>
