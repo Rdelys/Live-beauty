@@ -845,6 +845,21 @@ function openFullscreen(element) {
     }
 }
 const privateLiveUrlTemplate = "{{ route('live.private.show', ['modeleId' => ':modeleId', 'showPriveId' => ':showPriveId']) }}";
+function formatDateTime(dateString, timeString) {
+    const months = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ];
+    if (!dateString) return '—';
+
+    const dateObj = new Date(dateString + (timeString ? 'T' + timeString : 'T00:00'));
+    const day = dateObj.getDate();
+    const month = months[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+
+    return `${day} ${month} ${year}`;
+}
+
 async function fetchPrivateLives() {
     try {
         const response = await fetch('/api/live/private');
@@ -854,10 +869,8 @@ async function fetchPrivateLives() {
         liveContainer.innerHTML = '';
 
         lives.forEach(show => {
-            // 🚫 Ignorer les shows terminés
             if (show.etat && show.etat.toLowerCase() === "terminer") return;
 
-            // Génération de l'URL Laravel
             const url = privateLiveUrlTemplate
                 .replace(':modeleId', show.modele.id)
                 .replace(':showPriveId', show.id);
@@ -867,16 +880,13 @@ async function fetchPrivateLives() {
             link.classList.add('d-block', 'mb-2', 'p-2', 'rounded', 'text-decoration-none');
 
             if (show.etat && show.etat.toLowerCase() === "en cours") {
-                // Prénom du modèle uniquement, en badge
                 link.innerHTML = `<span class="badge bg-danger">🔒 ${show.modele.prenom}</span>`;
                 link.classList.add("highlight-private-live");
             } else {
-                // Formatage heure début et fin (HH:MM)
                 const debut = show.debut ? show.debut.substring(0,5) : '—';
                 const fin = show.fin ? show.fin.substring(0,5) : '—';
-                const date = show.date || '—';
+                const date = formatDateTime(show.date);
 
-                // Prénom + date + heures dans des badges
                 link.innerHTML = `
                     <span class="badge bg-primary">🔒 ${show.modele.prenom}</span>
                     <span class="badge bg-secondary ms-2">${date}</span>
@@ -891,6 +901,7 @@ async function fetchPrivateLives() {
         console.error("Erreur de chargement des lives privés", e);
     }
 }
+
 
 
 
