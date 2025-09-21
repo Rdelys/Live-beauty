@@ -14,44 +14,44 @@
   />
   <style>
    /* GLOBAL */
-body {
-  margin: 0;
-  font-family: 'Poppins', 'Segoe UI', sans-serif;
-  background-color: #1e1e2f;
-  color: #f1f1f1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  scroll-behavior: smooth;
-}
+    body {
+      margin: 0;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      background-color: #1e1e2f;
+      color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      scroll-behavior: smooth;
+    }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
 
-/* SIDEBAR */
-.sidebar {
-  width: 250px;
-  background-color: #28293e;
-  padding: 1.5rem 1rem;
-  height: 100vh;
-  overflow-y: auto;
-  position: fixed;
-  top: 0;
-  left: 0;
-  border-right: 1px solid #333;
-  transition: all 0.3s ease-in-out;
-  z-index: 1000;
-}
+    /* SIDEBAR */
+  .sidebar {
+    width: 250px;
+    background-color: #28293e;
+    padding: 1.5rem 1rem;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-right: 1px solid #333;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+  }
 
-.sidebar h5 {
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  color: #e63946;
-  font-size: 1.2rem;
-}
+  .sidebar h5 {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: #e63946;
+    font-size: 1.2rem;
+  }
 
 .sidebar a {
   display: flex;
@@ -336,6 +336,7 @@ footer {
   </div>
 
   <a class="menu-link"><i class="fas fa-users"></i> Clients</a>
+  <a class="menu-link"><i class="fas fa-video"></i> Shows privés</a>
 
   <a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
   <div class="submenu">
@@ -346,86 +347,94 @@ footer {
 
 <div class="content">
   <div id="dashboard-content" class="content-section">
-    <h2>Tableau de bord</h2>
-    <p>Bienvenue dans l'espace d'administration de Live Beauty.</p>
+  <h2 class="mb-4 text-white">Tableau de bord</h2>
+  <p class="mb-5 text-white">Bienvenue dans l'espace d'administration de Live Beauty.</p>
 
-    <!-- === Cards Row === -->
-    <div class="row g-4 mb-4">
-      <!-- Card for Nombre de Modèles -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card bg-dark text-white h-100">
-          <div class="card-body">
-            <h5 class="card-title">Nombre de Modèles</h5>
-            <p class="card-text">{{ $nombreDeModeles }}</p>
+  <!-- === Cards Row === -->
+  <div class="row g-4 mb-5">
+    <!-- Card: Nombre de Modèles -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white h-100 shadow-sm border-0">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="icon bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+            <i class="fas fa-user-friends fa-2x text-white"></i>
           </div>
-        </div>
-      </div>
-
-      <!-- Card for Nombre de Jetons -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card bg-dark text-white h-100">
-          <div class="card-body">
-            <h5 class="card-title">Nombre de Jetons</h5>
-            <p class="card-text">{{ $nombreDeJetons }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card for Nombre de Clients -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card bg-dark text-white h-100">
-          <div class="card-body">
-            <h5 class="card-title">Nombre de Clients</h5>
-            <p class="card-text">{{ $nombreDeClients }}</p>
+          <div>
+            <h6 class="mb-2 text-white">Nombre de Modèles</h6>
+            <p class="display-5 fw-bold text-danger mb-0">{{ $nombreDeModeles }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- === Charts Row === -->
-    <div class="row g-4">
-      <!-- Connexions -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card bg-dark text-white h-100 p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="card-title mb-0">Connexions des modèles (par jour)</h5>
-            <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-connections-container')">
-              Plein écran
-            </button>
+    <!-- Card: Nombre de Jetons -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white h-100 shadow-sm border-0">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="icon bg-success rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+            <i class="fas fa-coins fa-2x text-white"></i>
           </div>
-          <div id="chart-connections-container" style="overflow-x:auto; height:400px;">
-            <canvas id="chart-connections"></canvas>
+          <div>
+            <h6 class="mb-2 text-white">Nombre de Jetons</h6>
+            <p class="display-5 fw-bold text-success mb-0">{{ $nombreDeJetons }}</p>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Jetons -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card bg-dark text-white h-100 p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="card-title mb-0">Jetons achetés (par jour)</h5>
-            <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-tokens-container')">
-              Plein écran
-            </button>
+    <!-- Card: Nombre de Clients -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white h-100 shadow-sm border-0">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="icon bg-info rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+            <i class="fas fa-users fa-2x text-white"></i>
           </div>
-          <div id="chart-tokens-container" style="overflow-x:auto; height:400px;">
-            <canvas id="chart-tokens"></canvas>
+          <div>
+            <h6 class="mb-2 text-white">Nombre de Clients</h6>
+            <p class="display-5 fw-bold text-info mb-0">{{ $nombreDeClients }}</p>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Shows privés -->
-      <div class="col-lg-4 col-md-12">
-        <div class="card bg-dark text-white h-100 p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="card-title mb-0">Shows privés (par jour)</h5>
-            <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-shows-container')">
-              Plein écran
-            </button>
-          </div>
-          <div id="chart-shows-container" style="overflow-x:auto; height:400px;">
-            <canvas id="chart-shows"></canvas>
-          </div>
+  <!-- === Charts Row === -->
+  <div class="row g-4">
+    <!-- Connexions -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card bg-dark text-white h-100 p-3 shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0 text-white"><i class="fas fa-chart-line me-2 text-danger"></i> Connexions modèles</h5>
+          <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-connections-container')">Plein écran</button>
+        </div>
+        <div id="chart-connections-container" style="overflow-x:auto; height:350px;">
+          <canvas id="chart-connections"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jetons -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card bg-dark text-white h-100 p-3 shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0 text-white"><i class="fas fa-coins me-2 text-success"></i> Jetons achetés</h5>
+          <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-tokens-container')">Plein écran</button>
+        </div>
+        <div id="chart-tokens-container" style="overflow-x:auto; height:350px;">
+          <canvas id="chart-tokens"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shows privés -->
+    <div class="col-lg-4 col-md-12">
+      <div class="card bg-dark text-white h-100 p-3 shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0 text-white"><i class="fas fa-video me-2 text-warning"></i> Shows privés</h5>
+          <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-shows-container')">Plein écran</button>
+        </div>
+        <div id="chart-shows-container" style="overflow-x:auto; height:350px;">
+          <canvas id="chart-shows"></canvas>
         </div>
       </div>
     </div>
@@ -433,6 +442,59 @@ footer {
 </div>
 
 
+  <div id="shows-prives-content" class="content-section d-none">
+  <h2>Shows privés</h2>
+  <p>Liste des shows privés avec leurs statuts.</p>
+
+  <!-- Filtres -->
+  <div class="row mb-3" style="color:#ccc !important;">
+    <div class="col-md-3">
+      <select id="filterEtat" class="form-control">
+        <option value="">-- Tous les états --</option>
+        <option value="En attente">En attente</option>
+        <option value="En cours">En cours</option>
+        <option value="En pause">En pause</option>
+        <option value="Terminer">Terminé</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-secondary w-100" onclick="resetShowFilters()">Réinitialiser</button>
+    </div>
+  </div>
+
+<div class="table-responsive" style="overflow-x:auto; max-width:100%;">
+  <table class="table table-bordered table-striped align-middle text-center">
+    <thead>
+      <tr>
+        <th style="white-space:nowrap;">ID</th>
+        <th style="white-space:nowrap;">Client</th>
+        <th style="white-space:nowrap;">Modèle</th>
+        <th style="white-space:nowrap;">Date</th>
+        <th style="white-space:nowrap;">Début</th>
+        <th style="white-space:nowrap;">Fin</th>
+        <th style="white-space:nowrap;">Durée</th>
+        <th style="white-space:nowrap;">Jetons</th>
+        <th style="white-space:nowrap;">État</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($shows as $show)
+        <tr>
+          <td>{{ $show->id }}</td>
+          <td>{{ $show->user->nom }} {{ $show->user->prenoms }}</td>
+          <td>{{ $show->modele->prenom }}</td>
+          <td>{{ $show->date }}</td>
+          <td>{{ $show->debut }}</td>
+          <td>{{ $show->fin }}</td>
+          <td>{{ $show->duree }} min</td>
+          <td>{{ $show->jetons_total }}</td>
+          <td><span class="badge bg-info">{{ $show->etat }}</span></td>
+        </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
+</div>
     <div id="modeles-content" class="content-section d-none">
   <h2>Modèles</h2>
   <p>Section dédiée aux modèles disponibles.</p>
@@ -835,6 +897,7 @@ footer {
         "Ajout modeles": document.getElementById("ajoute-modeles-content"),
         "Liste des jetons": document.getElementById("liste-jetons-content"),
         "Ajout de jetons": document.getElementById("ajout-jetons-content"),
+        "Shows privés": document.getElementById("shows-prives-content"),
       };
 
       menuLinks.forEach(link => {
@@ -967,6 +1030,30 @@ function sortTable(colIndex, type = 'string', dir = 'asc') {
   rows.forEach(row => table.appendChild(row));
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const showRows = document.querySelectorAll("#shows-prives-content tbody tr");
+
+  function filterShows() {
+    const etat = document.getElementById("filterEtat").value.toLowerCase();
+
+    showRows.forEach(row => {
+      const tdEtat = row.cells[8].innerText.toLowerCase();
+      let visible = true;
+
+      if (etat && tdEtat !== etat) visible = false;
+
+      row.style.display = visible ? "" : "none";
+    });
+  }
+
+  document.getElementById("filterEtat").addEventListener("change", filterShows);
+
+  window.resetShowFilters = () => {
+    document.getElementById("filterEtat").value = "";
+    filterShows();
+  };
+});
+
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
@@ -1071,49 +1158,73 @@ function renderTokensChart(ctx, labels, data) {
 
 
 // 3. Shows privés
-function renderShowsChart(ctx, labels, data) {
+// 3. Shows privés avec jetons
+function renderShowsChart(ctx, labels, showsData, jetonsData, details) {
   return new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
-      datasets: [{
-        label: "Shows/jour",
-        data: data,
-        borderColor: "rgba(255, 99, 132, 1)",
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        fill: true,
-        tension: 0.3,
-        pointRadius: 3,
-      }]
+      datasets: [
+        {
+          label: "Shows/jour",
+          data: showsData,
+          borderColor: "rgba(255, 99, 132, 1)",
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          yAxisID: 'y',
+        },
+        {
+          label: "Jetons dépensés",
+          data: jetonsData,
+          borderColor: "rgba(54, 162, 235, 1)",
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          yAxisID: 'y1', // deuxième axe Y
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
         tooltip: {
           callbacks: {
-            label: ctx => `🎬 ${ctx.raw} shows`
+            label: function(ctx) {
+              if(ctx.dataset.label === "Shows/jour") {
+                return `🎬 ${ctx.raw} shows`;
+              } else if(ctx.dataset.label === "Jetons dépensés") {
+                return `💎 ${ctx.raw} jetons`;
+              }
+            }
           }
         },
         zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x'
-          },
-          zoom: {
-            wheel: { enabled: true },
-            pinch: { enabled: true },
-            mode: 'x'
-          }
+          pan: { enabled: true, mode: 'x' },
+          zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
         }
       },
       scales: {
         x: { ticks: { autoSkip: false } },
-        y: { beginAtZero: true }
+        y: { 
+          beginAtZero: true,
+          title: { display: true, text: 'Nombre de shows' },
+        },
+        y1: { 
+          beginAtZero: true,
+          position: 'right',
+          title: { display: true, text: 'Jetons dépensés' },
+          grid: { drawOnChartArea: false }
+        }
       }
     }
   });
 }
+
 
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -1135,10 +1246,14 @@ function renderShowsChart(ctx, labels, data) {
 
   // Shows privés
   const shows = await fetchJson(base + '/api/shows-per-day?days=30');
-  renderShowsChart(
-    document.getElementById('chart-shows').getContext('2d'),
-    shows.labels, shows.data, shows.jetons, shows.details
-  );
+renderShowsChart(
+  document.getElementById('chart-shows').getContext('2d'),
+  shows.labels,
+  shows.data,
+  shows.jetons,
+  shows.details
+);
+
 });
 
 function openFullscreen(id) {

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
         use Illuminate\Support\Facades\Hash;
 use App\Models\Jeton;
 use App\Models\User;
+use App\Models\ShowPrive;
 
 
 class ModeleController extends Controller
@@ -87,12 +88,14 @@ class ModeleController extends Controller
 {
     $modeles = Modele::all();
     $jetons = Jeton::all();
+    $shows = ShowPrive::with('user','modele')->get(); // ✅
+
     $nombreDeModeles = $modeles->count();  // Nombre de modèles
     $nombreDeJetons = $jetons->count();    // Nombre de jetons
     $nombreDeClients = User::count(); // ✅ total clients
 $clients = User::select('id', 'nom', 'prenoms', 'jetons', 'email', 'pseudo', 'banni', 'created_at')->get();
 
-    return view('admin', compact('modeles', 'jetons', 'nombreDeModeles', 'nombreDeJetons', 'nombreDeClients',
+    return view('admin', compact('modeles', 'shows', 'jetons', 'nombreDeModeles', 'nombreDeJetons', 'nombreDeClients',
         'clients'));
 }
 
@@ -204,7 +207,6 @@ public function uploadVideos(Request $request, $id)
 
     return back()->with('success', 'Vidéos ajoutées avec succès.');
 }
-
 
 }
 
