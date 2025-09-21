@@ -347,11 +347,12 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                     <!-- Menus -->
                     <div class="collapse navbar-collapse" id="mainNavbar">
                       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                       <a class="nav-link" href="#" data-type="default">Modèles</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="#" data-type="photo">Galerie photo</a>
-</li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="#" data-type="default">Modèles</a>
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="#" data-type="photo">Galerie photo</a>
+                      </li>
 
                       <li class="nav-item">
                           <a class="nav-link" href="#">Nouveaux Modèles</a>
@@ -369,9 +370,9 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                     
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
                     <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
-<a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
-    <i class="fa-solid fa-envelope"></i>
-</a>
+                    <a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
                     
                 @if(Auth::check())
                     <div class="me-3 text-white fw-bold">
@@ -409,7 +410,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 <!-- Chargement dynamique -->
                 </div>
                 <h5>Mes Lives Privés</h5>
-<div id="privateLives"></div>
+                <div id="privateLives"></div>
 
                 <br>
                 @if(Auth::check() && Auth::user()->favoris->count() > 0)
@@ -426,19 +427,19 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
             <!-- Cartes -->
             <div class="col-md-10 p-4">
                 <div class="row g-4">
-  @foreach($modeles as $modele)
-    <div class="col-md-4 card-item fille">
-    <div class="model-card card-default">
-      <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
-    @csrf
-    <button type="submit" class="btn btn-sm {{ Auth::user()->favoris->contains($modele->id) ? 'btn-warning' : 'btn-outline-light' }}">
-        @if(Auth::user()->favoris->contains($modele->id))
-            <i class="fas fa-heart text-danger"></i>
-        @else
-            <i class="far fa-heart text-white"></i>
-        @endif
-    </button>
-</form>
+                  @foreach($modeles as $modele)
+                    <div class="col-md-4 card-item fille">
+                    <div class="model-card card-default">
+                      <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
+                    @csrf
+                    <button type="submit" class="btn btn-sm {{ Auth::user()->favoris->contains($modele->id) ? 'btn-warning' : 'btn-outline-light' }}">
+                        @if(Auth::user()->favoris->contains($modele->id))
+                            <i class="fas fa-heart text-danger"></i>
+                        @else
+                            <i class="far fa-heart text-white"></i>
+                        @endif
+                    </button>
+                </form>
 
 <a href="{{ route('modele.private', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
     @php

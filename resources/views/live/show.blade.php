@@ -576,6 +576,20 @@ video {
             font-weight:bold;z-index:10;">
     00:00
 </div>
+@auth
+    @if(Auth::user()->role != 'modele' && !isset($showPriveId))
+        <div class="text-center my-3">
+            <a href="{{ route('modele.private', $modele->id) }}" 
+               class="btn btn-danger btn-lg"
+               target="_blank" 
+               rel="noopener noreferrer">
+                🔒 Réserver un Show Privé
+            </a>
+        </div>
+    @endif
+@endauth
+
+
 
 
 <div id="videoContainer" style="position: relative;">
@@ -700,7 +714,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
