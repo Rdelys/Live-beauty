@@ -738,12 +738,14 @@ const soundMessage  = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise");
 const soundEnter    = document.getElementById("soundEnter");
 /* === VARIABLES GLOBALES === */
+ /* <!--wss://livebeautyofficial.com  http://localhost:3000/-->*/
+
 let socket;
 let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("http://localhost:3000/", {
+socket = io("wss://livebeautyofficial.com", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1183,7 +1185,7 @@ startPrivateForm?.addEventListener("submit", async (e) => {
       document.getElementById("privateTimer").textContent = "00:00";
       alert("⚠️ Ce show est déjà terminé.");
     }
-    privateSocket = io("http://localhost:3000/", {
+    privateSocket = io("wss://livebeautyofficial.com", {
       path: "/socket.io",
       transports: ["websocket"]
     });
