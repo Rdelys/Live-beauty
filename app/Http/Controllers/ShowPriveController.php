@@ -78,5 +78,14 @@ public function pause($id)
     return response()->json(['success' => true, 'etat' => 'pause']);
 }
 
+public function demarrer($id)
+{
+    $show = ShowPrive::findOrFail($id);
+    $show->etat = 'En cours';   // ⚡ démarre le live privé
+    $show->save();
+
+    return response()->json(['success' => true, 'etat' => 'en_cours']);
+}
+
 }
 

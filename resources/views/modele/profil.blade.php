@@ -745,7 +745,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("http://localhost:3000/", {
+socket = io("wss://livebeautyofficial.com", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1185,11 +1185,22 @@ startPrivateForm?.addEventListener("submit", async (e) => {
       document.getElementById("privateTimer").textContent = "00:00";
       alert("⚠️ Ce show est déjà terminé.");
     }
+
+    await fetch(`/show-prive/demarrer/${currentShowPriveId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+      "Accept": "application/json"
+    }
+  }).then(r => r.json())
+    .then(data => console.log("Show démarré:", data));
+
     privateSocket = io("wss://livebeautyofficial.com", {
       path: "/socket.io",
       transports: ["websocket"]
     });
 
+    
     // Déclare comme broadcaster privé
 const endTimestamp = new Date(`1970-01-01T${endTime}`).getTime();
 

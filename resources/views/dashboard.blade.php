@@ -20,6 +20,33 @@
     --border-radius: 1rem;
 }
 
+/* Animation "éblouissante" autour du live privé */
+.highlight-private-live {
+  position: relative;
+  font-weight: bold;
+  color: #ff80ab !important;
+  animation: pulseGlow 1.5s infinite;
+}
+
+.highlight-private-live::after {
+  content: "⬅ EN COURS EN CE MOMENT !";
+  color: gold;
+  font-size: 0.9rem;
+  margin-left: 8px;
+  animation: bounceArrow 1s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { text-shadow: 0 0 5px #ff4081, 0 0 10px #ff80ab; }
+  50% { text-shadow: 0 0 20px #ff4081, 0 0 30px #ff80ab; }
+  100% { text-shadow: 0 0 5px #ff4081, 0 0 10px #ff80ab; }
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
 body {
     background-color: var(--dark-bg);
     color: var(--text-light);
@@ -827,21 +854,47 @@ async function fetchPrivateLives() {
         liveContainer.innerHTML = '';
 
         lives.forEach(show => {
-            // Génération de l'URL Laravel correcte
+            // 🚫 Ignorer les shows terminés
+            if (show.etat && show.etat.toLowerCase() === "terminer") return;
+
+            // Génération de l'URL Laravel
             const url = privateLiveUrlTemplate
                 .replace(':modeleId', show.modele.id)
                 .replace(':showPriveId', show.id);
 
             const link = document.createElement('a');
             link.href = url;
-            link.textContent = `🔒 ${show.modele.prenom}`;
-            link.classList.add('d-block', 'mb-1');
+            link.classList.add('d-block', 'mb-2', 'p-2', 'rounded', 'text-decoration-none');
+
+            if (show.etat && show.etat.toLowerCase() === "en cours") {
+                // Prénom du modèle uniquement, en badge
+                link.innerHTML = `<span class="badge bg-danger">🔒 ${show.modele.prenom}</span>`;
+                link.classList.add("highlight-private-live");
+            } else {
+                // Formatage heure début et fin (HH:MM)
+                const debut = show.debut ? show.debut.substring(0,5) : '—';
+                const fin = show.fin ? show.fin.substring(0,5) : '—';
+                const date = show.date || '—';
+
+                // Prénom + date + heures dans des badges
+                link.innerHTML = `
+                    <span class="badge bg-primary">🔒 ${show.modele.prenom}</span>
+                    <span class="badge bg-secondary ms-2">${date}</span>
+                    <span class="badge bg-info ms-1">Début: ${debut}</span>
+                    <span class="badge bg-warning text-dark ms-1">Fin: ${fin}</span>
+                `;
+            }
+
             liveContainer.appendChild(link);
         });
     } catch (e) {
         console.error("Erreur de chargement des lives privés", e);
     }
 }
+
+
+
+
 
 
 fetchPrivateLives();

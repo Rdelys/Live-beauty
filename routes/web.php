@@ -184,3 +184,6 @@ Route::post('/show-prive/terminer/{id}', [App\Http\Controllers\ShowPriveControll
 
 Route::post('/show-prive/pause/{id}', [App\Http\Controllers\ShowPriveController::class, 'pause'])
     ->name('show.prive.pause');
+    
+Route::post('/show-prive/demarrer/{id}', [App\Http\Controllers\ShowPriveController::class, 'demarrer'])
+    ->name('show.prive.demarrer');
