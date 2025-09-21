@@ -371,9 +371,9 @@ label {
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="workspaceprive-tab" data-bs-toggle="tab" data-bs-target="#workspaceprive" type="button" role="tab">
       WorkSpace pour show privée
-    @if(isset($modele->showPrives) && $modele->showPrives->count() > 0)
-      <span class="tab-counter">{{ $modele->showPrives->count() }}</span>
-    @endif    </button>
+    @if(isset($modele->showPrives) && $modele->showPrives->where('etat', '!=', 'Terminer')->count() > 0)
+  <span class="tab-counter">{{ $modele->showPrives->where('etat', '!=', 'Terminer')->count() }}</span>
+@endif
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="jetons-tab" data-bs-toggle="tab" data-bs-target="#jetons" type="button" role="tab">Jetons</button>
@@ -602,19 +602,30 @@ label {
         </thead>
         <tbody>
           @foreach($modele->showPrives as $show)
-            <tr>
-              <td>{{ $show->date }}</td>
-              <td>{{ $show->debut }}</td>
-              <td>{{ $show->fin }}</td>
-              <td>{{ $show->duree }}</td>
-              <td>{{ $show->jetons_total }}</td>
-              <td>
-                <span class="badge bg-{{ $show->etat == 'valide' ? 'success' : ($show->etat == 'en_attente' ? 'warning' : 'secondary') }}">
-                  {{ ucfirst($show->etat) }}
-                </span>
-              </td>
-            </tr>
-          @endforeach
+  @if($show->etat !== 'Terminer') {{-- ⚡ masque bien les shows terminés --}}
+    <tr>
+      <td>{{ $show->date }}</td>
+      <td>{{ $show->debut }}</td>
+      <td>{{ $show->fin }}</td>
+      <td>{{ $show->duree }}</td>
+      <td>{{ $show->jetons_total }}</td>
+      <td>
+        @php
+          $badgeClass = match($show->etat) {
+              'valide'      => 'success',
+              'en_attente'  => 'warning',
+              'pause'       => 'info',    // 💡 bleu pour pause
+              default       => 'secondary'
+          };
+        @endphp
+        <span class="badge bg-{{ $badgeClass }}">
+          {{ ucfirst($show->etat) }}
+        </span>
+      </td>
+    </tr>
+  @endif
+@endforeach
+
         </tbody>
       </table>
     </div>
@@ -630,7 +641,7 @@ label {
       <select id="showPriveId" class="form-control" required>
         <option value="">-- Sélectionner --</option>
         @foreach($modele->showPrives as $show)
-          @if($show->etat == 'valide' || $show->etat == 'en_attente')
+          @if($show->etat == 'En pause' || $show->etat == 'en_attente')
             <option value="{{ $show->id }}" 
                     data-date="{{ $show->date }}"
                     data-start="{{ $show->debut }}" 
@@ -1116,9 +1127,21 @@ function startTimer(durationSeconds) {
     display.textContent = `${minutes}:${seconds}`;
 
     if (remaining <= 0) {
-      clearInterval(timerInterval);
-      stopPrivateBtn.click(); // 🔴 stoppe automatiquement le live
+  clearInterval(timerInterval);
+
+  stopPrivateBtn.click(); // 🔴 stoppe le live
+
+  // ✅ Marquer comme Terminé
+  fetch(`/show-prive/terminer/${currentShowPriveId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+      "Accept": "application/json"
     }
+  }).then(r => r.json())
+    .then(data => console.log("Show terminé automatiquement:", data));
+}
+
     remaining--;
   }
 
@@ -1290,6 +1313,15 @@ stopPrivateBtn?.addEventListener("click", () => {
   }
   if(privateSocket) privateSocket.disconnect();
 
+  // ✅ Marquer comme Pause (seulement si ce n’est pas la fin du chrono)
+fetch(`/show-prive/pause/${currentShowPriveId}`, {
+  method: "POST",
+  headers: {
+    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+    "Accept": "application/json"
+  }
+}).then(r => r.json())
+  .then(data => console.log("Show mis en pause:", data));
   // 🔴 Réinitialise la vidéoJ
   privateLiveVideo.srcObject = null;
   privateLiveSection.style.display = 'none';

@@ -58,5 +58,25 @@ class ShowPriveController extends Controller
 
         return back()->with('success', "Show privé réservé avec succès !");
     }
+
+    public function terminer($id)
+{
+    $show = ShowPrive::findOrFail($id);
+    $show->etat = 'Terminer';   // ou 'Terminé'
+    $show->fin = now();
+    $show->save();
+
+    return response()->json(['success' => true, 'etat' => 'termine']);
+}
+
+public function pause($id)
+{
+    $show = ShowPrive::findOrFail($id);
+    $show->etat = 'En pause';    // ou 'Pause'
+    $show->save();
+
+    return response()->json(['success' => true, 'etat' => 'pause']);
+}
+
 }
 

@@ -179,3 +179,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/api/shows-per-day', [AnalyticsController::class, 'showsPerDay']);
 });
 
+Route::post('/show-prive/terminer/{id}', [App\Http\Controllers\ShowPriveController::class, 'terminer'])
+    ->name('show.prive.terminer');
+
+Route::post('/show-prive/pause/{id}', [App\Http\Controllers\ShowPriveController::class, 'pause'])
+    ->name('show.prive.pause');
