@@ -62,19 +62,46 @@ class AnalyticsController extends Controller
     }
 
     public function showsPerDay(Request $request)
-    {
-        $days = (int)$request->get('days', 30);
-        $labels = $this->buildDateRange($days);
+{
+    $days = (int)$request->get('days', 30);
+    $labels = $this->buildDateRange($days);
 
-        // show_prives has a 'date' column (date of rdv). We group by that.
-        $rows = ShowPrive::selectRaw('DATE(date) as date, COUNT(*) as count')
-            ->where('date', '>=', now()->subDays($days-1)->toDateString())
-            ->groupBy('date')->orderBy('date')->get()->pluck('count','date')->toArray();
+    $rows = ShowPrive::selectRaw('DATE(date) as date, COUNT(*) as count, SUM(jetons_total) as total_jetons')
+        ->where('date', '>=', now()->subDays($days-1)->toDateString())
+        ->groupBy('date')->orderBy('date')
+        ->get();
 
-        $data = array_map(function($d) use ($rows) {
-            return isset($rows[$d]) ? (int)$rows[$d] : 0;
-        }, $labels);
+    // On prépare data + infos complémentaires
+    $counts = [];
+    $jetons = [];
+    $details = [];
 
-        return response()->json(['labels'=>$labels,'data'=>$data]);
+    foreach ($labels as $d) {
+        $row = $rows->firstWhere('date', $d);
+        $counts[] = $row ? (int)$row->count : 0;
+        $jetons[] = $row ? (int)$row->total_jetons : 0;
+
+        if ($row) {
+            // récupérer tous les shows du jour
+            $dayShows = ShowPrive::with(['user:id,pseudo','modele:id,prenom'])
+                ->whereDate('date', $d)->get();
+
+            $details[$d] = $dayShows->map(fn($s) => [
+                'user'   => $s->user->pseudo ?? '',
+                'modele' => $s->modele->prenom ?? '',
+                'jetons' => $s->jetons_total,
+            ]);
+        } else {
+            $details[$d] = [];
+        }
     }
+
+    return response()->json([
+        'labels'  => $labels,
+        'data'    => $counts,
+        'jetons'  => $jetons,
+        'details' => $details
+    ]);
+}
+
 }

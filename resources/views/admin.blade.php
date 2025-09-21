@@ -344,67 +344,91 @@ footer {
   </div>
 </div>
 
+<div class="content">
+  <div id="dashboard-content" class="content-section">
+    <h2>Tableau de bord</h2>
+    <p>Bienvenue dans l'espace d'administration de Live Beauty.</p>
 
-  <div class="content">
-    <div id="dashboard-content" class="content-section">
-  <h2>Tableau de bord</h2>
-  <p>Bienvenue dans l'espace d'administration de Live Beauty.</p>
+    <!-- === Cards Row === -->
+    <div class="row g-4 mb-4">
+      <!-- Card for Nombre de Modèles -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card bg-dark text-white h-100">
+          <div class="card-body">
+            <h5 class="card-title">Nombre de Modèles</h5>
+            <p class="card-text">{{ $nombreDeModeles }}</p>
+          </div>
+        </div>
+      </div>
 
-  <!-- Cards displaying the count of models and tokens -->
-  <div class="row">
-    <!-- Card for Nombre de Modèles -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card bg-dark text-white">
-        <div class="card-body">
-          <h5 class="card-title">Nombre de Modèles</h5>
-          <p class="card-text">{{ $nombreDeModeles }}</p>
+      <!-- Card for Nombre de Jetons -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card bg-dark text-white h-100">
+          <div class="card-body">
+            <h5 class="card-title">Nombre de Jetons</h5>
+            <p class="card-text">{{ $nombreDeJetons }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card for Nombre de Clients -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card bg-dark text-white h-100">
+          <div class="card-body">
+            <h5 class="card-title">Nombre de Clients</h5>
+            <p class="card-text">{{ $nombreDeClients }}</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Card for Nombre de Jetons -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card bg-dark text-white">
-        <div class="card-body">
-          <h5 class="card-title">Nombre de Jetons</h5>
-          <p class="card-text">{{ $nombreDeJetons }}</p>
+    <!-- === Charts Row === -->
+    <div class="row g-4">
+      <!-- Connexions -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card bg-dark text-white h-100 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">Connexions des modèles (par jour)</h5>
+            <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-connections-container')">
+              Plein écran
+            </button>
+          </div>
+          <div id="chart-connections-container" style="overflow-x:auto; height:400px;">
+            <canvas id="chart-connections"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jetons -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card bg-dark text-white h-100 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">Jetons achetés (par jour)</h5>
+            <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-tokens-container')">
+              Plein écran
+            </button>
+          </div>
+          <div id="chart-tokens-container" style="overflow-x:auto; height:400px;">
+            <canvas id="chart-tokens"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shows privés -->
+      <div class="col-lg-4 col-md-12">
+        <div class="card bg-dark text-white h-100 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">Shows privés (par jour)</h5>
+            <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-shows-container')">
+              Plein écran
+            </button>
+          </div>
+          <div id="chart-shows-container" style="overflow-x:auto; height:400px;">
+            <canvas id="chart-shows"></canvas>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Card pour Nombre de Clients -->
-<div class="col-md-6 col-lg-4">
-  <div class="card bg-dark text-white">
-    <div class="card-body">
-      <h5 class="card-title">Nombre de Clients</h5>
-      <p class="card-text">{{ $nombreDeClients }}</p>
-    </div>
-  </div>
-</div>
-<!-- === Charts Row === -->
-<div class="row mt-4">
-  <div class="col-lg-4 mb-3">
-    <div class="card bg-dark text-white p-3">
-      <h5 class="card-title">Connexions des modèles (par jour)</h5>
-      <canvas id="chart-connections" height="200"></canvas>
-    </div>
-  </div>
-
-  <div class="col-lg-4 mb-3">
-    <div class="card bg-dark text-white p-3">
-      <h5 class="card-title">Jetons achetés (par jour)</h5>
-      <canvas id="chart-tokens" height="200"></canvas>
-    </div>
-  </div>
-
-  <div class="col-lg-4 mb-3">
-    <div class="card bg-dark text-white p-3">
-      <h5 class="card-title">Shows privés (par jour)</h5>
-      <canvas id="chart-shows" height="200"></canvas>
-    </div>
-  </div>
-</div>
-
   </div>
 </div>
 
@@ -945,55 +969,189 @@ function sortTable(colIndex, type = 'string', dir = 'asc') {
 
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
 <script>
   async function fetchJson(url) {
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    return res.json();
-  }
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  return res.json();
+}
 
-  function renderLineChart(ctx, labels, data, label) {
-    return new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: label,
-          data: data,
-          fill: true,
-          tension: 0.3,
-          pointRadius: 2,
-        }]
-      },
-      options: {
-        scales: {
-          x: { display: true, title: { display: false } },
-          y: { beginAtZero: true }
+// 1. Connexions des modèles
+function renderConnectionsChart(ctx, labels, data) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Connexions/jour",
+        data: data,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ctx => `📈 ${ctx.raw} connexions`
+          }
         },
-        plugins: {
-          legend: { display: false }
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x',
+            modifierKey: null, // permet de pan librement sans touche
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'x'
+          }
         }
+      },
+      scales: {
+        x: {
+          ticks: { autoSkip: false }
+        },
+        y: { beginAtZero: true }
       }
-    });
-  }
+    }
+  });
+}
+
+
+// 2. Jetons achetés
+function renderTokensChart(ctx, labels, data) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Jetons/jour",
+        data: data,
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ctx => `💰 ${ctx.raw} jetons`
+          }
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x'
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'x'
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { autoSkip: false } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+
+// 3. Shows privés
+function renderShowsChart(ctx, labels, data) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Shows/jour",
+        data: data,
+        borderColor: "rgba(255, 99, 132, 1)",
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ctx => `🎬 ${ctx.raw} shows`
+          }
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x'
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'x'
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { autoSkip: false } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // endpoints (adapte si tu as prefix/middleware)
-    const base = '/admin';
-    // Connexions
-    const conn = await fetchJson(base + '/api/model-connections?days=30');
-    const ctxConn = document.getElementById('chart-connections').getContext('2d');
-    renderLineChart(ctxConn, conn.labels, conn.data, 'Connexions/jour');
+  const base = '/admin';
 
-    // Jetons achetés
-    const tokens = await fetchJson(base + '/api/tokens-purchased?days=30');
-    const ctxTokens = document.getElementById('chart-tokens').getContext('2d');
-    renderLineChart(ctxTokens, tokens.labels, tokens.data, 'Jetons achetés/jour');
+  // Connexions
+  const conn = await fetchJson(base + '/api/model-connections?days=30');
+  renderConnectionsChart(
+    document.getElementById('chart-connections').getContext('2d'),
+    conn.labels, conn.data
+  );
 
-    // Shows
-    const shows = await fetchJson(base + '/api/shows-per-day?days=30');
-    const ctxShows = document.getElementById('chart-shows').getContext('2d');
-    renderLineChart(ctxShows, shows.labels, shows.data, 'Shows/jour');
-  });
+  // Jetons achetés
+  const tokens = await fetchJson(base + '/api/tokens-purchased?days=30');
+  renderTokensChart(
+    document.getElementById('chart-tokens').getContext('2d'),
+    tokens.labels, tokens.data
+  );
+
+  // Shows privés
+  const shows = await fetchJson(base + '/api/shows-per-day?days=30');
+  renderShowsChart(
+    document.getElementById('chart-shows').getContext('2d'),
+    shows.labels, shows.data, shows.jetons, shows.details
+  );
+});
+
+function openFullscreen(id) {
+  const elem = document.getElementById(id);
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { // IE11
+    elem.msRequestFullscreen();
+  }
+}
+
 </script>
 
 </div>
