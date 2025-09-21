@@ -761,6 +761,27 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 
+<div class="modal fade" id="privateLiveConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-white" style="background:#1a1a1a; border-radius:15px; border:2px solid #d6336c;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-danger">
+          <i class="fas fa-lock me-2"></i> Live privé
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Souhaitez-vous accéder au live privé ou le décaler ?</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center">
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary rounded-pill" id="btnDecaler">Décaler</button>
+        <button type="button" class="btn btn-danger rounded-pill" id="btnAcceder">Accéder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- PayPal SDK + Script -->
 <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_LIVE_CLIENT_ID') }}&currency=EUR"></script>
@@ -860,6 +881,8 @@ function formatDateTime(dateString, timeString) {
     return `${day} ${month} ${year}`;
 }
 
+let selectedLiveUrl = null; // stocke temporairement l'URL du live
+
 async function fetchPrivateLives() {
     try {
         const response = await fetch('/api/live/private');
@@ -871,23 +894,33 @@ async function fetchPrivateLives() {
         lives.forEach(show => {
             if (show.etat && show.etat.toLowerCase() === "terminer") return;
 
+            const isEnCours = show.etat && show.etat.toLowerCase() === "en cours";
             const url = privateLiveUrlTemplate
                 .replace(':modeleId', show.modele.id)
                 .replace(':showPriveId', show.id);
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.classList.add('d-block', 'mb-2', 'p-2', 'rounded', 'text-decoration-none');
+            const wrapper = document.createElement('a');
+            wrapper.href = "#"; // pas de redirection directe
+            wrapper.classList.add('d-block', 'mb-2', 'p-2', 'rounded', 'text-decoration-none');
 
-            if (show.etat && show.etat.toLowerCase() === "en cours") {
-                link.innerHTML = `<span class="badge bg-danger">🔒 ${show.modele.prenom}</span>`;
-                link.classList.add("highlight-private-live");
+            if (isEnCours) {
+                wrapper.innerHTML = `<span class="badge bg-danger">🔒 ${show.modele.prenom}</span>`;
+                wrapper.classList.add("highlight-private-live");
+
+                // Gestion du clic
+                wrapper.addEventListener("click", e => {
+                    e.preventDefault();
+                    selectedLiveUrl = url; // stocke le lien du live en cours
+                    const modal = new bootstrap.Modal(document.getElementById('privateLiveConfirmModal'));
+                    modal.show();
+                });
+
             } else {
                 const debut = show.debut ? show.debut.substring(0,5) : '—';
                 const fin = show.fin ? show.fin.substring(0,5) : '—';
                 const date = formatDateTime(show.date);
 
-                link.innerHTML = `
+                wrapper.innerHTML = `
                     <span class="badge bg-primary">🔒 ${show.modele.prenom}</span>
                     <span class="badge bg-secondary ms-2">${date}</span>
                     <span class="badge bg-info ms-1">Début: ${debut}</span>
@@ -895,12 +928,26 @@ async function fetchPrivateLives() {
                 `;
             }
 
-            liveContainer.appendChild(link);
+            liveContainer.appendChild(wrapper);
         });
     } catch (e) {
         console.error("Erreur de chargement des lives privés", e);
     }
 }
+
+// Bouton Accéder
+document.getElementById('btnAcceder').addEventListener('click', () => {
+    if (selectedLiveUrl) {
+        window.location.href = selectedLiveUrl;
+    }
+});
+
+// Bouton Décaler (on traitera après)
+document.getElementById('btnDecaler').addEventListener('click', () => {
+    alert("🚧 Fonction Décaler à implémenter...");
+});
+
+
 
 
 
@@ -913,6 +960,8 @@ setInterval(fetchPrivateLives, 15000);
 
 </script>
 
-  
+  <!-- Modal confirmation accès -->
+
+
 </body>
 </html>
