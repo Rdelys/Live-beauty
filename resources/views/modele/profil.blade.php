@@ -1449,8 +1449,18 @@ togglePrivateMicBtn?.addEventListener("click", () => {
 
 <div class="mb-3">
   <label class="form-label">Langues parlées</label>
-  <input type="text" name="langue" value="{{ $modele->langue ?? '' }}" class="form-control" placeholder="🇫🇷 Français, 🇬🇧 Anglais">
+  <select name="langue" class="form-control">
+    <option value="" disabled selected>{{ $modele->langue ? $modele->langue : 'Sélectionnez une langue' }}</option>
+    <option value="FR" {{ (old('langue', $modele->langue) == 'FR') ? 'selected' : '' }}>Francais</option>
+    <option value="EN" {{ (old('langue', $modele->langue) == 'EN') ? 'selected' : '' }}>Anglais</option>
+    <option value="DE" {{ (old('langue', $modele->langue) == 'DE') ? 'selected' : '' }}>Allemand</option>
+    <option value="ES" {{ (old('langue', $modele->langue) == 'ES') ? 'selected' : '' }}>Espagnol</option>
+    <option value="IT" {{ (old('langue', $modele->langue) == 'IT') ? 'selected' : '' }}>Italien</option>
+    <option value="PT" {{ (old('langue', $modele->langue) == 'PT') ? 'selected' : '' }}>Portugais</option>
+    <option value="NL" {{ (old('langue', $modele->langue) == 'NL') ? 'selected' : '' }}>Néerlandais</option>
+  </select>
 </div>
+
 
 <div class="mb-3">
   <label class="form-label">Ce qu’elle propose</label>

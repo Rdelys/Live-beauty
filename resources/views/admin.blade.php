@@ -673,8 +673,17 @@ footer {
 
 <div class="mb-3">
   <label class="form-label">Langues parlées</label>
-  <input type="text" name="langue" class="form-control" placeholder="ex: 🇫🇷 Français, 🇬🇧 Anglais">
+  <select name="langue" class="form-control">
+    <option value="FR">Francais</option>
+    <option value="EN">Anglais</option>
+    <option value="DE">Allemand</option>
+    <option value="ES">Espagnol</option>
+    <option value="IT">Italien</option>
+    <option value="PT">Portugais</option>
+    <option value="NL">Néerlandais</option>
+  </select>
 </div>
+
 
 <div class="mb-3">
   <label class="form-label">Ce qu’elle propose</label>
