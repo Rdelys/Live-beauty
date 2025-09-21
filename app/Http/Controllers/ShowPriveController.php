@@ -87,6 +87,47 @@ public function demarrer($id)
     return response()->json(['success' => true, 'etat' => 'en_cours']);
 }
 
+// app/Http/Controllers/ShowPriveController.php
+
+public function getShowPrive($id)
+{
+    $show = ShowPrive::findOrFail($id);
+    return response()->json($show);
+}
+
+public function decaler(Request $request, $id)
+{
+    $show = ShowPrive::findOrFail($id);
+
+    $date = $request->date;
+    $debut = $request->debut;
+
+    // Validation : ne peut pas être dans le passé si aujourd'hui
+    if ($date === date('Y-m-d') && strtotime($debut) <= time()) {
+        return response()->json(['success'=>false, 'message'=>'Impossible de choisir une heure passée.']);
+    }
+
+    // Calcul fin automatiquement
+    $finTimestamp = strtotime($debut) + ($show->duree * 60);
+    $fin = date('H:i', $finTimestamp);
+
+    $show->update([
+        'date' => $date,
+        'debut' => $debut,
+        'fin' => $fin
+    ]);
+
+    // Envoi mail au modèle et à l'utilisateur
+    Mail::raw("Le show privé prévu avec {$show->modele->prenom} a été décalé au {$date} de {$debut} à {$fin}.", function($msg) use ($show) {
+        $msg->to($show->user->email)->subject("Show privé décalé");
+    });
+
+    Mail::raw("Votre show privé avec {$show->user->nom} a été décalé au {$date} de {$debut} à {$fin}.", function($msg) use ($show) {
+        $msg->to($show->modele->email)->subject("Show privé décalé");
+    });
+
+    return response()->json(['success'=>true]);
+}
 
 }
 

@@ -188,5 +188,7 @@ Route::post('/show-prive/pause/{id}', [App\Http\Controllers\ShowPriveController:
 Route::post('/show-prive/demarrer/{id}', [App\Http\Controllers\ShowPriveController::class, 'demarrer'])
     ->name('show.prive.demarrer');
 
-Route::post('/live/private/decaler/{id}', [ShowPriveController::class, 'decaler'])
-    ->name('live.private.decaler');
+// routes/web.php
+Route::post('/showprive/{id}/decaler', [ShowPriveController::class, 'decaler'])->name('showprive.decaler');
+Route::get('/api/showprive/{id}', [ShowPriveController::class, 'getShowPrive']); // pour fetch JS
+

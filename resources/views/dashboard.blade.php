@@ -855,6 +855,36 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 
+<div class="modal fade" id="decalerLiveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="decalerLiveForm" class="modal-content" style="background:#1a1a1a; color:#fff; border-radius:15px; border:2px solid #d6336c;">
+      @csrf
+      <input type="hidden" name="show_id" id="decaler_show_id">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="fas fa-calendar-alt me-2"></i> Décaler le show privé</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control bg-dark text-white border-danger" name="date" id="decaler_date" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Heure de début</label>
+          <input type="time" class="form-control bg-dark text-white border-danger" name="debut" id="decaler_debut" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Heure de fin</label>
+          <input type="time" class="form-control bg-dark text-white border-danger" name="fin" id="decaler_fin" readonly>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill">Enregistrer le nouveau créneau</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 function openFullscreen(element) {
     if (element.requestFullscreen) {
@@ -943,9 +973,93 @@ document.getElementById('btnAcceder').addEventListener('click', () => {
 });
 
 // Bouton Décaler (on traitera après)
-document.getElementById('btnDecaler').addEventListener('click', () => {
-    alert("🚧 Fonction Décaler à implémenter...");
+const decalerModal = new bootstrap.Modal(document.getElementById('decalerLiveModal'));
+let showDureeMinutes = 0; // durée du show en minutes
+
+document.getElementById('btnDecaler').addEventListener('click', async () => {
+    if (!selectedLiveUrl) return;
+
+    // Récupération de l'ID du show depuis l'URL
+    const urlParts = selectedLiveUrl.split('/');
+    const showId = urlParts[urlParts.length - 1];
+
+    document.getElementById('decaler_show_id').value = showId;
+
+    // Récupérer la durée du show depuis l'API
+    const response = await fetch(`/api/showprive/${showId}`);
+    const show = await response.json();
+    showDureeMinutes = show.duree;
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('decaler_date').value = show.date;
+    document.getElementById('decaler_date').setAttribute('min', today);
+
+    document.getElementById('decaler_debut').value = show.debut;
+    updateFin();
+
+    decalerModal.show();
 });
+
+// Calcul automatique de l'heure de fin
+document.getElementById('decaler_debut').addEventListener('input', updateFin);
+document.getElementById('decaler_date').addEventListener('change', () => {
+    const selectedDate = document.getElementById('decaler_date').value;
+    const today = new Date().toISOString().split('T')[0];
+    const debutInput = document.getElementById('decaler_debut');
+    if (selectedDate === today) {
+        const now = new Date();
+        const minTime = now.toTimeString().substring(0,5);
+        if (debutInput.value < minTime) debutInput.value = minTime;
+        debutInput.setAttribute('min', minTime);
+    } else {
+        debutInput.removeAttribute('min');
+    }
+    updateFin();
+});
+
+function updateFin() {
+    const debut = document.getElementById('decaler_debut').value;
+    if (!debut || !showDureeMinutes) return;
+
+    const [h, m] = debut.split(':').map(Number);
+    const finDate = new Date();
+    finDate.setHours(h);
+    finDate.setMinutes(m + showDureeMinutes);
+
+    const finH = String(finDate.getHours()).padStart(2, '0');
+    const finM = String(finDate.getMinutes()).padStart(2, '0');
+
+    document.getElementById('decaler_fin').value = `${finH}:${finM}`;
+}
+
+// Soumission du formulaire
+document.getElementById('decalerLiveForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+        date: form.date.value,
+        debut: form.debut.value,
+        fin: form.fin.value,
+        _token: form._token.value
+    };
+
+    const showId = form.show_id.value;
+    const res = await fetch(`/showprive/${showId}/decaler`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    if (result.success) {
+        alert('📅 Show privé décalé avec succès !');
+        decalerModal.hide();
+        fetchPrivateLives(); // rafraîchit la liste
+    } else {
+        alert(result.message || 'Erreur lors du décalage.');
+    }
+});
+
 
 
 
