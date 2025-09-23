@@ -930,6 +930,9 @@ async function fetchPrivateLives() {
             return;
         }
 
+        // Vérifier s’il existe un live en cours
+        const hasLiveEnCours = activeLives.some(show => show.etat && show.etat.toLowerCase() === "en cours");
+
         // Bouton pour réduire/ouvrir
         const toggleBtn = document.createElement('button');
         toggleBtn.classList.add("btn", "btn-sm", "btn-outline-light", "mb-2", "w-100");
@@ -937,7 +940,15 @@ async function fetchPrivateLives() {
         toggleBtn.setAttribute("data-bs-target", "#collapsePrivateLives");
         toggleBtn.setAttribute("aria-expanded", "false");
         toggleBtn.setAttribute("aria-controls", "collapsePrivateLives");
-        toggleBtn.innerText = `Shows privés (${activeLives.length})`;
+
+        if (hasLiveEnCours) {
+            toggleBtn.innerHTML = `Shows privés (${activeLives.length}) 
+                <span class="ms-2 badge bg-danger">EN COURS 🔥</span>`;
+            toggleBtn.classList.add("highlight-private-live");
+        } else {
+            toggleBtn.innerText = `Shows privés (${activeLives.length})`;
+        }
+
         liveContainer.appendChild(toggleBtn);
 
         // Conteneur collapsible
