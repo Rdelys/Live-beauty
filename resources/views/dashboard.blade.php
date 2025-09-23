@@ -921,26 +921,49 @@ async function fetchPrivateLives() {
         const liveContainer = document.getElementById('privateLives');
         liveContainer.innerHTML = '';
 
-        lives.forEach(show => {
-            if (show.etat && show.etat.toLowerCase() === "terminer") return;
+        // Filtrer les shows terminés
+        const activeLives = lives.filter(show => !(show.etat && show.etat.toLowerCase() === "terminer"));
 
+        // ✅ Si aucun show privé -> afficher un message et sortir
+        if (activeLives.length === 0) {
+            liveContainer.innerHTML = `<span class="text-muted fst-italic">Aucun show privé disponible</span>`;
+            return;
+        }
+
+        // Bouton pour réduire/ouvrir
+        const toggleBtn = document.createElement('button');
+        toggleBtn.classList.add("btn", "btn-sm", "btn-outline-light", "mb-2", "w-100");
+        toggleBtn.setAttribute("data-bs-toggle", "collapse");
+        toggleBtn.setAttribute("data-bs-target", "#collapsePrivateLives");
+        toggleBtn.setAttribute("aria-expanded", "false");
+        toggleBtn.setAttribute("aria-controls", "collapsePrivateLives");
+        toggleBtn.innerText = `Shows privés (${activeLives.length})`;
+        liveContainer.appendChild(toggleBtn);
+
+        // Conteneur collapsible
+        const collapseDiv = document.createElement('div');
+        collapseDiv.classList.add("collapse");
+        collapseDiv.id = "collapsePrivateLives";
+        liveContainer.appendChild(collapseDiv);
+
+        // Boucle sur les shows actifs
+        activeLives.forEach(show => {
             const isEnCours = show.etat && show.etat.toLowerCase() === "en cours";
             const url = privateLiveUrlTemplate
                 .replace(':modeleId', show.modele.id)
                 .replace(':showPriveId', show.id);
 
             const wrapper = document.createElement('a');
-            wrapper.href = "#"; // pas de redirection directe
+            wrapper.href = "#"; 
             wrapper.classList.add('d-block', 'mb-2', 'p-2', 'rounded', 'text-decoration-none');
 
             if (isEnCours) {
                 wrapper.innerHTML = `<span class="badge bg-danger">🔒 ${show.modele.prenom}</span>`;
                 wrapper.classList.add("highlight-private-live");
 
-                // Gestion du clic
                 wrapper.addEventListener("click", e => {
                     e.preventDefault();
-                    selectedLiveUrl = url; // stocke le lien du live en cours
+                    selectedLiveUrl = url;
                     const modal = new bootstrap.Modal(document.getElementById('privateLiveConfirmModal'));
                     modal.show();
                 });
@@ -958,12 +981,16 @@ async function fetchPrivateLives() {
                 `;
             }
 
-            liveContainer.appendChild(wrapper);
+            collapseDiv.appendChild(wrapper);
         });
+
     } catch (e) {
         console.error("Erreur de chargement des lives privés", e);
+        document.getElementById('privateLives').innerHTML =
+            `<span class="text-danger">Impossible de charger les shows privés</span>`;
     }
 }
+
 
 // Bouton Accéder
 document.getElementById('btnAcceder').addEventListener('click', () => {

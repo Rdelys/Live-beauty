@@ -15,9 +15,9 @@ class UpdateShowStatus extends Command
     {
         $now = Carbon::now();
 
-        $updated = ShowPrive::where('etat', '!=', 'Terminé')
+        $updated = ShowPrive::where('etat', '!=', 'Terminer')
             ->whereRaw("STR_TO_DATE(CONCAT(date, ' ', fin), '%Y-%m-%d %H:%i:%s') <= ?", [$now])
-            ->update(['etat' => 'Terminé']);
+            ->update(['etat' => 'Terminer']);
 
         $this->info("Shows mis à jour : {$updated}");
     }
