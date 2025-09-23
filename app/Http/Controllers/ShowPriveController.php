@@ -18,10 +18,15 @@ class ShowPriveController extends Controller
         $modele = Modele::findOrFail($request->modele_id);
 
         // Calcul coût
-        $duree = (strtotime($request->fin) - strtotime($request->debut)) / 60;
+        // Ajout de 10 minutes bonus
+        $finAvecBonus = date('H:i', strtotime($request->fin) + (10 * 60));
+
+        // Calcul durée (en tenant compte du bonus)
+        $duree = (strtotime($finAvecBonus) - strtotime($request->debut)) / 60;
         if ($duree <= 0) {
             return back()->with('error', 'Durée invalide.');
         }
+
 
         $tranches = ceil($duree / ($modele->duree_show_privee ?? 30));
         $jetonsTotal = $tranches * ($modele->nombre_jetons_show_privee ?? 0);
@@ -41,7 +46,7 @@ class ShowPriveController extends Controller
             'modele_id'    => $modele->id,
             'date'         => $request->date,
             'debut'        => $request->debut,
-            'fin'          => $request->fin,
+            'fin'          => $finAvecBonus,  // ⚡ fin = heure choisie + 10 min
             'duree'        => $duree,
             'jetons_total' => $jetonsTotal,
             'etat'         => 'en_attente',
@@ -66,7 +71,7 @@ class ShowPriveController extends Controller
     $show->fin = now();
     $show->save();
 
-    return response()->json(['success' => true, 'etat' => 'termine']);
+    return response()->json(['success' => true, 'etat' => 'terminer']);
 }
 
 public function pause($id)
