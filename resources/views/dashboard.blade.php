@@ -1114,6 +1114,7 @@ setInterval(fetchPrivateLives, 15000);
 
   <!-- Modal confirmation accès -->
 
+<x-private-live-popup />
 
 </body>
 </html>
