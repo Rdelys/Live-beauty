@@ -1283,7 +1283,7 @@ startPrivateForm?.addEventListener("submit", async (e) => {
   }).then(r => r.json())
     .then(data => console.log("Show démarré:", data));
 
-    privateSocket = io("http://localhost:3000/", {
+    privateSocket = io("wss://livebeautyofficial.com", {
       path: "/socket.io",
       transports: ["websocket"]
     });
