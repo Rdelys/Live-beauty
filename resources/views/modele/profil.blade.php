@@ -1378,14 +1378,38 @@ privateSocket.emit("broadcaster", {
 
     /* VIEWERS */
     privateSocket.on("viewer-connected", (data) => {
-      privateViewers[data.socketId] = data.pseudo;
-      updatePrivateViewers();
-      soundEnter.play().catch(()=>{});
-    });
+  privateViewers[data.socketId] = data.pseudo;
+  updatePrivateViewers();
+  soundEnter.play().catch(()=>{});
+
+  // 👉 Si le chrono est terminé et qu’on avait suspendu le débit → on relance
+  const timerText = document.getElementById("privateTimer")?.textContent || "00:00";
+  if (timerText === "00:00" && !debitInterval) {
+    startDebitLoop();
+    const bubble = document.createElement("div");
+    bubble.classList.add("chat-bubble");
+    bubble.innerHTML = `▶️ Débit repris : client reconnecté`;
+    privateMessagesDiv.appendChild(bubble);
+    privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+  }
+});
+
+
     privateSocket.on("viewer-disconnected", (socketId) => {
-      delete privateViewers[socketId];
-      updatePrivateViewers();
-    });
+  delete privateViewers[socketId];
+  updatePrivateViewers();
+
+  // 👉 Si plus aucun client présent, on stoppe le débit
+  if (Object.keys(privateViewers).length === 0) {
+    stopDebitLoop();
+    const bubble = document.createElement("div");
+    bubble.classList.add("chat-bubble");
+    bubble.innerHTML = `⏸ Débit suspendu : aucun client connecté`;
+    privateMessagesDiv.appendChild(bubble);
+    privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+  }
+});
+
 
     function updatePrivateViewers() {
       document.getElementById("privateViewersCount").textContent = Object.keys(privateViewers).length;
