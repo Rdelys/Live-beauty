@@ -408,8 +408,13 @@ footer {
           <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-connections-container')">Plein écran</button>
         </div>
         <div id="chart-connections-container" style="overflow-x:auto; height:350px;">
-          <canvas id="chart-connections"></canvas>
-        </div>
+  <canvas id="chart-connections"></canvas>
+</div>
+<div class="mt-2 text-center">
+  <button class="btn btn-sm btn-secondary" onclick="resetZoom('chart-connections')">🔄 Reset</button>
+  <button class="btn btn-sm btn-secondary" onclick="panChart('chart-connections', -50)">⬅️</button>
+  <button class="btn btn-sm btn-secondary" onclick="panChart('chart-connections', 50)">➡️</button>
+</div>
       </div>
     </div>
 
@@ -421,8 +426,13 @@ footer {
           <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-tokens-container')">Plein écran</button>
         </div>
         <div id="chart-tokens-container" style="overflow-x:auto; height:350px;">
-          <canvas id="chart-tokens"></canvas>
-        </div>
+  <canvas id="chart-tokens"></canvas>
+</div>
+<div class="mt-2 text-center">
+  <button class="btn btn-sm btn-secondary" onclick="resetZoom('chart-tokens')">🔄 Reset</button>
+  <button class="btn btn-sm btn-secondary" onclick="panChart('chart-tokens', -50)">⬅️</button>
+  <button class="btn btn-sm btn-secondary" onclick="panChart('chart-tokens', 50)">➡️</button>
+</div>
       </div>
     </div>
 
@@ -434,8 +444,13 @@ footer {
           <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-shows-container')">Plein écran</button>
         </div>
         <div id="chart-shows-container" style="overflow-x:auto; height:350px;">
-          <canvas id="chart-shows"></canvas>
-        </div>
+  <canvas id="chart-shows"></canvas>
+</div>
+<div class="mt-2 text-center">
+  <button class="btn btn-sm btn-secondary" onclick="resetZoom('chart-shows')">🔄 Reset</button>
+  <button class="btn btn-sm btn-secondary" onclick="panChart('chart-shows', -50)">⬅️</button>
+  <button class="btn btn-sm btn-secondary" onclick="panChart('chart-shows', 50)">➡️</button>
+</div>
       </div>
     </div>
   </div>
@@ -1097,17 +1112,9 @@ function renderConnectionsChart(ctx, labels, data) {
           }
         },
         zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x',
-            modifierKey: null, // permet de pan librement sans touche
-          },
-          zoom: {
-            wheel: { enabled: true },
-            pinch: { enabled: true },
-            mode: 'x'
-          }
-        }
+    pan: { enabled: true, mode: 'x' },
+    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+  }
       },
       scales: {
         x: {
@@ -1146,16 +1153,9 @@ function renderTokensChart(ctx, labels, data) {
           }
         },
         zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x'
-          },
-          zoom: {
-            wheel: { enabled: true },
-            pinch: { enabled: true },
-            mode: 'x'
-          }
-        }
+    pan: { enabled: true, mode: 'x' },
+    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+  }
       },
       scales: {
         x: { ticks: { autoSkip: false } },
@@ -1273,6 +1273,19 @@ function openFullscreen(id) {
     elem.webkitRequestFullscreen();
   } else if (elem.msRequestFullscreen) { // IE11
     elem.msRequestFullscreen();
+  }
+}
+function resetZoom(chartId) {
+  const chart = Chart.getChart(chartId);
+  if (chart) {
+    chart.resetZoom();
+  }
+}
+
+function panChart(chartId, amount) {
+  const chart = Chart.getChart(chartId);
+  if (chart) {
+    chart.pan({ x: amount }, undefined, 'default');
   }
 }
 
