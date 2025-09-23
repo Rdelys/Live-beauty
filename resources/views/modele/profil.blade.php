@@ -641,7 +641,7 @@ label {
       <select id="showPriveId" class="form-control" required>
         <option value="">-- Sélectionner --</option>
         @foreach($modele->showPrives as $show)
-          @if($show->etat == 'En pause' || $show->etat == 'en_attente')
+          @if($show->etat !== 'Terminer')
             <option value="{{ $show->id }}" 
                     data-date="{{ $show->date }}"
                     data-start="{{ $show->debut }}" 
@@ -1129,26 +1129,114 @@ function startTimer(durationSeconds) {
     display.textContent = `${minutes}:${seconds}`;
 
     if (remaining <= 0) {
-  clearInterval(timerInterval);
+      clearInterval(timerInterval);
 
-  stopPrivateBtn.click(); // 🔴 stoppe le live
+      // ✅ NE PAS arrêter le live
+      // stopPrivateBtn.click();
 
-  // ✅ Marquer comme Terminé
+      // ✅ Démarrer le débit automatique à la minute
+      startDebitLoop();
+    }
+
+    remaining--;
+  }
+
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+let debitInterval;
+
+function startDebitLoop() {
+  // ✅ Message automatique côté modèle
+  const bubbleStart = document.createElement("div");
+  bubbleStart.classList.add("chat-bubble");
+  bubbleStart.innerHTML = `⏳ Le chrono est terminé. Début des déductions automatiques par minute...`;
+  privateMessagesDiv.appendChild(bubbleStart);
+  privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+
+  // ✅ Envoi aussi côté client (socket)
+  privateSocket?.emit("chat-message", {
+    showPriveId: currentShowPriveId,
+    pseudo: "Système",
+    message: "⏳ Le chrono est terminé. Début des déductions automatiques par minute..."
+  });
+
+  debitInterval = setInterval(() => {
+    fetch(`/show-prive/debiter/${currentShowPriveId}`, {
+      method: "POST",
+      headers: {
+        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+        "Accept": "application/json"
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        // ✅ Message côté modèle
+        const bubble = document.createElement("div");
+        bubble.classList.add("chat-bubble");
+        bubble.innerHTML = `💎 Débit automatique : -${data.debit} jetons (reste ${data.jetons_restants})`;
+        privateMessagesDiv.appendChild(bubble);
+        privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+
+        // ✅ Message côté client via Socket
+        privateSocket?.emit("chat-message", {
+          showPriveId: currentShowPriveId,
+          pseudo: "Système",
+          message: `💎 Débit automatique : -${data.debit} jetons (reste ${data.jetons_restants})`
+        });
+
+      } else {
+        const bubbleStop = document.createElement("div");
+        bubbleStop.classList.add("chat-bubble");
+        bubbleStop.innerHTML = `❌ Fin du show : ${data.message}`;
+        privateMessagesDiv.appendChild(bubbleStop);
+        privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+
+        // ✅ Message côté client
+        privateSocket?.emit("chat-message", {
+          showPriveId: currentShowPriveId,
+          pseudo: "Système",
+          message: `❌ Fin du show : ${data.message}`
+        });
+
+        stopPrivateShow();
+      }
+    });
+  }, 60_000); // toutes les 60 secondes
+}
+
+
+
+function stopDebitLoop() {
+  clearInterval(debitInterval);
+}
+
+function stopPrivateShow() {
+  stopDebitLoop();
+
   fetch(`/show-prive/terminer/${currentShowPriveId}`, {
     method: "POST",
     headers: {
       "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
       "Accept": "application/json"
     }
-  }).then(r => r.json())
-    .then(data => console.log("Show terminé automatiquement:", data));
-}
+  });
 
-    remaining--;
+  // Arrêter flux & connexions
+  if(privateStream) privateStream.getTracks().forEach(t => t.stop());
+  for (let id in privatePeerConnections){
+    privatePeerConnections[id].close();
+    delete privatePeerConnections[id];
   }
+  if(privateSocket) privateSocket.disconnect();
 
-  updateTimer(); // premier affichage
-  timerInterval = setInterval(updateTimer, 1000);
+  privateLiveVideo.srcObject = null;
+  privateLiveSection.style.display = 'none';
+  startPrivateForm.style.display = 'block';
+  stopPrivateBtn.style.display = 'none';
+  document.getElementById("privateTimer").textContent = "00:00";
 }
 
 clearInterval(timerInterval);
@@ -1195,7 +1283,7 @@ startPrivateForm?.addEventListener("submit", async (e) => {
   }).then(r => r.json())
     .then(data => console.log("Show démarré:", data));
 
-    privateSocket = io("wss://livebeautyofficial.com", {
+    privateSocket = io("http://localhost:3000/", {
       path: "/socket.io",
       transports: ["websocket"]
     });
@@ -1318,33 +1406,42 @@ privateSocket.emit("broadcaster", {
 
 // === STOP LIVE PRIVÉ ===
 stopPrivateBtn?.addEventListener("click", () => {
-  // 🔴 Stoppe flux et connexions
-  if(privateStream) privateStream.getTracks().forEach(t => t.stop());
-  for (let id in privatePeerConnections){
+  const timerText = document.getElementById("privateTimer")?.textContent || "00:00";
+
+  // ✅ Si le chrono est terminé (00:00) → on termine complètement le show
+  if (timerText === "00:00") {
+    stopPrivateShow(); // appelle la fonction qui marque etat = Terminer
+    return;
+  }
+
+  // ✅ Sinon → on met juste en pause
+  if (privateStream) privateStream.getTracks().forEach(t => t.stop());
+  for (let id in privatePeerConnections) {
     privatePeerConnections[id].close();
     delete privatePeerConnections[id];
   }
-  if(privateSocket) privateSocket.disconnect();
+  if (privateSocket) privateSocket.disconnect();
 
-  // ✅ Marquer comme Pause (seulement si ce n’est pas la fin du chrono)
-fetch(`/show-prive/pause/${currentShowPriveId}`, {
-  method: "POST",
-  headers: {
-    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-    "Accept": "application/json"
-  }
-}).then(r => r.json())
-  .then(data => console.log("Show mis en pause:", data));
-  // 🔴 Réinitialise la vidéoJ
+  fetch(`/show-prive/pause/${currentShowPriveId}`, {
+    method: "POST",
+    headers: {
+      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+      "Accept": "application/json"
+    }
+  }).then(r => r.json())
+    .then(data => console.log("Show mis en pause:", data));
+
+  // 🔴 Réinitialise la vidéo
   privateLiveVideo.srcObject = null;
   privateLiveSection.style.display = 'none';
   startPrivateForm.style.display = 'block';
   stopPrivateBtn.style.display = 'none';
 
-  // ✅ Réinitialise le chrono
+  // ✅ Le chrono est juste arrêté côté front,
+  // mais il reprendra correctement au redémarrage
   clearInterval(timerInterval);
-  document.getElementById("privateTimer").textContent = "00:00";
 });
+
 
 /* === CONTROLES LIVE PRIVÉ === */
 const pausePrivateBtn = document.getElementById("pausePrivateBtn");

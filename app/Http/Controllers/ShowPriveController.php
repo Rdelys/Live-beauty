@@ -129,5 +129,40 @@ public function decaler(Request $request, $id)
     return response()->json(['success'=>true]);
 }
 
+// app/Http/Controllers/ShowPriveController.php
+public function debiterJetons($showPriveId) {
+    $show = ShowPrive::findOrFail($showPriveId);
+    $user = $show->user; // client lié au show
+    $modele = $show->modele;
+
+    // calcule coût par minute
+    $coutParMinute = $modele->nombre_jetons_show_privee / $modele->duree_show_privee;
+
+    if ($user->jetons >= $coutParMinute) {
+        $user->jetons -= $coutParMinute;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'jetons_restants' => $user->jetons,
+            'debit' => $coutParMinute
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => "Solde insuffisant"
+        ]);
+    }
+}
+
+public function terminerShow($showPriveId) {
+    $show = ShowPrive::findOrFail($showPriveId);
+    $show->etat = "Terminer";
+    $show->fin = now();
+    $show->save();
+
+    return response()->json(['success' => true]);
+}
+
 }
 

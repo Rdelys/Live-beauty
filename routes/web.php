@@ -192,3 +192,6 @@ Route::post('/show-prive/demarrer/{id}', [App\Http\Controllers\ShowPriveControll
 Route::post('/showprive/{id}/decaler', [ShowPriveController::class, 'decaler'])->name('showprive.decaler');
 Route::get('/api/showprive/{id}', [ShowPriveController::class, 'getShowPrive']); // pour fetch JS
 
+// routes/web.php
+Route::post('/show-prive/debiter/{showPriveId}', [ShowPriveController::class, 'debiterJetons']);
+Route::post('/show-prive/terminer/{showPriveId}', [ShowPriveController::class, 'terminerShow']);
