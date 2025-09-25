@@ -1209,6 +1209,20 @@ setInterval(fetchPrivateLives, 15000);
   <!-- Modal confirmation accès -->
 
 <x-private-live-popup />
+<script>
+// Bloquer le clic droit et le drag sur les images floutées
+document.addEventListener("contextmenu", function(e) {
+    if (e.target.closest(".blur-wrapper")) {
+        e.preventDefault();
+    }
+});
+
+document.addEventListener("dragstart", function(e) {
+    if (e.target.closest(".blur-wrapper")) {
+        e.preventDefault();
+    }
+});
+</script>
 
 </body>
 </html>

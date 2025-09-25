@@ -995,5 +995,19 @@ function openFullscreen(element) {
 }
 </script>
 
+<script>
+// Bloquer le clic droit et le drag sur les images floutées
+document.addEventListener("contextmenu", function(e) {
+    if (e.target.closest(".blur-wrapper")) {
+        e.preventDefault();
+    }
+});
+
+document.addEventListener("dragstart", function(e) {
+    if (e.target.closest(".blur-wrapper")) {
+        e.preventDefault();
+    }
+});
+</script>
 </body>
 </html>
