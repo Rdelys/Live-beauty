@@ -94,33 +94,76 @@
         padding: 0.25rem 0;
         font-size: 1rem;
     }
+
+ .vignette-locked {
+    position: relative;
+    display: inline-block;
+}
+
+.vignette-locked img {
+    filter: blur(6px);
+    pointer-events: none; /* empêche le clic */
+}
+
+.vignette-locked .overlay-lock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: #fff;
+    background: rgba(0,0,0,0.6);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+
 </style>
 
 <div class="container modele-container py-5">
     <div class="row gy-4">
 
-        <div class="col-12 col-md-6">
-            @php
-                $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
-                $firstPhoto = $photos[0] ?? null;
-            @endphp
+       <div class="col-12 col-md-6">
+    @php
+        $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+        $firstPhoto = $photos[0] ?? null;
+    @endphp
 
-            @if ($firstPhoto)
-                <div class="photo-principale-container">
-                    <img id="photoPrincipale" src="{{ asset('storage/' . $firstPhoto) }}" alt="Photo principale de {{ $modele->prenom }}" class="photo-principale" />
-                </div>
-
-                <div class="d-flex flex-wrap gap-2">
-                    @foreach ($photos as $photo)
-                        <img src="{{ asset('storage/' . $photo) }}" alt="Photo de {{ $modele->prenom }}" class="photo-vignette" onclick="changePhoto(this)" />
-                    @endforeach
-                </div>
-            @else
-                <div class="photo-principale-container">
-                    <img src="https://via.placeholder.com/600x400?text=Pas+de+photo" class="photo-principale rounded shadow" />
-                </div>
-            @endif
+    @if ($firstPhoto)
+        <div class="photo-principale-container">
+            <img id="photoPrincipale"
+                 src="{{ asset('storage/' . $firstPhoto) }}"
+                 alt="Photo principale de {{ $modele->prenom }}"
+                 class="photo-principale" />
         </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            @foreach ($photos as $index => $photo)
+                @if ($modele->mode ===  1)  {{-- Mode payant --}}
+                    {{-- Toutes les vignettes floutées si le mode est payant --}}
+                    <div class="vignette-locked">
+                        <img src="{{ asset('storage/' . $photo) }}"
+                             alt="Photo verrouillée"
+                             class="photo-vignette" />
+                        <div class="overlay-lock">🔒</div>
+                    </div>
+                @else
+                    {{-- Vignettes normales si le mode est gratuit --}}
+                    <img src="{{ asset('storage/' . $photo) }}"
+                         alt="Photo de {{ $modele->prenom }}"
+                         class="photo-vignette {{ $index === 0 ? 'active' : '' }}"
+                         onclick="changePhoto(this)" />
+                @endif
+            @endforeach
+        </div>
+    @else
+        <div class="photo-principale-container">
+            <img src="https://via.placeholder.com/600x400?text=Pas+de+photo"
+                 class="photo-principale rounded shadow" />
+        </div>
+    @endif
+</div>
+
 
         <div class="col-12 col-md-6">
             <div class="d-flex justify-content-between align-items-center mb-3">
