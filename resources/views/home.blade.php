@@ -391,6 +391,49 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
     margin: 0;
 }
 
+.blur-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.blur-wrapper img,
+.blur-wrapper video,
+.blur-wrapper iframe {
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.blur-wrapper.soft img,
+.blur-wrapper.soft video,
+.blur-wrapper.soft iframe {
+  filter: blur(8px);
+}
+
+.blur-wrapper.strong img,
+.blur-wrapper.strong video,
+.blur-wrapper.strong iframe {
+  filter: blur(20px);
+}
+
+.blur-wrapper.pixel img,
+.blur-wrapper.pixel video,
+.blur-wrapper.pixel iframe {
+  image-rendering: pixelated;
+  filter: blur(2px);
+}
+
+.blur-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 1rem;
+  text-align: center;
+}
+
     </style>
 </head>
 
@@ -533,15 +576,19 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 </div>
 
         <div class="position-absolute bottom-0 end-0 p-2">
-    <button class="btn btn-sm btn-light rounded-pill open-gallery" 
-            data-media='@json($photos)' 
-            data-type="photo"
-            data-bs-toggle="modal" 
-            data-bs-target="#galleryModal" 
-            title="Voir les photos">
-        <i class="fas fa-camera"></i>
-        <span>{{ count($photos) }}</span>
-    </button>
+          <button class="btn btn-sm btn-light rounded-pill open-gallery" 
+              data-media='@json($photos)' 
+              data-type="photo"
+              data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
+              data-flou="{{ $modele->type_flou ?? 'soft' }}"
+              data-prix="{{ $modele->prix_flou ?? 0 }}"
+              data-bs-toggle="modal" 
+              data-bs-target="#galleryModal" 
+              title="Voir les photos">
+          <i class="fas fa-camera"></i>
+          <span>{{ count($photos) }}</span>
+      </button>
+
 
     @php
     $videos = [];
@@ -562,14 +609,18 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
     @if(count($videos) > 0)
         <button class="btn btn-sm btn-light rounded-pill open-gallery"
-                data-media='@json($videos)'
-                data-type="video"
-                data-bs-toggle="modal" 
-                data-bs-target="#galleryModal"
-                title="Voir les vidéos">
-            <i class="fas fa-video"></i>
-            <span>{{ count($videos) }}</span>
-        </button>
+        data-media='@json($videos)'
+        data-type="video"
+        data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
+        data-flou="{{ $modele->type_flou ?? 'soft' }}"
+        data-prix="{{ $modele->prix_flou ?? 0 }}"
+        data-bs-toggle="modal" 
+        data-bs-target="#galleryModal"
+        title="Voir les vidéos">
+    <i class="fas fa-video"></i>
+    <span>{{ count($videos) }}</span>
+</button>
+
     @endif
 </div>
 
@@ -680,6 +731,9 @@ document.addEventListener('click', function(e) {
     const type = btn.dataset.type;
     const galleryInner = document.getElementById('galleryInner');
 
+    const isPayant = btn.dataset.payant === "1";
+    const flouType = btn.dataset.flou || "soft";
+
     galleryInner.innerHTML = media.map((item, i) => {
     let content = '';
 
@@ -694,12 +748,26 @@ document.addEventListener('click', function(e) {
         }
     }
 
+    // ✅ Si payant → flouter avec overlay
+    if (isPayant) {
+        content = `
+            <div class="blur-wrapper ${flouType}">
+                ${content}
+                <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
+                    <div class="fw-bold fs-5">Contenu flouté</div>
+                    <div class="small">Prix : ${btn.dataset.prix ?? '??'} €</div>
+                </div>
+            </div>
+        `;
+    }
+
     return `
         <div class="carousel-item ${i === 0 ? 'active' : ''}">
             ${content}
         </div>
     `;
 }).join('');
+
 
 });
 document.addEventListener('DOMContentLoaded', function () {

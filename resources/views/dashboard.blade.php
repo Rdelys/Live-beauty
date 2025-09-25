@@ -354,6 +354,41 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 .card-photo .open-gallery {
     margin: 0;
 }
+
+/* Wrappers */
+.blur-wrapper { position: relative; overflow: hidden; display:block; }
+.blur-wrapper img, .blur-wrapper video { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* Types */
+.blur-wrapper.soft img,
+.blur-wrapper.soft video { filter: blur(6px); transition: filter .25s ease; }
+
+.blur-wrapper.strong img,
+.blur-wrapper.strong video { filter: blur(14px); transition: filter .25s ease; }
+
+/* pixelisé approx. (pour images seulement, vidéos pixelisées nécessitent canvas côté serveur/client) */
+.blur-wrapper.pixel img { filter: blur(2px); image-rendering: pixelated; transform: scale(1.02); }
+
+/* Overlay */
+.blur-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 20;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  gap: 8px;
+}
+.blur-overlay .fw-bold { font-size: 1.2rem; }
+
+.blur-overlay [id^="paypal-button-container-flou-"] {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  width: auto !important;
+  margin-top: 10px;
+}
+
     </style>
 </head>
 
@@ -542,14 +577,18 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
         <div class="position-absolute bottom-0 end-0 p-2">
     <button class="btn btn-sm btn-light rounded-pill open-gallery" 
-            data-media='@json($photos)' 
-            data-type="photo"
-            data-bs-toggle="modal" 
-            data-bs-target="#galleryModal" 
-            title="Voir les photos">
-        <i class="fas fa-camera"></i>
-        <span>{{ count($photos) }}</span>
-    </button>
+        data-media='@json($photos)' 
+        data-type="photo"
+        data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
+        data-flou="{{ $modele->type_flou ?? 'soft' }}"
+        data-prix="{{ $modele->prix_flou ?? 0 }}"
+        data-bs-toggle="modal" 
+        data-bs-target="#galleryModal" 
+        title="Voir les photos">
+    <i class="fas fa-camera"></i>
+    <span>{{ count($photos) }}</span>
+</button>
+
 
     @php
     $videos = [];
@@ -572,6 +611,10 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         <button class="btn btn-sm btn-light rounded-pill open-gallery"
                 data-media='@json($videos)'
                 data-type="video"
+                data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
+                data-flou="{{ $modele->type_flou ?? 'soft' }}"
+                        data-prix="{{ $modele->prix_flou ?? 0 }}"
+
                 data-bs-toggle="modal" 
                 data-bs-target="#galleryModal"
                 title="Voir les vidéos">
@@ -639,22 +682,67 @@ document.addEventListener('click', function(e) {
     if (!btn) return;
 
     const media = JSON.parse(btn.dataset.media || '[]');
-    const type = btn.dataset.type;
-    const galleryInner = document.getElementById('galleryInner');
+const type = btn.dataset.type;
+const isPayant = btn.dataset.payant === "1";
+const flouType = btn.dataset.flou || "soft";
 
-    galleryInner.innerHTML = media.map((item, i) => {
+const galleryInner = document.getElementById('galleryInner');
+
+galleryInner.innerHTML = media.map((item, i) => {
     let content = '';
 
     if (type === 'photo') {
         content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)">`;
-    } 
-    else if (type === 'video') {
+    } else if (type === 'video') {
         if (item.includes('http') && !item.endsWith('.mp4')) {
             content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
         } else {
             content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)"></video>`;
         }
     }
+
+    // ✅ Appliquer le flou si payant
+    if (isPayant) {
+    const prix = btn.dataset.prix || '??';
+
+    content = `
+        <div class="blur-wrapper ${flouType}">
+            ${content}
+            <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
+                <div class="fw-bold fs-5">Contenu flouté</div>
+                <div class="small mb-2">Prix : ${prix} €</div>
+                <div id="paypal-button-container-flou-${i}" class="w-100 text-center"></div>
+            </div>
+        </div>
+    `;
+
+    // ⚡ Initialiser PayPal pour ce contenu
+    setTimeout(() => {
+        paypal.Buttons({
+            style: {
+                color: 'gold',
+                shape: 'pill',
+                label: 'pay'
+            },
+            createOrder: (data, actions) => {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: { value: prix }
+                    }]
+                });
+            },
+            onApprove: (data, actions) => {
+                return actions.order.capture().then(function(details) {
+                    alert('✅ Paiement confirmé, vous pouvez maintenant voir le contenu !');
+                    document.querySelector(`#paypal-button-container-flou-${i}`)
+                        .closest('.blur-wrapper')
+                        .classList.remove('blur-wrapper'); // supprime le flou
+                });
+            }
+        }).render(`#paypal-button-container-flou-${i}`);
+    }, 500);
+}
+
 
     return `
         <div class="carousel-item ${i === 0 ? 'active' : ''}">
@@ -784,7 +872,13 @@ document.addEventListener('click', function(e) {
 
 
 <!-- PayPal SDK + Script -->
-<script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_LIVE_CLIENT_ID') }}&currency=EUR"></script>
+@if(app()->environment('local'))
+    {{-- Environnement local -> Sandbox --}}
+    <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_SANDBOX_CLIENT_ID') }}&currency=EUR"></script>
+@else
+    {{-- Environnement prod -> Live --}}
+    <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_LIVE_CLIENT_ID') }}&currency=EUR"></script>
+@endif
 <script>
   const packs = [
     { jetons: 30, price: '5.49' },

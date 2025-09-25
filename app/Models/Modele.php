@@ -30,13 +30,18 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     'poitrine',
     'fesse',
     'langue',
-    'services'
+    'services',
+    'mode',           // <-- ajouté
+    'type_flou',      // <-- ajouté
+    'prix_flou'       // <-- ajouté
 ];
 
 protected $casts = [
     'photos'     => 'array',
     'video_link' => 'array',
     'video_file' => 'array',
+    'mode'       => 'integer', // <-- ajouté
+    'prix_flou'  => 'float',   // <-- ajouté
 ];
 
 
