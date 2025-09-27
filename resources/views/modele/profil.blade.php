@@ -422,7 +422,6 @@ label {
       </p>
     @endif
 
-    <p><strong>Jetons Surprise :</strong> {{ $modele->jetons_surprise}} Jetons</p>
     <p><strong>Nombre jetons show privée :</strong> {{ $modele->nombre_jetons_show_privee ?? 'Non défini' }}</p>
 <p><strong>Durée show privée :</strong> {{ $modele->duree_show_privee ? $modele->duree_show_privee . ' minutes' : 'Non définie' }}</p>
 
