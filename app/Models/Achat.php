@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Achat extends Model
 {
-    protected $fillable = ['user_id', 'modele_id', 'jetons'];
+protected $fillable = ['user_id', 'modele_id', 'jetons', 'type', 'photo_path'];
 
     public function user() {
         return $this->belongsTo(User::class);

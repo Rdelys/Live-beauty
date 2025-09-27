@@ -726,7 +726,8 @@ galleryInner.innerHTML = media.map((item, i) => {
             content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)"></video>`;
         }
     }
-const dejaAchete = btn.dataset.dejaachete === "1";
+const dejaAcheteDetail = @json($achatsDetail ?? []);
+const dejaAchete = btn.dataset.dejaachete === "1" || dejaAcheteDetail.includes(item);
 
     // ✅ Appliquer le flou si payant
     if (isPayant && !dejaAchete) {
@@ -741,9 +742,11 @@ const dejaAchete = btn.dataset.dejaachete === "1";
 
                     <button class="btn btn-warning fw-bold acheter-photo"
                             data-modele="{{ $modele->id }}"
+                            data-photo="${item}"
                             data-prix="${prixDetail}">
                         🔑 Acheter cette photo
                     </button>
+
 
                     <button class="btn btn-danger fw-bold acheter-global mt-2"
                             data-modele="{{ $modele->id }}"
@@ -787,7 +790,45 @@ const dejaAchete = btn.dataset.dejaachete === "1";
 document.addEventListener("click", function(e) {
     if (e.target.classList.contains("acheter-photo")) {
         const modeleId = e.target.dataset.modele;
-        const prix = e.target.dataset.prix;
+        const prix     = e.target.dataset.prix;
+        const photo    = e.target.dataset.photo;
+
+        fetch(`/acheter/photo/detail/${modeleId}`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+    },
+    body: JSON.stringify({ prix: prix, photo: photo })
+})
+.then(async res => {
+    if (!res.ok) {
+        const text = await res.text(); // récupérer HTML de l’erreur
+        throw new Error(`Erreur serveur (${res.status}): ${text}`);
+    }
+    return res.json();
+})
+.then(data => {
+    if (data.success) {
+        alert("✅ Photo débloquée !");
+        e.target.closest(".blur-wrapper").classList.remove("blur-wrapper");
+        e.target.closest(".blur-overlay").remove();
+    } else {
+        alert(data.error || "Erreur lors de l'achat.");
+    }
+})
+.catch(err => {
+    console.error("Erreur fetch:", err);
+    alert("❌ Une erreur est survenue. Voir console.");
+});
+
+    }
+});
+
+document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("acheter-global")) {
+        const modeleId = e.target.dataset.modele;
+        const prix     = e.target.dataset.prix;
 
         fetch(`/acheter/photo/${modeleId}`, {
             method: "POST",
@@ -800,16 +841,17 @@ document.addEventListener("click", function(e) {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert("✅ Achat réussi ! Contenu débloqué.");
-                e.target.closest(".blur-wrapper").classList.remove("blur-wrapper");
-                e.target.closest(".blur-overlay").remove();
-                location.reload();
+                alert("✅ Galerie débloquée !");
+                // Débloquer toutes les photos du carousel
+                document.querySelectorAll(".blur-wrapper").forEach(el => el.classList.remove("blur-wrapper"));
+                document.querySelectorAll(".blur-overlay").forEach(el => el.remove());
             } else {
-                alert(data.error || "Erreur lors de l'achat.");
+                alert(data.error || "Erreur lors de l'achat global.");
             }
         });
     }
 });
+
 
 
     </script>

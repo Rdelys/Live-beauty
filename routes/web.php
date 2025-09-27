@@ -200,6 +200,10 @@ Route::post('/acheter/photo/{modeleId}', [App\Http\Controllers\AchatController::
     ->middleware('auth')
     ->name('photo.acheter');
 
+Route::post('/acheter/photo/detail/{modeleId}', [App\Http\Controllers\AchatController::class, 'acheterDetail'])
+    ->middleware('auth')
+    ->name('photo.acheter.detail');
+
     // routes/web.php
     Route::get('/achats', [AdminController::class, 'achats'])->name('admin.achats');
 // API Achats par jour
