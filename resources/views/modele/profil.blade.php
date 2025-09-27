@@ -418,7 +418,7 @@ label {
       </p>
 
       <p><strong>Prix du flou :</strong> 
-        {{ $modele->prix_flou ? number_format($modele->prix_flou, 2, ',', ' ') . ' €' : 'Non défini' }}
+        {{ $modele->prix_flou ? number_format($modele->prix_flou, 2, ',', ' ') . ' Jetons' : 'Non défini' }}
       </p>
     @endif
 
@@ -1628,7 +1628,7 @@ togglePrivateMicBtn?.addEventListener("click", () => {
   </div>
 
   <div class="mb-3">
-    <label class="form-label">Prix pour enlever le flou (€)</label>
+    <label class="form-label">Prix pour enlever le flou (Jetons)</label>
     <input type="number" step="0.01" name="prix_flou" value="{{ old('prix_flou', $modele->prix_flou) }}" class="form-control" min="0">
   </div>
 </div>
