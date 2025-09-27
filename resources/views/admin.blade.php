@@ -336,7 +336,7 @@ footer {
   </div>
 
   <a class="menu-link"><i class="fas fa-users"></i> Clients</a>
-  <a class="menu-link"><i class="fas fa-shopping-cart"></i> Achats</a>
+  <a class="menu-link"><i class="fas fa-shopping-cart"></i> Achats photos</a>
   <a class="menu-link"><i class="fas fa-video"></i> Shows privés</a>
 
   <a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
