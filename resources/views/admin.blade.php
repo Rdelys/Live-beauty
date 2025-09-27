@@ -336,6 +336,7 @@ footer {
   </div>
 
   <a class="menu-link"><i class="fas fa-users"></i> Clients</a>
+  <a class="menu-link"><i class="fas fa-shopping-cart"></i> Achats</a>
   <a class="menu-link"><i class="fas fa-video"></i> Shows privés</a>
 
   <a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
@@ -396,6 +397,22 @@ footer {
         </div>
       </div>
     </div>
+
+    <!-- Card: Nombre d'Achats Photos -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white h-100 shadow-sm border-0">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="icon bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+            <i class="fas fa-shopping-cart fa-2x text-white"></i>
+          </div>
+          <div>
+            <h6 class="mb-2 text-white">Nombre d'Achats Photos</h6>
+            <p class="display-5 fw-bold text-warning mb-0">{{ $nombreAchatsPhotos }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- === Charts Row === -->
@@ -453,6 +470,53 @@ footer {
         </div>
       </div>
     </div>
+    <!-- Achats -->
+    <div class="col-lg-4 col-md-12">
+      <div class="card bg-dark text-white h-100 p-3 shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0 text-white"><i class="fas fa-shopping-cart me-2 text-warning"></i> Achats photos</h5>
+          <button class="btn btn-sm btn-primary" onclick="openFullscreen('chart-achats-container')">Plein écran</button>
+        </div>
+        <div id="chart-achats-container" style="overflow-x:auto; height:350px;">
+          <canvas id="chart-achats"></canvas>
+          <div class="mt-2 text-center">
+            <button class="btn btn-sm btn-secondary" onclick="resetZoom('chart-achats')">🔄 Reset</button>
+            <button class="btn btn-sm btn-secondary" onclick="panChart('chart-achats', -50)">⬅️</button>
+            <button class="btn btn-sm btn-secondary" onclick="panChart('chart-achats', 50)">➡️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="achats-content" class="content-section d-none">
+  <h2>Achats de photos</h2>
+  <p>Liste des achats effectués par les clients.</p>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Client</th>
+          <th>Modèle</th>
+          <th>Jetons</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($achats as $achat)
+          <tr>
+            <td>{{ $achat->id }}</td>
+            <td>{{ $achat->user->nom }} {{ $achat->user->prenoms }} ({{ $achat->user->pseudo }})</td>
+            <td>{{ $achat->modele->nom }} {{ $achat->modele->prenom }}</td>
+            <td>{{ $achat->jetons }}</td>
+            <td>{{ $achat->created_at->format('d/m/Y H:i') }}</td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -916,6 +980,7 @@ footer {
         "Tableau de bord": document.getElementById("dashboard-content"),
         "Modèles": document.getElementById("modeles-content"),
         "Clients": document.getElementById("clients-content"),
+        "Achats": document.getElementById("achats-content"), // ✅ ajout
         "Jetons": document.getElementById("jetons-content"),
         "Liste des modeles": document.getElementById("modeles-content"),
         "Ajout modeles": document.getElementById("ajoute-modeles-content"),
@@ -1234,6 +1299,39 @@ function renderShowsChart(ctx, labels, showsData, jetonsData, details) {
   });
 }
 
+// 4. Achats photos
+function renderAchatsChart(ctx, labels, data) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Jetons dépensés (achats)",
+        data: data,
+        borderColor: "rgba(255, 206, 86, 1)",
+        backgroundColor: "rgba(255, 206, 86, 0.2)",
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: { label: ctx => `🛒 ${ctx.raw} jetons` }
+        },
+        zoom: {
+          pan: { enabled: true, mode: 'x' },
+          zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+        }
+      },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
 
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -1262,6 +1360,14 @@ renderShowsChart(
   shows.jetons,
   shows.details
 );
+
+// Achats
+const achats = await fetchJson(base + '/api/achats-par-jour?days=30');
+renderAchatsChart(
+  document.getElementById('chart-achats').getContext('2d'),
+  achats.labels, achats.data
+);
+
 
 });
 

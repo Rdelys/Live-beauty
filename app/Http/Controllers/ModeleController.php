@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Jeton;
 use App\Models\User;
 use App\Models\ShowPrive;
+use App\Models\Achat;
+use Carbon\Carbon;
 
 class ModeleController extends Controller
 {
@@ -95,26 +97,32 @@ class ModeleController extends Controller
     }
 
     public function index()
-    {
-        $modeles = Modele::all();
-        $jetons = Jeton::all();
-        $shows = ShowPrive::with('user','modele')->get();
+{
+    $modeles = Modele::all();
+    $jetons = Jeton::all();
+    $shows = ShowPrive::with('user','modele')->get();
+    $achats = Achat::with(['user','modele'])->latest()->get(); // ✅ ajout
 
-        $nombreDeModeles = $modeles->count();
-        $nombreDeJetons = $jetons->count();
-        $nombreDeClients = User::count();
-        $clients = User::select('id', 'nom', 'prenoms', 'jetons', 'email', 'pseudo', 'banni', 'created_at')->get();
+    $nombreDeModeles = $modeles->count();
+    $nombreDeJetons = $jetons->count();
+    $nombreDeClients = User::count();
+    $nombreAchatsPhotos = Achat::count();
 
-        return view('admin', compact(
-            'modeles',
-            'shows',
-            'jetons',
-            'nombreDeModeles',
-            'nombreDeJetons',
-            'nombreDeClients',
-            'clients'
-        ));
-    }
+    $clients = User::select('id', 'nom', 'prenoms', 'jetons', 'email', 'pseudo', 'banni', 'created_at')->get();
+
+    return view('admin', compact(
+        'modeles',
+        'shows',
+        'jetons',
+        'nombreDeModeles',
+        'nombreDeJetons',
+        'nombreDeClients',
+        'clients',
+        'achats', // ✅ ajout
+        'nombreAchatsPhotos' // ✅ ajout
+    ));
+}
+
 
     public function edit($id)
     {
@@ -234,4 +242,23 @@ class ModeleController extends Controller
 
         return back()->with('success', 'Vidéos ajoutées avec succès.');
     }
+    public function achats() {
+    $achats = Achat::with(['user','modele'])->latest()->get();
+    return view('admin.achats', compact('achats'));
+}
+
+public function achatsParJour(Request $request) {
+    $days = $request->get('days', 30);
+
+    $data = Achat::selectRaw('DATE(created_at) as date, SUM(jetons) as total')
+        ->where('created_at', '>=', Carbon::now()->subDays($days))
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get();
+
+    return response()->json([
+        'labels' => $data->pluck('date')->map(fn($d)=>Carbon::parse($d)->format('d/m'))->toArray(),
+        'data'   => $data->pluck('total')->toArray(),
+    ]);
+}
 }

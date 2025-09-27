@@ -199,3 +199,8 @@ Route::post('/show-prive/terminer/{showPriveId}', [ShowPriveController::class, '
 Route::post('/acheter/photo/{modeleId}', [App\Http\Controllers\AchatController::class, 'acheter'])
     ->middleware('auth')
     ->name('photo.acheter');
+
+    // routes/web.php
+    Route::get('/achats', [AdminController::class, 'achats'])->name('admin.achats');
+// API Achats par jour
+Route::get('/admin/api/achats-par-jour', [ModeleController::class, 'achatsParJour']);
