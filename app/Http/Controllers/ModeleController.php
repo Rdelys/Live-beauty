@@ -45,6 +45,8 @@ class ModeleController extends Controller
             'mode' => 'nullable|boolean',
             'type_flou' => 'nullable|string|in:soft,strong,pixel',
             'prix_flou' => 'nullable|numeric|min:0',
+            'prix_flou_detail' => 'nullable|numeric|min:0',
+
         ]);
 
         // Liens vidéos
@@ -91,6 +93,7 @@ class ModeleController extends Controller
             'mode'       => $request->boolean('mode') ? 1 : 0,
             'type_flou'  => $validated['type_flou'] ?? null,
             'prix_flou'  => $validated['prix_flou'] ?? null,
+            'prix_flou_detail' => $validated['prix_flou_detail'] ?? null,
         ]);
 
         return redirect()->back()->with('success', 'Modèle ajouté avec succès !');
@@ -131,61 +134,67 @@ class ModeleController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $modele = Modele::findOrFail($id);
+{
+    $modele = Modele::findOrFail($id);
 
-        $request->validate([
-            'mode' => 'nullable|boolean',
-            'type_flou' => 'nullable|string|in:soft,strong,pixel',
-            'prix_flou' => 'nullable|numeric|min:0',
-        ]);
+    // ✅ On récupère bien $validated
+    $validated = $request->validate([
+        'nom'        => 'nullable|string|max:255',
+        'prenom'     => 'nullable|string|max:255',
+        'description'=> 'nullable|string',
+        'age'        => 'nullable|integer|min:18|max:99',
+        'taille'     => 'nullable|string|max:10',
+        'silhouette' => 'nullable|string|max:50',
+        'poitrine'   => 'nullable|string|max:50',
+        'fesse'      => 'nullable|string|max:50',
+        'langue'     => 'nullable|string|max:255',
+        'services'   => 'nullable|string',
+        'email'      => 'nullable|email',
 
-        $modele->nom = $request->nom;
-        $modele->prenom = $request->prenom;
-        $modele->description = $request->description;
-        $modele->age = $request->age;
-        $modele->taille = $request->taille;
-        $modele->silhouette = $request->silhouette;
-        $modele->poitrine = $request->poitrine;
-        $modele->fesse = $request->fesse;
-        $modele->langue = $request->langue;
-        $modele->services = $request->services;
+        'nombre_jetons_show_privee' => 'nullable|integer|min:0',
+        'duree_show_privee'         => 'nullable|integer|min:1|max:240',
 
-        $modele->video_link = $request->video_link;
-        $modele->email = $request->email;
-        $modele->nombre_jetons_show_privee = $request->nombre_jetons_show_privee;
-        $modele->duree_show_privee = $request->duree_show_privee;
+        'mode'              => 'nullable|boolean',
+        'type_flou'         => 'nullable|string|in:soft,strong,pixel',
+        'prix_flou'         => 'nullable|numeric|min:0',
+        'prix_flou_detail'  => 'nullable|numeric|min:0',
+    ]);
 
-        if ($request->hasFile('video_file')) {
-            $newFiles = [];
-            foreach ($request->file('video_file') as $file) {
-                $newFiles[] = $file->store('videos', 'public');
-            }
-            $modele->video_file = array_merge((array)$modele->video_file, $newFiles);
+    // ✅ Remplissage simple
+    $modele->fill($validated);
+
+    // ✅ Correction : assigner séparément les booléens et casts
+    $modele->mode = $request->boolean('mode') ? 1 : 0;
+    $modele->prix_flou = $request->filled('prix_flou') ? floatval($request->prix_flou) : null;
+    $modele->prix_flou_detail = $request->filled('prix_flou_detail') ? floatval($request->prix_flou_detail) : null;
+
+    // ✅ Vidéos (merge)
+    if ($request->hasFile('video_file')) {
+        $newFiles = [];
+        foreach ($request->file('video_file') as $file) {
+            $newFiles[] = $file->store('videos', 'public');
         }
-
-        if ($request->has('video_link')) {
-            $currentLinks = is_array($modele->video_link) ? $modele->video_link : (json_decode($modele->video_link, true) ?: []);
-            $modele->video_link = array_merge($currentLinks, $request->video_link ?? []);
-        }
-
-        if ($request->hasFile('photos')) {
-            $photosPaths = [];
-            foreach ($request->file('photos') as $photo) {
-                $photosPaths[] = $photo->store('photos', 'public');
-            }
-            $modele->photos = $photosPaths;
-        }
-
-        // ✅ Nouveaux champs
-        $modele->mode = $request->boolean('mode') ? 1 : 0;
-        $modele->type_flou = $request->input('type_flou');
-        $modele->prix_flou = $request->input('prix_flou') ? floatval($request->input('prix_flou')) : null;
-
-        $modele->save();
-
-        return redirect()->back()->with('success', 'Mise à jour avec succès !');
+        $modele->video_file = array_merge((array)$modele->video_file, $newFiles);
     }
+
+    if ($request->has('video_link')) {
+        $currentLinks = is_array($modele->video_link) ? $modele->video_link : (json_decode($modele->video_link, true) ?: []);
+        $modele->video_link = array_merge($currentLinks, $request->video_link ?? []);
+    }
+
+    if ($request->hasFile('photos')) {
+        $photosPaths = [];
+        foreach ($request->file('photos') as $photo) {
+            $photosPaths[] = $photo->store('photos', 'public');
+        }
+        $modele->photos = $photosPaths;
+    }
+
+    $modele->save();
+
+    return redirect()->back()->with('success', 'Mise à jour avec succès !');
+}
+
 
     public function destroy($id)
     {

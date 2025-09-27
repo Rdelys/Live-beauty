@@ -420,7 +420,11 @@ label {
       <p><strong>Prix du flou :</strong> 
         {{ $modele->prix_flou ? number_format($modele->prix_flou, 2, ',', ' ') . ' Jetons' : 'Non défini' }}
       </p>
+      <p><strong>Prix du flou (détail) :</strong> 
+        {{ $modele->prix_flou_detail ? number_format($modele->prix_flou_detail, 2, ',', ' ') . ' Jetons' : 'Non défini' }}
+      </p>
     @endif
+    
 
     <p><strong>Nombre jetons show privée :</strong> {{ $modele->nombre_jetons_show_privee ?? 'Non défini' }}</p>
 <p><strong>Durée show privée :</strong> {{ $modele->duree_show_privee ? $modele->duree_show_privee . ' minutes' : 'Non définie' }}</p>
@@ -1629,6 +1633,12 @@ togglePrivateMicBtn?.addEventListener("click", () => {
   <div class="mb-3">
     <label class="form-label">Prix pour enlever le flou (Jetons)</label>
     <input type="number" step="0.01" name="prix_flou" value="{{ old('prix_flou', $modele->prix_flou) }}" class="form-control" min="0">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Prix flou détail (Jetons)</label>
+    <input type="number" step="0.01" name="prix_flou_detail" 
+          value="{{ old('prix_flou_detail', $modele->prix_flou_detail) }}" 
+          class="form-control" min="0">
   </div>
 </div>
 
