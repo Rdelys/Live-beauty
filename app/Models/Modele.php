@@ -73,6 +73,10 @@ protected static function booted()
         }
     });
 }
+public function achats()
+{
+    return $this->hasMany(\App\Models\Achat::class);
+}
 
 
 }

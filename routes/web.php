@@ -195,3 +195,7 @@ Route::get('/api/showprive/{id}', [ShowPriveController::class, 'getShowPrive']);
 // routes/web.php
 Route::post('/show-prive/debiter/{showPriveId}', [ShowPriveController::class, 'debiterJetons']);
 Route::post('/show-prive/terminer/{showPriveId}', [ShowPriveController::class, 'terminerShow']);
+
+Route::post('/acheter/photo/{modeleId}', [App\Http\Controllers\AchatController::class, 'acheter'])
+    ->middleware('auth')
+    ->name('photo.acheter');

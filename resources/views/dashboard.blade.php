@@ -490,6 +490,10 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
             <div class="col-md-10 p-4">
                 <div class="row g-4">
                   @foreach($modeles as $modele)
+                  @php
+    $dejaAchete = in_array($modele->id, $achats ?? []);
+@endphp
+
                     <div class="col-md-4 card-item fille">
                     <div class="model-card card-default">
                       <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
@@ -547,7 +551,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
     </div>
 </a>
 </div>
-<div class="model-card card-photo d-none position-relative">
+<div class="model-card card-photo d-none position-relative" data-modele-id="{{ $modele->id }}">
         @php
     $videos = [];
 
@@ -584,6 +588,8 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         data-prix="{{ $modele->prix_flou ?? 0 }}"
         data-bs-toggle="modal" 
         data-bs-target="#galleryModal" 
+        data-dejaachete="{{ $dejaAchete ? '1' : '0' }}"
+
         title="Voir les photos">
     <i class="fas fa-camera"></i>
     <span>{{ count($photos) }}</span>
@@ -700,48 +706,28 @@ galleryInner.innerHTML = media.map((item, i) => {
             content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)"></video>`;
         }
     }
+const dejaAchete = btn.dataset.dejaachete === "1";
 
     // ✅ Appliquer le flou si payant
-    if (isPayant) {
+    if (isPayant && !dejaAchete) {
     const prix = btn.dataset.prix || '??';
-
     content = `
         <div class="blur-wrapper ${flouType}">
             ${content}
             <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
                 <div class="fw-bold fs-5">Contenu flouté</div>
-                <div class="small mb-2">Prix : ${prix} €</div>
-                <div id="paypal-button-container-flou-${i}" class="w-100 text-center"></div>
+                <div class="small mb-2">Prix : ${prix} jetons</div>
+                <button class="btn btn-warning fw-bold acheter-photo"
+                        data-modele="{{ $modele->id }}"
+                        data-prix="{{ $modele->prix_flou }}">
+                    🔑 Acheter
+                </button>
+
             </div>
         </div>
     `;
-
-    // ⚡ Initialiser PayPal pour ce contenu
-    setTimeout(() => {
-        paypal.Buttons({
-            style: {
-                color: 'gold',
-                shape: 'pill',
-                label: 'pay'
-            },
-            createOrder: (data, actions) => {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: { value: prix }
-                    }]
-                });
-            },
-            onApprove: (data, actions) => {
-                return actions.order.capture().then(function(details) {
-                    alert('✅ Paiement confirmé, vous pouvez maintenant voir le contenu !');
-                    document.querySelector(`#paypal-button-container-flou-${i}`)
-                        .closest('.blur-wrapper')
-                        .classList.remove('blur-wrapper'); // supprime le flou
-                });
-            }
-        }).render(`#paypal-button-container-flou-${i}`);
-    }, 500);
 }
+
 
 
     return `
@@ -751,6 +737,34 @@ galleryInner.innerHTML = media.map((item, i) => {
     `;
 }).join('');
 });
+
+document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("acheter-photo")) {
+        const modeleId = e.target.dataset.modele;
+        const prix = e.target.dataset.prix;
+
+        fetch(`/acheter/photo/${modeleId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({ prix: prix })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Achat réussi ! Contenu débloqué.");
+                e.target.closest(".blur-wrapper").classList.remove("blur-wrapper");
+                e.target.closest(".blur-overlay").remove();
+                location.reload();
+            } else {
+                alert(data.error || "Erreur lors de l'achat.");
+            }
+        });
+    }
+});
+
 
     </script>
 
@@ -1191,16 +1205,6 @@ document.getElementById('decalerLiveForm').addEventListener('submit', async (e) 
         alert(result.message || 'Erreur lors du décalage.');
     }
 });
-
-
-
-
-
-
-
-
-
-
 fetchPrivateLives();
 setInterval(fetchPrivateLives, 15000);
 

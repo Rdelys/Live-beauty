@@ -39,4 +39,9 @@ class User extends Authenticatable
     return $this->belongsToMany(Modele::class, 'favoris');
 }
 
+public function achats()
+{
+    return $this->hasMany(\App\Models\Achat::class);
+}
+
 }

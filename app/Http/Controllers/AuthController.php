@@ -170,10 +170,18 @@ public function toggleBan($id)
         return redirect('/');
     }
 
-    public function dashboard() {
- $modeles = Modele::all();
-    return view('dashboard', compact('modeles'));    }
+   public function dashboard() {
+    $modeles = Modele::all();
+    $achats = [];
 
+    if (Auth::check()) {
+        $achats = \App\Models\Achat::where('user_id', Auth::id())
+            ->pluck('modele_id')
+            ->toArray();
+    }
+
+    return view('dashboard', compact('modeles', 'achats'));
+}
     public function updateProfile(Request $request)
 {
     $user = Auth::user();
