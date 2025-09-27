@@ -360,14 +360,26 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 .blur-wrapper img, .blur-wrapper video { width:100%; height:100%; object-fit:cover; display:block; }
 
 /* Types */
+/* Flou léger */
 .blur-wrapper.soft img,
-.blur-wrapper.soft video { filter: blur(6px); transition: filter .25s ease; }
+.blur-wrapper.soft video {
+  filter: blur(6px);
+  transition: filter .25s ease;
+}
 
+/* Flou fort */
 .blur-wrapper.strong img,
-.blur-wrapper.strong video { filter: blur(14px); transition: filter .25s ease; }
+.blur-wrapper.strong video {
+  filter: blur(20px);
+  transition: filter .25s ease;
+}
 
-/* pixelisé approx. (pour images seulement, vidéos pixelisées nécessitent canvas côté serveur/client) */
-.blur-wrapper.pixel img { filter: blur(2px); image-rendering: pixelated; transform: scale(1.02); }
+/* Pixelisé (approx. pour images seulement) */
+.blur-wrapper.pixel img {
+  filter: blur(3px);
+  image-rendering: pixelated;
+  transform: scale(1.05);
+}
 
 /* Overlay */
 .blur-overlay {
@@ -378,6 +390,8 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
   background: rgba(0,0,0,0.45);
   color: #fff;
   gap: 8px;
+
+  pointer-events: none; /* ⚡ ne bloque plus le carousel */
 }
 .blur-overlay .fw-bold { font-size: 1.2rem; }
 
@@ -389,6 +403,9 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
   margin-top: 10px;
 }
 
+.blur-overlay button {
+  pointer-events: auto; /* ⚡ clic autorisé UNIQUEMENT sur les boutons */
+}
     </style>
 </head>
 
@@ -585,12 +602,13 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         data-type="photo"
         data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
         data-flou="{{ $modele->type_flou ?? 'soft' }}"
-        data-prix="{{ $modele->prix_flou ?? 0 }}"
+        data-prix-global="{{ $modele->prix_flou ?? 0 }}"
+        data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
         data-bs-toggle="modal" 
         data-bs-target="#galleryModal" 
         data-dejaachete="{{ $dejaAchete ? '1' : '0' }}"
-
         title="Voir les photos">
+
     <i class="fas fa-camera"></i>
     <span>{{ count($photos) }}</span>
 </button>
@@ -619,7 +637,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 data-type="video"
                 data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
                 data-flou="{{ $modele->type_flou ?? 'soft' }}"
-                        data-prix="{{ $modele->prix_flou ?? 0 }}"
+                        data-prix-global="{{ $modele->prix_flou ?? 0 }}"
 
                 data-bs-toggle="modal" 
                 data-bs-target="#galleryModal"
@@ -691,6 +709,8 @@ document.addEventListener('click', function(e) {
 const type = btn.dataset.type;
 const isPayant = btn.dataset.payant === "1";
 const flouType = btn.dataset.flou || "soft";
+const prixGlobal = btn.dataset.prixGlobal || '??';
+const prixDetail = btn.dataset.prixDetail || '??';
 
 const galleryInner = document.getElementById('galleryInner');
 
@@ -710,23 +730,49 @@ const dejaAchete = btn.dataset.dejaachete === "1";
 
     // ✅ Appliquer le flou si payant
     if (isPayant && !dejaAchete) {
-    const prix = btn.dataset.prix || '??';
+    if (type === 'photo') {
+        content = `
+            <div class="blur-wrapper ${flouType}">
+                ${content}
+                <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
+                    <div class="fw-bold fs-5">Contenu flouté</div>
+                    <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
+                    <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
+
+                    <button class="btn btn-warning fw-bold acheter-photo"
+                            data-modele="{{ $modele->id }}"
+                            data-prix="${prixDetail}">
+                        🔑 Acheter cette photo
+                    </button>
+
+                    <button class="btn btn-danger fw-bold acheter-global mt-2"
+                            data-modele="{{ $modele->id }}"
+                            data-prix="${prixGlobal}">
+                        🔓 Débloquer toute la galerie
+                    </button>
+                </div>
+            </div>
+        `;
+    } else if (type === 'video') {
     content = `
         <div class="blur-wrapper ${flouType}">
             ${content}
             <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
-                <div class="fw-bold fs-5">Contenu flouté</div>
-                <div class="small mb-2">Prix : ${prix} jetons</div>
-                <button class="btn btn-warning fw-bold acheter-photo"
+                <div class="fw-bold fs-5">Vidéo floutée</div>
+                <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
+                <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
+                <button class="btn btn-danger fw-bold acheter-global"
                         data-modele="{{ $modele->id }}"
-                        data-prix="{{ $modele->prix_flou }}">
-                    🔑 Acheter
+                        data-prix="${prixGlobal}">
+                    🔓 Débloquer toutes les vidéos
                 </button>
-
             </div>
         </div>
     `;
 }
+
+}
+
 
 
 
