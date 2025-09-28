@@ -6,6 +6,7 @@ use App\Models\Achat;
 use App\Models\Modele;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AchatController extends Controller
 {
@@ -14,110 +15,139 @@ class AchatController extends Controller
         try {
             $modele = Modele::findOrFail($modeleId);
             $user   = Auth::user();
+            $prix   = $modele->prix_flou ?? $request->input('prix', 0);
 
-            $prix = $modele->prix_flou ?? $request->input('prix', 0);
-
-            // Vérif jetons suffisants
             if ($user->jetons < $prix) {
-                return response()->json(['error' => 'Pas assez de jetons'], 403);
+                return response()->json(['success' => false, 'error' => 'Pas assez de jetons'], 403);
             }
 
-            // Vérif si déjà acheté
-            if (Achat::where('user_id', $user->id)->where('modele_id', $modele->id)->exists()) {
-                return response()->json(['success' => true, 'message' => 'Déjà acheté']);
+            // Si déjà acheté en GLOBAL, ne pas débiter à nouveau
+            $alreadyGlobal = Achat::where('user_id', $user->id)
+                ->where('modele_id', $modele->id)
+                ->where('type', 'global')
+                ->exists();
+
+            if ($alreadyGlobal) {
+                return response()->json(['success' => true, 'message' => 'Galerie déjà débloquée']);
             }
 
-            // Débiter jetons
-            $user->jetons -= $prix;
-            $user->save();
+            // transaction pour éviter la double dépense en cas de concurrence
+            DB::transaction(function () use ($user, $modele, $prix) {
+                // Verif verrouillée
+                $exists = Achat::where('user_id', $user->id)
+                    ->where('modele_id', $modele->id)
+                    ->where('type', 'global')
+                    ->lockForUpdate()
+                    ->exists();
 
-            // Enregistrer l’achat
-            Achat::create([
-                'user_id'   => $user->id,
-                'modele_id' => $modele->id,
-                'jetons'    => $prix,
-                'created_at'=> now(),
-            ]);
+                if (!$exists) {
+                    // débiter
+                    $user->decrement('jetons', $prix);
+
+                    Achat::create([
+                        'user_id'   => $user->id,
+                        'modele_id' => $modele->id,
+                        'jetons'    => $prix,
+                        'type'      => 'global',
+                        'photo_path'=> '', // vide pour global
+                    ]);
+                }
+            });
+
+            $user->refresh();
 
             return response()->json([
                 'success'     => true,
                 'new_balance' => $user->jetons,
-                'message'     => 'Achat réussi'
+                'message'     => 'Galerie débloquée'
             ]);
-
         } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function acheterDetail(Request $request, $modeleId)
+    {
+        try {
+            $modele = Modele::findOrFail($modeleId);
+            $user   = Auth::user();
+            $prix   = $modele->prix_flou_detail ?? $request->input('prix', 0);
+            $photo  = $request->input('photo');
+
+            if (empty($photo)) {
+                return response()->json(['success' => false, 'error' => 'Photo manquante'], 422);
+            }
+
+            if ($user->jetons < $prix) {
+                return response()->json(['success' => false, 'error' => 'Pas assez de jetons'], 403);
+            }
+
+            // Vérif si déjà acheté cette photo précise (type detail + même photo_path)
+            $exists = Achat::where('user_id', $user->id)
+                ->where('modele_id', $modele->id)
+                ->where('type', 'detail')
+                ->where('photo_path', $photo)
+                ->exists();
+
+            if ($exists) {
+                return response()->json(['success' => true, 'message' => 'Photo déjà achetée']);
+            }
+
+            DB::transaction(function () use ($user, $modele, $prix, $photo) {
+                $exists = Achat::where('user_id', $user->id)
+                    ->where('modele_id', $modele->id)
+                    ->where('type', 'detail')
+                    ->where('photo_path', $photo)
+                    ->lockForUpdate()
+                    ->exists();
+
+                if (!$exists) {
+                    $user->decrement('jetons', $prix);
+
+                    Achat::create([
+                        'user_id'    => $user->id,
+                        'modele_id'  => $modele->id,
+                        'jetons'     => $prix,
+                        'type'       => 'detail',
+                        'photo_path' => $photo,
+                    ]);
+                }
+            });
+
+            $user->refresh();
+
             return response()->json([
-                'success' => false,
-                'error'   => $e->getMessage()
-            ], 500);
+                'success'     => true,
+                'new_balance' => $user->jetons,
+                'message'     => 'Photo achetée avec succès',
+                'photo'       => $photo
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
     public function dashboard()
-    {
-        $modeles = Modele::all();
-        $achats  = [];
-        $achatsDetail = [];
-
-        if (Auth::check()) {
-            $achats = Achat::where('user_id', Auth::id())->pluck('modele_id')->toArray();
-            $achatsDetail = Achat::where('user_id', Auth::id())
-                         ->where('type', 'detail')
-                         ->pluck('photo_path')
-                         ->toArray();
-        }
-
-        return view('dashboard', compact('modeles', 'achats', 'achatsDetail'));
-    }
-
-    public function acheterDetail(Request $request, $modeleId)
 {
-    try {
-        $modele = Modele::findOrFail($modeleId);
-        $user   = Auth::user();
-        $prix = $modele->prix_flou_detail ?? $request->input('prix', 0);
-        $photo  = $request->input('photo'); // chemin ou index de la photo
+    $user = Auth::user();
 
-        if ($user->jetons < $prix) {
-            return response()->json(['error' => 'Pas assez de jetons'], 403);
-        }
+    // Achats globaux (id des modèles débloqués totalement)
+    $achatsGlobal = \DB::table('galleryAchat')
+        ->where('user_id', $user->id)
+        ->where('status', 1)
+        ->pluck('modele_id')
+        ->toArray();
 
-        // Vérif si déjà acheté
-        if (Achat::where('user_id', $user->id)
-                 ->where('modele_id', $modele->id)
-                 ->where('type', 'detail')
-                 ->where('photo_path', $photo)
-                 ->exists()) {
-            return response()->json(['success' => true, 'message' => 'Photo déjà achetée']);
-        }
+    // Achats détail (photos précises débloquées)
+    $achatsDetail = \DB::table('galleryAchat')
+        ->where('user_id', $user->id)
+        ->where('status', 1)
+        ->pluck('photo') // à adapter selon ta colonne
+        ->toArray();
 
-        // Débiter jetons
-        $user->jetons -= $prix;
-        $user->save();
+    $modeles = Modele::all();
 
-        // Enregistrer l’achat détail
-        Achat::create([
-            'user_id'    => $user->id,
-            'modele_id'  => $modele->id,
-            'jetons'     => $prix,
-            'type'       => 'detail',
-            'photo_path' => $photo,
-            'created_at' => now(),
-        ]);
-
-        return response()->json([
-            'success'     => true,
-            'new_balance' => $user->jetons,
-            'message'     => 'Photo achetée avec succès',
-            'photo'       => $photo
-        ]);
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'success' => false,
-            'error'   => $e->getMessage()
-        ], 500);
-    }
+    return view('dashboard', compact('modeles', 'achatsGlobal', 'achatsDetail'));
 }
 
 }

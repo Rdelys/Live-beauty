@@ -508,7 +508,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 <div class="row g-4">
                   @foreach($modeles as $modele)
                   @php
-    $dejaAchete = in_array($modele->id, $achats ?? []);
+    $dejaAcheteGlobal = in_array($modele->id, $achatsGlobal ?? []);
 @endphp
 
                     <div class="col-md-4 card-item fille">
@@ -606,7 +606,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
         data-bs-toggle="modal" 
         data-bs-target="#galleryModal" 
-        data-dejaachete="{{ $dejaAchete ? '1' : '0' }}"
+data-dejaachete="{{ $dejaAcheteGlobal ? '1' : '0' }}"
         title="Voir les photos">
 
     <i class="fas fa-camera"></i>
@@ -730,7 +730,17 @@ const dejaAcheteDetail = @json($achatsDetail ?? []);
 const dejaAchete = btn.dataset.dejaachete === "1" || dejaAcheteDetail.includes(item);
 
     // ✅ Appliquer le flou si payant
-    if (isPayant && !dejaAchete) {
+    // ✅ Cas débloqué (pas de flou)
+if (!isPayant || dejaAchete) {
+    return `
+        <div class="carousel-item ${i === 0 ? 'active' : ''}">
+            ${content}
+        </div>
+    `;
+}
+
+// ✅ Cas flouté (non acheté)
+if (isPayant && !dejaAchete) {
     if (type === 'photo') {
         content = `
             <div class="blur-wrapper ${flouType}">
@@ -747,7 +757,6 @@ const dejaAchete = btn.dataset.dejaachete === "1" || dejaAcheteDetail.includes(i
                         🔑 Acheter cette photo
                     </button>
 
-
                     <button class="btn btn-danger fw-bold acheter-global mt-2"
                             data-modele="{{ $modele->id }}"
                             data-prix="${prixGlobal}">
@@ -757,24 +766,24 @@ const dejaAchete = btn.dataset.dejaachete === "1" || dejaAcheteDetail.includes(i
             </div>
         `;
     } else if (type === 'video') {
-    content = `
-        <div class="blur-wrapper ${flouType}">
-            ${content}
-            <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
-                <div class="fw-bold fs-5">Vidéo floutée</div>
-                <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
-                <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
-                <button class="btn btn-danger fw-bold acheter-global"
-                        data-modele="{{ $modele->id }}"
-                        data-prix="${prixGlobal}">
-                    🔓 Débloquer toutes les vidéos
-                </button>
+        content = `
+            <div class="blur-wrapper ${flouType}">
+                ${content}
+                <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
+                    <div class="fw-bold fs-5">Vidéo floutée</div>
+                    <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
+                    <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
+                    <button class="btn btn-danger fw-bold acheter-global"
+                            data-modele="{{ $modele->id }}"
+                            data-prix="${prixGlobal}">
+                        🔓 Débloquer toutes les vidéos
+                    </button>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+    }
 }
 
-}
 
 
 
