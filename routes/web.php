@@ -8,7 +8,7 @@ use App\Http\Controllers\LiveController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ModeleAuth\ForgotPasswordController as ModeleForgotPasswordController;
 use App\Http\Controllers\ModeleAuth\ResetPasswordController as ModeleResetPasswordController;
-
+use App\Http\Controllers\AchatController;
 use App\Models\Modele;
 
 Route::get('/forbidden', function () {
@@ -207,4 +207,8 @@ Route::post('/acheter/photo/detail/{modeleId}', [App\Http\Controllers\AchatContr
     // routes/web.php
     Route::get('/achats', [AdminController::class, 'achats'])->name('admin.achats');
 // API Achats par jour
-Route::get('/admin/api/achats-par-jour', [ModeleController::class, 'achatsParJour']);
+    Route::get('/admin/api/achats-par-jour', [ModeleController::class, 'achatsParJour']);
+
+    Route::get('/mes-achats', [AchatController::class, 'mesAchats'])
+        ->middleware('auth')
+        ->name('achats.mes');

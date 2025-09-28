@@ -432,7 +432,11 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                       <li class="nav-item">
                           <a class="nav-link" href="#" data-type="photo">Galerie photo</a>
                       </li>
-
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ route('achats.mes') }}">
+                          <i class="fas fa-image me-1"></i> Voir mes photos achetées
+                        </a>
+                      </li>
                       <li class="nav-item">
                           <a class="nav-link" href="#">Nouveaux Modèles</a>
                       </li>
@@ -597,21 +601,22 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 </div>
 
         <div class="position-absolute bottom-0 end-0 p-2">
-    <button class="btn btn-sm btn-light rounded-pill open-gallery" 
-        data-media='@json($photos)' 
-        data-type="photo"
-        data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
-        data-flou="{{ $modele->type_flou ?? 'soft' }}"
-        data-prix-global="{{ $modele->prix_flou ?? 0 }}"
-        data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
-        data-bs-toggle="modal" 
-        data-bs-target="#galleryModal" 
-data-dejaachete="{{ $dejaAcheteGlobal ? '1' : '0' }}"
-        title="Voir les photos">
-
+    <button class="btn btn-sm btn-light rounded-pill open-gallery"
+    data-modele="{{ $modele->id }}"
+    data-media='@json($photos)'
+    data-type="photo"
+    data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
+    data-flou="{{ $modele->type_flou ?? 'soft' }}"
+    data-prix-global="{{ $modele->prix_flou ?? 0 }}"
+    data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
+    data-bs-toggle="modal"
+    data-bs-target="#galleryModal"
+    data-dejaachete="{{ $dejaAcheteGlobal ? '1' : '0' }}"
+    title="Voir les photos">
     <i class="fas fa-camera"></i>
     <span>{{ count($photos) }}</span>
 </button>
+
 
 
     @php
@@ -633,18 +638,19 @@ data-dejaachete="{{ $dejaAcheteGlobal ? '1' : '0' }}"
 
     @if(count($videos) > 0)
         <button class="btn btn-sm btn-light rounded-pill open-gallery"
-                data-media='@json($videos)'
-                data-type="video"
-                data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
-                data-flou="{{ $modele->type_flou ?? 'soft' }}"
-                        data-prix-global="{{ $modele->prix_flou ?? 0 }}"
-
-                data-bs-toggle="modal" 
-                data-bs-target="#galleryModal"
-                title="Voir les vidéos">
-            <i class="fas fa-video"></i>
-            <span>{{ count($videos) }}</span>
-        </button>
+    data-modele="{{ $modele->id }}"
+    data-media='@json($videos)'
+    data-type="video"
+    data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
+    data-flou="{{ $modele->type_flou ?? 'soft' }}"
+    data-prix-global="{{ $modele->prix_flou ?? 0 }}"
+    data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
+    data-bs-toggle="modal"
+    data-bs-target="#galleryModal"
+    title="Voir les vidéos">
+    <i class="fas fa-video"></i>
+    <span>{{ count($videos) }}</span>
+</button>
     @endif
 </div>
 
@@ -702,164 +708,189 @@ data-dejaachete="{{ $dejaAcheteGlobal ? '1' : '0' }}"
 
 // Ouvrir la modal galerie
 document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.open-gallery');
-    if (!btn) return;
+  const btn = e.target.closest('.open-gallery');
+  if (!btn) return;
 
-    const media = JSON.parse(btn.dataset.media || '[]');
-const type = btn.dataset.type;
-const isPayant = btn.dataset.payant === "1";
-const flouType = btn.dataset.flou || "soft";
-const prixGlobal = btn.dataset.prixGlobal || '??';
-const prixDetail = btn.dataset.prixDetail || '??';
+  const modeleId     = btn.dataset.modele; // <-- IMPORTANT : id du modèle provenant du bouton
+  const media        = JSON.parse(btn.dataset.media || '[]');
+  const type         = btn.dataset.type;
+  const isPayant     = btn.dataset.payant === "1";
+  const flouType     = btn.dataset.flou || "soft";
+  const prixGlobal   = btn.dataset.prixGlobal || '??';
+  const prixDetail   = btn.dataset.prixDetail || '??';
 
-const galleryInner = document.getElementById('galleryInner');
+  const dejaAcheteGlobal  = btn.dataset.dejaachete === "1";
+  const dejaAcheteDetail  = JSON.parse(btn.dataset.dejaachetedetail || "[]");
 
-galleryInner.innerHTML = media.map((item, i) => {
+  const galleryInner = document.getElementById('galleryInner');
+
+  galleryInner.innerHTML = media.map((item, i) => {
     let content = '';
 
     if (type === 'photo') {
-        content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)">`;
+      content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)">`;
     } else if (type === 'video') {
-        if (item.includes('http') && !item.endsWith('.mp4')) {
-            content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
-        } else {
-            content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)"></video>`;
-        }
+      if (item.includes('http') && !item.endsWith('.mp4')) {
+        content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
+      } else {
+        content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)"></video>`;
+      }
     }
-const dejaAcheteDetail = @json($achatsDetail ?? []);
-const dejaAchete = btn.dataset.dejaachete === "1" || dejaAcheteDetail.includes(item);
 
-    // ✅ Appliquer le flou si payant
-    // ✅ Cas débloqué (pas de flou)
-if (!isPayant || dejaAchete) {
-    return `
+    const dejaAchete = dejaAcheteGlobal || dejaAcheteDetail.includes(item);
+
+    // affichage net si gratuit ou déjà acheté
+    if (!isPayant || dejaAchete) {
+      return `
         <div class="carousel-item ${i === 0 ? 'active' : ''}">
-            ${content}
+          ${content}
         </div>
-    `;
-}
-
-// ✅ Cas flouté (non acheté)
-if (isPayant && !dejaAchete) {
-    if (type === 'photo') {
-        content = `
-            <div class="blur-wrapper ${flouType}">
-                ${content}
-                <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
-                    <div class="fw-bold fs-5">Contenu flouté</div>
-                    <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
-                    <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
-
-                    <button class="btn btn-warning fw-bold acheter-photo"
-                            data-modele="{{ $modele->id }}"
-                            data-photo="${item}"
-                            data-prix="${prixDetail}">
-                        🔑 Acheter cette photo
-                    </button>
-
-                    <button class="btn btn-danger fw-bold acheter-global mt-2"
-                            data-modele="{{ $modele->id }}"
-                            data-prix="${prixGlobal}">
-                        🔓 Débloquer toute la galerie
-                    </button>
-                </div>
-            </div>
-        `;
-    } else if (type === 'video') {
-        content = `
-            <div class="blur-wrapper ${flouType}">
-                ${content}
-                <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
-                    <div class="fw-bold fs-5">Vidéo floutée</div>
-                    <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
-                    <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
-                    <button class="btn btn-danger fw-bold acheter-global"
-                            data-modele="{{ $modele->id }}"
-                            data-prix="${prixGlobal}">
-                        🔓 Débloquer toutes les vidéos
-                    </button>
-                </div>
-            </div>
-        `;
+      `;
     }
-}
 
+    // flouté si payant et non acheté
+    if (isPayant && !dejaAchete) {
+      if (type === 'photo') {
+        content = `
+          <div class="blur-wrapper ${flouType}">
+            ${content}
+            <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
+              <div class="fw-bold fs-5">Contenu flouté</div>
+              <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
+              <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
 
+              <button class="btn btn-warning fw-bold acheter-photo"
+                      data-modele="${modeleId}"
+                      data-photo="${item}"
+                      data-prix="${prixDetail}">
+                  🔑 Acheter cette photo
+              </button>
 
-
+              <button class="btn btn-danger fw-bold acheter-global mt-2"
+                      data-modele="${modeleId}"
+                      data-prix="${prixGlobal}">
+                  🔓 Débloquer toute la galerie
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (type === 'video') {
+        content = `
+          <div class="blur-wrapper ${flouType}">
+            ${content}
+            <div class="blur-overlay d-flex flex-column align-items-center justify-content-center">
+              <div class="fw-bold fs-5">Vidéo floutée</div>
+              <div class="small mb-2">Prix global : ${prixGlobal} jetons</div>
+              <div class="small mb-2">Ou achat individuel : ${prixDetail} jetons</div>
+              <button class="btn btn-danger fw-bold acheter-global"
+                      data-modele="${modeleId}"
+                      data-prix="${prixGlobal}">
+                  🔓 Débloquer toutes les vidéos
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
 
     return `
-        <div class="carousel-item ${i === 0 ? 'active' : ''}">
-            ${content}
-        </div>
+      <div class="carousel-item ${i === 0 ? 'active' : ''}">
+        ${content}
+      </div>
     `;
-}).join('');
+  }).join('');
 });
 
-document.addEventListener("click", function(e) {
-    if (e.target.classList.contains("acheter-photo")) {
-        const modeleId = e.target.dataset.modele;
-        const prix     = e.target.dataset.prix;
-        const photo    = e.target.dataset.photo;
 
-        fetch(`/acheter/photo/detail/${modeleId}`, {
+// Achat d'une photo (detail)
+document.addEventListener("click", function(e) {
+  const btn = e.target.closest('.acheter-photo');
+  if (!btn) return;
+
+  const modeleId = btn.dataset.modele;
+  const prix     = btn.dataset.prix;
+  const photo    = btn.dataset.photo;
+
+  fetch(`/acheter/photo/detail/${modeleId}`, {
     method: "POST",
     headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": "{{ csrf_token() }}"
     },
     body: JSON.stringify({ prix: prix, photo: photo })
-})
-.then(async res => {
+  })
+  .then(async res => {
     if (!res.ok) {
-        const text = await res.text(); // récupérer HTML de l’erreur
-        throw new Error(`Erreur serveur (${res.status}): ${text}`);
+      const text = await res.text();
+      throw new Error(`Erreur serveur (${res.status}): ${text}`);
     }
     return res.json();
-})
-.then(data => {
+  })
+  .then(data => {
     if (data.success) {
-        alert("✅ Photo débloquée !");
-        e.target.closest(".blur-wrapper").classList.remove("blur-wrapper");
-        e.target.closest(".blur-overlay").remove();
+      alert("✅ Photo débloquée !");
+      // Retirer le flou sur la photo dans le carousel
+      const wrap = btn.closest(".blur-wrapper");
+      if (wrap) {
+        wrap.classList.remove("blur-wrapper", "soft", "strong", "pixel");
+        const overlay = wrap.querySelector(".blur-overlay");
+        if (overlay) overlay.remove();
+      }
+      // Mettre à jour les boutons open-gallery pour ce modèle (dataset)
+      document.querySelectorAll(`.open-gallery[data-modele="${modeleId}"]`).forEach(openBtn => {
+        const arr = JSON.parse(openBtn.dataset.dejaachetedetail || "[]");
+        if (!arr.includes(photo)) arr.push(photo);
+        openBtn.dataset.dejaachetedetail = JSON.stringify(arr);
+      });
     } else {
-        alert(data.error || "Erreur lors de l'achat.");
+      alert(data.error || "Erreur lors de l'achat.");
     }
-})
-.catch(err => {
+  })
+  .catch(err => {
     console.error("Erreur fetch:", err);
     alert("❌ Une erreur est survenue. Voir console.");
+  });
 });
 
-    }
-});
-
+// Achat global (toute la galerie)
 document.addEventListener("click", function(e) {
-    if (e.target.classList.contains("acheter-global")) {
-        const modeleId = e.target.dataset.modele;
-        const prix     = e.target.dataset.prix;
+  const btn = e.target.closest('.acheter-global');
+  if (!btn) return;
 
-        fetch(`/acheter/photo/${modeleId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            body: JSON.stringify({ prix: prix })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("✅ Galerie débloquée !");
-                // Débloquer toutes les photos du carousel
-                document.querySelectorAll(".blur-wrapper").forEach(el => el.classList.remove("blur-wrapper"));
-                document.querySelectorAll(".blur-overlay").forEach(el => el.remove());
-            } else {
-                alert(data.error || "Erreur lors de l'achat global.");
-            }
-        });
+  const modeleId = btn.dataset.modele;
+  const prix     = btn.dataset.prix;
+
+  fetch(`/acheter/photo/${modeleId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": "{{ csrf_token() }}"
+    },
+    body: JSON.stringify({ prix: prix })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("✅ Galerie débloquée !");
+      // Débloquer visuellement tous les éléments floutés du carousel
+      document.querySelectorAll(".blur-wrapper").forEach(el => {
+        el.classList.remove("blur-wrapper", "soft", "strong", "pixel");
+      });
+      document.querySelectorAll(".blur-overlay").forEach(el => el.remove());
+      // Mettre à jour les boutons open-gallery pour ce modèle
+      document.querySelectorAll(`.open-gallery[data-modele="${modeleId}"]`).forEach(openBtn => {
+        openBtn.dataset.dejaachete = "1";
+      });
+    } else {
+      alert(data.error || "Erreur lors de l'achat global.");
     }
+  })
+  .catch(err => {
+    console.error("Erreur achat global:", err);
+    alert("❌ Une erreur est survenue. Voir console.");
+  });
 });
+
 
 
 

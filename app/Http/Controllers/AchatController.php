@@ -128,26 +128,41 @@ class AchatController extends Controller
     }
 
     public function dashboard()
+    {
+        $modeles = Modele::all();
+        $achatsGlobal = [];
+        $achatsDetail = [];
+
+        if (Auth::check()) {
+            // Global = modèles pour lesquels l'utilisateur a acheté la galerie complète
+            $achatsGlobal = Achat::where('user_id', Auth::id())
+                ->where('type', 'global')
+                ->pluck('modele_id')
+                ->toArray();
+
+            // Details = liste des photo_path achetées (pour décocher le flou individuel)
+            $achatsDetail = Achat::where('user_id', Auth::id())
+                ->where('type', 'detail')
+                ->pluck('photo_path')
+                ->toArray();
+        }
+
+        return view('dashboard', compact('modeles', 'achatsGlobal', 'achatsDetail'));
+    }
+
+    public function mesAchats()
 {
-    $user = Auth::user();
+    $user = auth()->user();
 
-    // Achats globaux (id des modèles débloqués totalement)
-    $achatsGlobal = \DB::table('galleryAchat')
+    // Tous les achats de l’utilisateur
+    $achats = \App\Models\Achat::with('modele')
         ->where('user_id', $user->id)
-        ->where('status', 1)
-        ->pluck('modele_id')
-        ->toArray();
+        ->get();
 
-    // Achats détail (photos précises débloquées)
-    $achatsDetail = \DB::table('galleryAchat')
-        ->where('user_id', $user->id)
-        ->where('status', 1)
-        ->pluck('photo') // à adapter selon ta colonne
-        ->toArray();
+    // Regrouper par modèle
+    $groupes = $achats->groupBy('modele_id');
 
-    $modeles = Modele::all();
-
-    return view('dashboard', compact('modeles', 'achatsGlobal', 'achatsDetail'));
+    return view('achats.mes', compact('groupes'));
 }
 
 }
