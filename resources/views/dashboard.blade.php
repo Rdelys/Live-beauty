@@ -434,7 +434,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                       </li>
                       <li class="nav-item">
                         <a class="nav-link" href="{{ route('achats.mes') }}">
-                          <i class="fas fa-image me-1"></i> Voir mes photos achetées
+                          <i class="fas fa-image me-1"></i>Mes photos achetées
                         </a>
                       </li>
                       <li class="nav-item">
