@@ -212,3 +212,13 @@ Route::post('/acheter/photo/detail/{modeleId}', [App\Http\Controllers\AchatContr
     Route::get('/mes-achats', [AchatController::class, 'mesAchats'])
         ->middleware('auth')
         ->name('achats.mes');
+
+        use App\Http\Controllers\JetonProposeController;
+
+// Admin - gestion jetons proposés (form GET intégré dans admin.blade ou page dédiée)
+Route::post('/admin/jetons-proposes/store', [JetonProposeController::class,'store'])->name('jetons-proposes.store');
+Route::get('/admin/jetons-proposes', [JetonProposeController::class,'index'])->name('jetons-proposes.index');
+Route::delete('/admin/jetons-proposes/{id}', [JetonProposeController::class,'destroy'])->name('jetons-proposes.destroy');
+
+// API pour profil : récupérer un jeton proposé (JSON)
+Route::get('/api/jetons-proposes/{id}', [JetonProposeController::class,'show'])->name('api.jetonpropose.show');

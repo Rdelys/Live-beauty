@@ -344,6 +344,12 @@ footer {
     <a class="menu-link"><i class="fas fa-list-ul"></i> Liste des jetons</a>
     <a class="menu-link"><i class="fas fa-plus-circle"></i> Ajout de jetons</a>
   </div>
+
+  <a href="#" class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons Proposés</a>
+  <div class="submenu">
+    <a href="#" class="menu-link">Liste des jetons proposés</a>
+    <a href="#" class="menu-link">Ajout jetons proposés</a>
+  </div>
 </div>
 
 <div class="content">
@@ -806,6 +812,53 @@ footer {
 </form>
 
     </div>
+<div id="liste-jetons-proposes-content" class="content-section d-none">
+  <h2>Liste des jetons proposés</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr><th>Nom</th><th>Description</th><th>Nombre</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      @foreach($jetonsProposes as $jp)
+      <tr>
+        <td>{{ $jp->nom }}</td>
+        <td>{{ $jp->description }}</td>
+        <td>{{ $jp->nombre_de_jetons }}</td>
+        <td>
+          <form method="POST" action="{{ route('jetons-proposes.destroy', $jp->id) }}">
+            @csrf
+            @method('DELETE')
+            <button class="btn btn-danger btn-sm">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
+
+<div id="ajout-jetons-proposes-content" class="content-section d-none">
+  <h2>Ajouter un jeton proposé</h2>
+
+  <form action="{{ route('jetons-proposes.store') }}" method="POST" id="form-jeton-propose">
+    @csrf
+    <div class="mb-3">
+      <label>Nom</label>
+      <input type="text" name="nom" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Description</label>
+      <textarea name="description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+      <label>Nombre de jetons</label>
+      <input type="number" name="nombre_de_jetons" class="form-control" required>
+    </div>
+
+    <!-- Optionnel : template inputs dynamiques (ajout futur) -->
+    <button type="submit" class="btn btn-primary">Créer Jeton proposé</button>
+  </form>
+</div>
 
     <div id="clients-content" class="content-section d-none">
   <h2>Clients</h2>
@@ -987,6 +1040,8 @@ footer {
         "Liste des jetons": document.getElementById("liste-jetons-content"),
         "Ajout de jetons": document.getElementById("ajout-jetons-content"),
         "Shows privés": document.getElementById("shows-prives-content"),
+ "Liste des jetons proposés": document.getElementById("liste-jetons-proposes-content"),
+  "Ajout jetons proposés": document.getElementById("ajout-jetons-proposes-content"),
       };
 
       menuLinks.forEach(link => {

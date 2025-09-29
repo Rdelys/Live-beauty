@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\ShowPrive;
 use App\Models\Achat;
 use Carbon\Carbon;
+use App\Models\JetonPropose;
 
 class ModeleController extends Controller
 {
@@ -105,6 +106,7 @@ class ModeleController extends Controller
     $jetons = Jeton::all();
     $shows = ShowPrive::with('user','modele')->get();
     $achats = Achat::with(['user','modele'])->latest()->get(); // ✅ ajout
+    $jetonsProposes = JetonPropose::all(); // <-- nouveau
 
     $nombreDeModeles = $modeles->count();
     $nombreDeJetons = $jetons->count();
@@ -115,6 +117,7 @@ class ModeleController extends Controller
 
     return view('admin', compact(
         'modeles',
+        'jetonsProposes',
         'shows',
         'jetons',
         'nombreDeModeles',
