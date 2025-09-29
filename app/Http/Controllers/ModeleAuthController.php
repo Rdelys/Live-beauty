@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Models\JetonPropose;
 
 class ModeleAuthController extends Controller
 {
@@ -54,6 +55,8 @@ class ModeleAuthController extends Controller
     public function profile()
     {
 $modele = Modele::with('jetons')->findOrFail(session('modele_id'));
-        return view('modele.profil', compact('modele'));
+    $jetonsProposes = JetonPropose::all(); // ⚡ récupère tous les jetons proposés
+
+        return view('modele.profil', compact('modele', 'jetonsProposes'));
     }
 }

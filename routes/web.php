@@ -10,6 +10,7 @@ use App\Http\Controllers\ModeleAuth\ForgotPasswordController as ModeleForgotPass
 use App\Http\Controllers\ModeleAuth\ResetPasswordController as ModeleResetPasswordController;
 use App\Http\Controllers\AchatController;
 use App\Models\Modele;
+use App\Models\JetonPropose;
 
 Route::get('/forbidden', function () {
     return response()->view('errors.403', [], 403);

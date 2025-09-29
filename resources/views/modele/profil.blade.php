@@ -489,6 +489,24 @@ label {
     <div class="card bg-dark text-white mb-4 shadow">
       <div class="card-body">
         <h5 class="card-title">➕ Créer un jeton personnalisé</h5>
+        {{-- Sélecteur Jeton proposé --}}
+          @if(isset($jetonsProposes) && $jetonsProposes->count() > 0)
+            <div class="mb-3">
+              <label class="form-label">Jetons proposés</label>
+              <select id="select-jeton-propose" class="form-control">
+                <option value="">-- Choisir un jeton proposé (préremplir) --</option>
+                @foreach($jetonsProposes as $jp)
+                  <option value="{{ $jp->id }}"
+                          data-nom="{{ e($jp->nom) }}"
+                          data-description="{{ e($jp->description) }}"
+                          data-nombre="{{ $jp->nombre_de_jetons }}">
+                    {{ $jp->nom }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+          @endif
+
           <form action="{{ route('jetons.store') }}" method="POST">
             @csrf
             <div class="mb-3">
@@ -1682,6 +1700,38 @@ document.addEventListener('DOMContentLoaded', function() {
     label.textContent = checked ? 'Payant' : 'Gratuit';
   });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+  const select = document.getElementById('select-jeton-propose');
+  if (!select) return;
+
+  select.addEventListener('change', function() {
+    const id = this.value;
+    if (!id) {
+      // clear the fields if needed
+      document.querySelector('input[name="nom"]').value = '';
+      document.querySelector('textarea[name="description"]').value = '';
+      document.querySelector('input[name="nombre_de_jetons"]').value = '';
+      return;
+    }
+
+    // Option 1: utiliser les data-attributes déjà imprimés
+    const opt = this.selectedOptions[0];
+    document.querySelector('input[name="nom"]').value = opt.dataset.nom || '';
+    document.querySelector('textarea[name="description"]').value = opt.dataset.description || '';
+    document.querySelector('input[name="nombre_de_jetons"]').value = opt.dataset.nombre || '';
+
+    // Option 2 (plus robuste) : fetch les détails via API
+    // fetch(`/api/jetons-proposes/${id}`)
+    //   .then(r => r.json())
+    //   .then(data => {
+    //     document.querySelector('input[name="nom"]').value = data.nom || '';
+    //     document.querySelector('textarea[name="description"]').value = data.description || '';
+    //     document.querySelector('input[name="nombre_de_jetons"]').value = data.nombre_de_jetons || '';
+    //   });
+  });
+});
+
 </script>
 
 </body>
