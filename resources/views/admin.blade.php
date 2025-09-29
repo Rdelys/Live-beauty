@@ -389,6 +389,19 @@ footer {
       </div>
     </div>
 
+    <div class="col-md-6 col-lg-4">
+      <div class="card bg-dark text-white h-100 shadow-sm border-0">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="icon bg-success rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+            <i class="fas fa-coins fa-2x text-white"></i>
+          </div>
+          <div>
+            <h6 class="mb-2 text-white">Nombre de Jetons proposé</h6>
+            <p class="display-5 fw-bold text-success mb-0">{{ $nombrejetonsProposes }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Card: Nombre de Clients -->
     <div class="col-md-6 col-lg-4">
       <div class="card bg-dark text-white h-100 shadow-sm border-0">

@@ -112,6 +112,7 @@ class ModeleController extends Controller
     $nombreDeJetons = $jetons->count();
     $nombreDeClients = User::count();
     $nombreAchatsPhotos = Achat::count();
+    $nombrejetonsProposes = JetonPropose::count(); // <-- nouveau
 
     $clients = User::select('id', 'nom', 'prenoms', 'jetons', 'email', 'pseudo', 'banni', 'created_at')->get();
 
@@ -125,7 +126,8 @@ class ModeleController extends Controller
         'nombreDeClients',
         'clients',
         'achats', // ✅ ajout
-        'nombreAchatsPhotos' // ✅ ajout
+        'nombreAchatsPhotos',
+        'nombrejetonsProposes' // ✅ ajout
     ));
 }
 
