@@ -579,12 +579,9 @@ video {
 @auth
     @if(Auth::user()->role != 'modele' && !isset($showPriveId))
         <div class="text-center my-3">
-            <a href="{{ route('modele.private', $modele->id) }}" 
-               class="btn btn-danger btn-lg"
-               target="_blank" 
-               rel="noopener noreferrer">
-                🔒 Réserver un Show Privé
-            </a>
+            <button id="switchPrivateBtn" class="btn btn-danger">
+              🚪 Passer en show privée
+            </button>
         </div>
     @endif
 @endauth
@@ -714,7 +711,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -795,6 +792,35 @@ if (messageInputtest) {
   });
 }
 
+const switchPrivateBtn = document.getElementById("switchPrivateBtn");
+let isPrivate = false;
+
+switchPrivateBtn.addEventListener("click", () => {
+    if (!socket) return;
+
+    if (!isPrivate) {
+        // Passage en show privée
+        socket.emit("switch-to-private", { 
+            pseudo: "{{ $modele->prenom ?? 'Modèle' }}" 
+        });
+        switchPrivateBtn.textContent = "❌ Annuler le show privée";
+        isPrivate = true;
+    } else {
+        // Annulation du show privée
+        socket.emit("cancel-private", { 
+            pseudo: "{{ $modele->prenom ?? 'Modèle' }}" 
+        });
+        switchPrivateBtn.textContent = "🚪 Passer en show privée";
+        isPrivate = false;
+    }
+});
+
+// Événement de redirection (expulsion des autres users)
+socket.on("redirect-dashboard", () => {
+    window.location.href = "/dashboard";
+});
+
+socket.emit("join-public", { pseudo: "{{ Auth::user()->pseudo }}" });
 
 
 socket.on("typing", (data) => {
