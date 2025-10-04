@@ -866,8 +866,12 @@ switchPrivateBtn.addEventListener("click", () => {
 
 // Événement de redirection (expulsion des autres users)
 socket.on("redirect-dashboard", () => {
-    window.location.href = "/dashboard";
+    // Rediriger seulement si l’utilisateur n’est pas celui en privé
+    if (!isPrivate) {
+        window.location.href = "/dashboard";
+    }
 });
+
 
 socket.emit("join-public", { pseudo: "{{ Auth::user()->pseudo }}" });
 
