@@ -827,6 +827,7 @@ switchPrivateBtn.addEventListener("click", () => {
                     headers: {
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                         "Content-Type": "application/json"
+                        "Accept": "application/json"
                     },
                     body: JSON.stringify({
                         user_id: "{{ Auth::user()->id }}",
