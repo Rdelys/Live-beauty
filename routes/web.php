@@ -223,3 +223,12 @@ Route::delete('/admin/jetons-proposes/{id}', [JetonProposeController::class,'des
 
 // API pour profil : récupérer un jeton proposé (JSON)
 Route::get('/api/jetons-proposes/{id}', [JetonProposeController::class,'show'])->name('api.jetonpropose.show');
+
+// Débit jetons pour show privé déclenché en live
+Route::post('/live/debiter', [App\Http\Controllers\LiveController::class, 'debiterJetonsLive'])
+    ->middleware('auth')
+    ->name('live.debiter');
+
+    Route::post('/live/can-start', [LiveController::class, 'canStartPrivate'])
+    ->middleware('auth')
+    ->name('live.canStart');

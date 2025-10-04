@@ -711,7 +711,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -792,28 +792,77 @@ if (messageInputtest) {
   });
 }
 
-const switchPrivateBtn = document.getElementById("switchPrivateBtn");
+let debitInterval = null;
+const userJetonsSpan = document.getElementById("userJetons");
+const messagesDive = document.getElementById("messages");
 let isPrivate = false;
 
 switchPrivateBtn.addEventListener("click", () => {
-    if (!socket) return;
-
     if (!isPrivate) {
-        // Passage en show privée
-        socket.emit("switch-to-private", { 
-            pseudo: "{{ $modele->prenom ?? 'Modèle' }}" 
+        // Vérifie si user peut démarrer avant de lancer le show privé
+        fetch("{{ route('live.canStart') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.canStart) {
+                alert(data.message);
+                return; // ❌ stop, pas assez de jetons
+            }
+
+            // ✅ Lancer le show privée
+            socket.emit("switch-to-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
+            switchPrivateBtn.textContent = "❌ Annuler le show privée";
+            isPrivate = true;
+
+            // Début débit auto
+            debitInterval = setInterval(() => {
+                fetch("{{ route('live.debiter') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user_id: "{{ Auth::user()->id }}",
+                        modele_id: "{{ $modele->id }}"
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (userJetonsSpan) userJetonsSpan.textContent = data.jetons_restants;
+
+                        const bubble = document.createElement("div");
+                        bubble.className = "chat-bubble";
+                        bubble.style.color = "#FFD740";
+                        bubble.innerHTML = data.chat_message;
+                        messagesDive.appendChild(bubble);
+                        messagesDive.scrollTop = messagesDive.scrollHeight;
+                    } else {
+                        clearInterval(debitInterval);
+                        alert(data.message);
+                    }
+                });
+            }, 60000);
+
         });
-        switchPrivateBtn.textContent = "❌ Annuler le show privée";
-        isPrivate = true;
     } else {
-        // Annulation du show privée
-        socket.emit("cancel-private", { 
-            pseudo: "{{ $modele->prenom ?? 'Modèle' }}" 
-        });
+        // Annuler le show privée
+        socket.emit("cancel-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
         switchPrivateBtn.textContent = "🚪 Passer en show privée";
         isPrivate = false;
+
+        if (debitInterval) clearInterval(debitInterval);
     }
 });
+
+
 
 // Événement de redirection (expulsion des autres users)
 socket.on("redirect-dashboard", () => {
