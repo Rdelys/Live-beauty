@@ -113,6 +113,14 @@ public function canStartPrivate(Request $request)
     $modele = Modele::findOrFail($request->modele_id);
 
     // coût minimum d'une minute
+    // éviter division par zéro
+    if (empty($modele->duree_show_privee) || $modele->duree_show_privee == 0) {
+        return response()->json([
+            'success' => false,
+            'message' => "⛔ Durée du show privée non définie pour ce modèle."
+        ], 400);
+    }
+
     $coutParMinute = ceil($modele->nombre_jetons_show_privee / $modele->duree_show_privee);
 
     if ($user->jetons >= $coutParMinute) {
