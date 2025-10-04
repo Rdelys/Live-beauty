@@ -18,12 +18,24 @@ class JetonController extends Controller
             'nombre_de_jetons' => 'required|numeric|min:0',
         ]);
 
+        // Vérifie si un jeton avec le même nom existe déjà pour ce modèle
+        $exists = \App\Models\Jeton::where('modele_id', session('modele_id'))
+            ->whereRaw('LOWER(nom) = ?', [strtolower($request->nom)])
+            ->exists();
+
+        if ($exists) {
+            return redirect()->route('modele.profil')
+                ->withErrors(['nom' => '❌ Un jeton avec ce nom existe déjà.']);
+        }
+
+        // Création du jeton
         \App\Models\Jeton::create([
             'nom' => $request->nom,
             'description' => $request->description,
             'nombre_de_jetons' => $request->nombre_de_jetons,
             'modele_id' => session('modele_id'),
         ]);
+
 
         return redirect()->route('modele.profil')->with('success', 'Jeton créé avec succès.');
     }
