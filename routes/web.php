@@ -232,3 +232,6 @@ Route::post('/live/debiter', [App\Http\Controllers\LiveController::class, 'debit
     Route::post('/live/can-start', [LiveController::class, 'canStartPrivate'])
     ->middleware('auth')
     ->name('live.canStart');
+
+Route::delete('/jetons/{id}', [JetonController::class, 'destroy'])->name('jetons.destroy');
+

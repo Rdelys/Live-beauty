@@ -532,12 +532,19 @@ label {
           @if($modele->jetons && count($modele->jetons) > 0)
           <ul class="list-group list-group-flush">
             @foreach($modele->jetons as $jeton)
-              <li class="list-group-item bg-transparent d-flex justify-content-between align-items-start text-white border-bottom">
+              <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center text-white border-bottom">
                 <div>
                   <strong>{{ $jeton->nom }}</strong><br>
-                  <small class="text-muted">{{ $jeton->description }}</small>
+                  <small>{{ $jeton->description }}</small>
                 </div>
-                <span class="badge bg-info rounded-pill">{{ $jeton->nombre_de_jetons }}</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-info rounded-pill">{{ $jeton->nombre_de_jetons }}</span>
+                  <form action="{{ route('jetons.destroy', $jeton->id) }}" method="POST" onsubmit="return confirm('Supprimer ce jeton ?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-danger">🗑️</button>
+                  </form>
+                </div>
               </li>
             @endforeach
           </ul>

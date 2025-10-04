@@ -99,4 +99,17 @@ public function useJeton(Request $request)
     ]);
 }
 
+
+public function destroy($id)
+{
+    $jeton = \App\Models\Jeton::findOrFail($id);
+
+    // Vérifie que c’est bien le modèle connecté qui possède le jeton
+    if (session()->has('modele_id') && $jeton->modele_id == session('modele_id')) {
+        $jeton->delete();
+        return redirect()->route('modele.profil')->with('success', 'Jeton supprimé avec succès.');
+    }
+
+    return redirect()->route('forbidden');
+}
 }
