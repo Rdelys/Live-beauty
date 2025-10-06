@@ -610,9 +610,9 @@ video {
 </button>
 
       <!-- Default tokens icon -->
-      <button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
+      <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
         💠
-      </button>
+      </button>-->
 
       <!-- Model personal tokens icon (gold) -->
       <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
@@ -653,11 +653,11 @@ video {
       <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
           <div class="menu-title">Envoyer une Surprise</div>
           <div class="token-grid">
-              <div class="token-item" data-cost="1"><div class="token-emoji">💋</div><div class="token-cost">1</div></div>
-              <div class="token-item" data-cost="5"><div class="token-emoji">🍸</div><div class="token-cost">5</div></div>
-              <div class="token-item" data-cost="10"><div class="token-emoji">👙</div><div class="token-cost">10</div></div>
-              <div class="token-item" data-cost="25"><div class="token-emoji">💄</div><div class="token-cost">25</div></div>
-              <div class="token-item" data-cost="50"><div class="token-emoji">👠</div><div class="token-cost">50</div></div>
+              <div class="token-item" data-cost="1"><div class="token-emoji">💋</div><div class="token-cost">100</div></div>
+              <div class="token-item" data-cost="5"><div class="token-emoji">🍸</div><div class="token-cost">250</div></div>
+              <div class="token-item" data-cost="10"><div class="token-emoji">👙</div><div class="token-cost">500</div></div>
+              <div class="token-item" data-cost="25"><div class="token-emoji">💄</div><div class="token-cost">750</div></div>
+              <div class="token-item" data-cost="50"><div class="token-emoji">👠</div><div class="token-cost">1000</div></div>
           </div>
       </div>
     </div>
@@ -711,7 +711,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1116,7 +1116,7 @@ document.addEventListener("keydown", (e) => {
 </style>
 <script>
 (function(){
-    const defaultBtn = document.getElementById('defaultTokensBtn');
+    //const defaultBtn = document.getElementById('defaultTokensBtn');
     const modelBtn = document.getElementById('modelTokensBtn');
     const defaultMenu = document.getElementById('defaultTokenMenu') || null;
 const modelMenu = document.getElementById('modelTokenMenu') || null;
@@ -1136,7 +1136,7 @@ const videoContainer = document.getElementById('videoContainer');
 }
 
 
-    defaultBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(defaultMenu); });
+    //defaultBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(defaultMenu); });
     modelBtn?.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(modelMenu); });
 modelSurpriseTokensBtn?.addEventListener('click', (e) => { 
     e.stopPropagation(); 
