@@ -339,11 +339,11 @@ footer {
   <a class="menu-link"><i class="fas fa-shopping-cart"></i> Achats photos</a>
   <a class="menu-link"><i class="fas fa-video"></i> Shows privés</a>
 
-  <a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
+  <!--<a class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons</a>
   <div class="submenu">
     <a class="menu-link"><i class="fas fa-list-ul"></i> Liste des jetons</a>
     <a class="menu-link"><i class="fas fa-plus-circle"></i> Ajout de jetons</a>
-  </div>
+  </div>-->
 
   <a href="#" class="menu-link has-submenu"><i class="fas fa-coins"></i> Jetons Proposés</a>
   <div class="submenu">
@@ -375,7 +375,7 @@ footer {
     </div>
 
     <!-- Card: Nombre de Jetons -->
-    <div class="col-md-6 col-lg-4">
+    <!--<div class="col-md-6 col-lg-4">
       <div class="card bg-dark text-white h-100 shadow-sm border-0">
         <div class="card-body d-flex align-items-center gap-3">
           <div class="icon bg-success rounded-circle d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
@@ -387,7 +387,7 @@ footer {
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
 
     <div class="col-md-6 col-lg-4">
       <div class="card bg-dark text-white h-100 shadow-sm border-0">
@@ -455,7 +455,7 @@ footer {
     </div>
 
     <!-- Jetons -->
-    <div class="col-lg-4 col-md-6">
+    <!--<div class="col-lg-4 col-md-6">
       <div class="card bg-dark text-white h-100 p-3 shadow-sm border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-0 text-white"><i class="fas fa-coins me-2 text-success"></i> Jetons achetés</h5>
@@ -470,7 +470,7 @@ footer {
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
 
     <!-- Shows privés -->
     <div class="col-lg-4 col-md-12">
