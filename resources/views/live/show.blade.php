@@ -1276,7 +1276,7 @@ socket.emit("jeton-sent", {
 
     if (typeof socket !== 'undefined') {
     socket.on("jeton-sent", (data) => {
-        const message = `Jetons - ${data.pseudo || ''} - ${data.description || ''}`;
+        const message = `Jetons - ${data.pseudo || ''} - ${data.name || ''} - ${data.description || ''}`;
         createTokenBubble(message, data.cost, data.isGolden);
             if (soundMessage) soundMessage.play().catch(() => {});
 
