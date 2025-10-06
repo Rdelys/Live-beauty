@@ -455,7 +455,7 @@ footer {
     </div>
 
     <!-- Jetons -->
-    <!--<div class="col-lg-4 col-md-6">
+    <<div class="col-lg-4 col-md-6">
       <div class="card bg-dark text-white h-100 p-3 shadow-sm border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-0 text-white"><i class="fas fa-coins me-2 text-success"></i> Jetons achetés</h5>
@@ -470,7 +470,7 @@ footer {
           </div>
         </div>
       </div>
-    </div>-->
+    </div>
 
     <!-- Shows privés -->
     <div class="col-lg-4 col-md-12">
