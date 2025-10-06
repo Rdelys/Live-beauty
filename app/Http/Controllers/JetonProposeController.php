@@ -47,4 +47,12 @@ class JetonProposeController extends Controller
         $jp->delete();
         return redirect()->back()->with('success', 'Jeton proposé supprimé.');
     }
+
+    public function update(Request $request, $id)
+{
+    $jeton = JetonPropose::findOrFail($id);
+    $jeton->update($request->only(['nom', 'description', 'nombre_de_jetons']));
+    return redirect()->back()->with('success', 'Jeton proposé modifié avec succès.');
+}
+
 }

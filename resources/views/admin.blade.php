@@ -838,12 +838,25 @@ footer {
         <td>{{ $jp->description }}</td>
         <td>{{ $jp->nombre_de_jetons }}</td>
         <td>
-          <form method="POST" action="{{ route('jetons-proposes.destroy', $jp->id) }}">
+  <!-- Bouton Modifier -->
+          <button class="btn btn-primary btn-sm" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#editJetonModal"
+                  data-id="{{ $jp->id }}"
+                  data-nom="{{ $jp->nom }}"
+                  data-description="{{ $jp->description }}"
+                  data-nombre="{{ $jp->nombre_de_jetons }}">
+            Modifier
+          </button>
+
+          <!-- Bouton Supprimer -->
+          <form method="POST" action="{{ route('jetons-proposes.destroy', $jp->id) }}" style="display:inline;">
             @csrf
             @method('DELETE')
             <button class="btn btn-danger btn-sm">Supprimer</button>
           </form>
         </td>
+
       </tr>
       @endforeach
     </tbody>
@@ -1038,6 +1051,40 @@ footer {
       </form>
     </div>
   </div>
+<!-- Modal de modification -->
+<div class="modal fade" id="editJetonModal" tabindex="-1" aria-labelledby="editJetonModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editJetonModalLabel">Modifier le jeton proposé</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" id="editJetonForm">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <input type="hidden" id="edit-id" name="id">
+          <div class="mb-3">
+            <label>Nom</label>
+            <input type="text" id="edit-nom" name="nom" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Description</label>
+            <textarea id="edit-description" name="description" class="form-control"></textarea>
+          </div>
+          <div class="mb-3">
+            <label>Nombre de jetons</label>
+            <input type="number" id="edit-nombre" name="nombre_de_jetons" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -1471,6 +1518,26 @@ function panChart(chartId, amount) {
 <footer class="text-center text-muted mt-4" style="color: #ccc !important;">  
   &copy; {{ date('Y') }} Live Beauty. Tous droits réservés.
 </footer>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const editModal = document.getElementById('editJetonModal');
+  const form = document.getElementById('editJetonForm');
+
+  editModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const id = button.getAttribute('data-id');
+    const nom = button.getAttribute('data-nom');
+    const description = button.getAttribute('data-description');
+    const nombre = button.getAttribute('data-nombre');
+
+    form.action = `/jetons-proposes/${id}`;
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-nom').value = nom;
+    document.getElementById('edit-description').value = description;
+    document.getElementById('edit-nombre').value = nombre;
+  });
+});
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>

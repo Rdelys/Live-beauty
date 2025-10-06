@@ -234,4 +234,5 @@ Route::post('/live/debiter', [App\Http\Controllers\LiveController::class, 'debit
     ->name('live.canStart');
 
 Route::delete('/jetons/{id}', [JetonController::class, 'destroy'])->name('jetons.destroy');
+Route::put('/jetons-proposes/{id}', [JetonProposeController::class, 'update'])->name('jetons-proposes.update');
 
