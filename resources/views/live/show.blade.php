@@ -707,11 +707,35 @@ video {
     </div>
 
   </div>
+
+  <!-- Modal confirmation show privé -->
+<div class="modal fade" id="confirmPrivateModal" tabindex="-1" aria-labelledby="confirmPrivateLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-0 rounded-3 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="confirmPrivateLabel">🎥 Show privé</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>
+          Ce show privé coûte 
+          <strong id="privateCost" class="text-warning"></strong> jetons par minute.
+        </p>
+        <p>Souhaitez-vous continuer ?</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
+        <button type="button" class="btn btn-danger" id="confirmPrivateYes">Oui</button>
+      </div>
+    </div>
+  </div>
+</div>
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -797,71 +821,86 @@ const userJetonsSpan = document.getElementById("userJetons");
 const messagesDive = document.getElementById("messages");
 let isPrivate = false;
 
-switchPrivateBtn.addEventListener("click", () => {
-    if (!isPrivate) {
-        // Vérifie si user peut démarrer avant de lancer le show privé
-        fetch("{{ route('live.canStart') }}", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.canStart) {
-                alert(data.message);
-                return; // ❌ stop, pas assez de jetons
-            }
+const switchPrivateBtn = document.getElementById("switchPrivateBtn");
+const confirmModal = new bootstrap.Modal(document.getElementById("confirmPrivateModal"));
+const privateCostElem = document.getElementById("privateCost");
 
-            // ✅ Lancer le show privée
-            socket.emit("switch-to-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
-            switchPrivateBtn.textContent = "❌ Annuler le show privée";
-            isPrivate = true;
+switchPrivateBtn.addEventListener("click", async () => {
+  if (!isPrivate) {
+    // 🔹 Récupérer le tarif avant d'afficher le modal
+    const res = await fetch("{{ route('live.canStart') }}", {
+      method: "POST",
+      headers: {
+        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+    });
+    const data = await res.json();
 
-            // Début débit auto
-            debitInterval = setInterval(() => {
-                fetch("{{ route('live.debiter') }}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({
-                        user_id: "{{ Auth::user()->id }}",
-                        modele_id: "{{ $modele->id }}"
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        if (userJetonsSpan) userJetonsSpan.textContent = data.jetons_restants;
-
-                        const bubble = document.createElement("div");
-                        bubble.className = "chat-bubble";
-                        bubble.style.color = "#FFD740";
-                        bubble.innerHTML = data.chat_message;
-                        messagesDive.appendChild(bubble);
-                        messagesDive.scrollTop = messagesDive.scrollHeight;
-                    } else {
-                        clearInterval(debitInterval);
-                        alert(data.message);
-                    }
-                });
-            }, 60000);
-
-        });
-    } else {
-        // Annuler le show privée
-        socket.emit("cancel-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
-        switchPrivateBtn.textContent = "🚪 Passer en show privée";
-        isPrivate = false;
-
-        if (debitInterval) clearInterval(debitInterval);
+    if (!data.canStart && data.message) {
+      alert(data.message);
+      return;
     }
+
+    // 🔹 Calcul du coût (identique à canStartPrivate)
+    const coutParMinute = Math.ceil({{ $modele->nombre_jetons_show_privee }} / {{ $modele->duree_show_privee }});
+    privateCostElem.textContent = coutParMinute;
+
+    // 🔹 Ouvrir le modal
+    confirmModal.show();
+
+    // 🔹 Attendre la confirmation utilisateur
+    document.getElementById("confirmPrivateYes").onclick = () => {
+      confirmModal.hide();
+      startPrivateShow();
+    };
+  } else {
+    // 🔹 Annuler le show privé
+    socket.emit("cancel-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
+    switchPrivateBtn.textContent = "🚪 Passer en show privée";
+    isPrivate = false;
+    if (debitInterval) clearInterval(debitInterval);
+  }
 });
+
+function startPrivateShow() {
+  socket.emit("switch-to-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
+  switchPrivateBtn.textContent = "❌ Annuler le show privée";
+  isPrivate = true;
+
+  // Début du débit automatique
+  debitInterval = setInterval(() => {
+    fetch("{{ route('live.debiter') }}", {
+      method: "POST",
+      headers: {
+        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        user_id: "{{ Auth::user()->id }}",
+        modele_id: "{{ $modele->id }}"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        if (userJetonsSpan) userJetonsSpan.textContent = data.jetons_restants;
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble";
+        bubble.style.color = "#FFD740";
+        bubble.innerHTML = data.chat_message;
+        messagesDive.appendChild(bubble);
+        messagesDive.scrollTop = messagesDive.scrollHeight;
+      } else {
+        clearInterval(debitInterval);
+        alert(data.message);
+      }
+    });
+  }, 60000);
+}
+
 
 
 
@@ -1094,6 +1133,8 @@ document.addEventListener("keydown", (e) => {
 });
 </script>
 <x-private-live-popup />
+
+
 
 </body>
 </html>
