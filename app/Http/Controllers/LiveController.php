@@ -84,28 +84,46 @@ public function activePrivate()
 public function debiterJetonsLive(Request $request)
 {
     $user = Auth::user();
-    $modele = Modele::findOrFail($request->modele_id); // modèle en live
+    $modele = Modele::findOrFail($request->modele_id);
 
-    // coût par minute (arrondi à l'entier supérieur)
-    $coutParMinute = ceil($modele->nombre_jetons_show_privee / $modele->duree_show_privee);
-
-    if ($user->jetons >= $coutParMinute) {
-        $user->jetons -= $coutParMinute;
-        $user->save();
-
-        return response()->json([
-            'success' => true,
-            'jetons_restants' => $user->jetons,
-            'debit' => $coutParMinute,
-            'chat_message' => "⏳ -{$coutParMinute} jetons déduits. Solde restant : {$user->jetons}"
-        ]);
-    } else {
+    // 🛑 1️⃣ Vérifie si le modèle est toujours en live
+    if (!$modele->en_live) {
         return response()->json([
             'success' => false,
-            'message' => "💸 Plus assez de jetons. Show privé terminé."
+            'message' => "🚫 Le modèle a arrêté le live. Aucun jeton ne sera débité."
         ]);
     }
+
+    // 💰 2️⃣ Calcul du coût par minute (sécurisé)
+    if (empty($modele->duree_show_privee) || $modele->duree_show_privee == 0) {
+        return response()->json([
+            'success' => false,
+            'message' => "⛔ Durée du show privée non définie."
+        ]);
+    }
+
+    $coutParMinute = ceil($modele->nombre_jetons_show_privee / $modele->duree_show_privee);
+
+    // 💸 3️⃣ Vérifie si le client a assez de jetons
+    if ($user->jetons < $coutParMinute) {
+        return response()->json([
+            'success' => false,
+            'message' => "💸 Plus assez de jetons. Le show privé s'arrête."
+        ]);
+    }
+
+    // ✅ 4️⃣ Débit des jetons
+    $user->jetons -= $coutParMinute;
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'jetons_restants' => $user->jetons,
+        'debit' => $coutParMinute,
+        'chat_message' => "⏳ -{$coutParMinute} jetons déduits. Solde restant : {$user->jetons}"
+    ]);
 }
+
 
 public function canStartPrivate(Request $request)
 {
