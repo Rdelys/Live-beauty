@@ -24,15 +24,17 @@ class LiveController extends Controller
     }
 
     public function stop(Request $request)
-    {
-        $modele = Modele::find(session('modele_id'));
-        if ($modele) {
-            $modele->en_live = false;
-            $modele->save();
-        }
-
-        return response()->json(['success' => true]);
+{
+    $modele = Modele::find(session('modele_id'));
+    if ($modele) {
+        $modele->en_live = false;
+        $modele->prive = 0; // ✅ remet à 0 à la fin
+        $modele->save();
     }
+
+    return response()->json(['success' => true]);
+}
+
 
     public function active()
     {
@@ -122,6 +124,30 @@ public function debiterJetonsLive(Request $request)
         'debit' => $coutParMinute,
         'chat_message' => "⏳ -{$coutParMinute} jetons déduits. Solde restant : {$user->jetons}"
     ]);
+}
+
+public function startPrivate(Request $request)
+{
+    $modele = \App\Models\Modele::findOrFail($request->modele_id);
+
+    // 🟢 On passe le modèle en "prive"
+    $modele->prive = 1;
+    $modele->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Le modèle est maintenant en mode privé 🎥',
+        'prive' => $modele->prive
+    ]);
+}
+
+public function stopPrivate(Request $request)
+{
+    $modele = \App\Models\Modele::findOrFail($request->modele_id);
+    $modele->prive = 0;
+    $modele->save();
+
+    return response()->json(['success' => true, 'message' => 'Le show privé est terminé.']);
 }
 
 

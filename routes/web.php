@@ -236,3 +236,8 @@ Route::post('/live/debiter', [App\Http\Controllers\LiveController::class, 'debit
 Route::delete('/jetons/{id}', [JetonController::class, 'destroy'])->name('jetons.destroy');
 Route::put('/jetons-proposes/{id}', [JetonProposeController::class, 'update'])->name('jetons-proposes.update');
 
+Route::post('/live/start-private', [App\Http\Controllers\LiveController::class, 'startPrivate'])
+    ->name('live.startPrivate');
+
+    Route::post('/live/stop-private', [App\Http\Controllers\LiveController::class, 'stopPrivate'])
+    ->name('live.stopPrivate');

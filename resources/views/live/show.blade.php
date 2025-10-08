@@ -861,6 +861,16 @@ switchPrivateBtn.addEventListener("click", async () => {
     switchPrivateBtn.textContent = "🚪 Passer en show privée";
     isPrivate = false;
     if (debitInterval) clearInterval(debitInterval);
+    fetch("{{ route('live.stopPrivate') }}", {
+  method: "POST",
+  headers: {
+    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+});
+
   }
 });
 
@@ -869,7 +879,29 @@ function startPrivateShow() {
   switchPrivateBtn.textContent = "❌ Annuler le show privée";
   isPrivate = true;
 
-  // Début du débit automatique
+  // ✅ Appel au backend pour activer le mode privé
+  fetch("{{ route('live.startPrivate') }}", {
+    method: "POST",
+    headers: {
+      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({
+      modele_id: "{{ $modele->id }}"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      console.log("✅ Mode privé activé :", data.message);
+    } else {
+      console.warn("⚠️ Impossible d’activer le mode privé :", data);
+    }
+  })
+  .catch(err => console.error("Erreur:", err));
+
+  // 🔁 Début du débit automatique
   debitInterval = setInterval(() => {
     fetch("{{ route('live.debiter') }}", {
       method: "POST",
@@ -900,6 +932,7 @@ function startPrivateShow() {
     });
   }, 60000);
 }
+
 
 
 

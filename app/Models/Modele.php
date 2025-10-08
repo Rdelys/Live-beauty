@@ -35,6 +35,7 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     'type_flou',      // <-- ajouté
     'prix_flou',
     'prix_flou_detail', // ✅ ajouté
+        'prive', // ✅ ajouté ici
 ];
 
 protected $casts = [
@@ -44,6 +45,7 @@ protected $casts = [
     'mode'       => 'integer', // <-- ajouté
     'prix_flou'  => 'float',
     'prix_flou_detail' => 'float', // ✅ ajouté
+        'prive'      => 'integer', // ✅ ajouté ici
 ];
 
 
