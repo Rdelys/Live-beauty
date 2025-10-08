@@ -37,10 +37,11 @@ class LiveController extends Controller
 
 
     public function active()
-    {
-        $lives = Modele::where('en_live', true)->get(['id', 'prenom']);
-        return response()->json($lives);
-    }
+{
+    $lives = Modele::where('en_live', true)->get(['id', 'prenom', 'prive']);
+    return response()->json($lives);
+}
+
 
     public function show($id)
 {

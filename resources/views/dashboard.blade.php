@@ -675,24 +675,36 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         }
 
         async function fetchLiveModels() {
-            try {
-                const response = await fetch('/api/live/active');
-                const lives = await response.json();
+    try {
+        const response = await fetch('/api/live/active');
+        const lives = await response.json();
 
-                const liveContainer = document.getElementById('activeLives');
-                liveContainer.innerHTML = '';
+        const liveContainer = document.getElementById('activeLives');
+        liveContainer.innerHTML = '';
 
-                lives.forEach(model => {
-                    const link = document.createElement('a');
-                    link.href = `/live/${model.id}`;
-                    link.textContent = `🔴 ${model.prenom}`;
-                    link.classList.add('d-block', 'mb-1');
-                    liveContainer.appendChild(link);
-                });
-            } catch (e) {
-                console.error("Erreur de chargement des lives", e);
+        lives.forEach(model => {
+            const link = document.createElement('a');
+            link.href = `/live/${model.id}`;
+            link.classList.add('d-block', 'mb-1', 'fw-bold');
+
+            // 🟢 si show privé
+            if (model.prive === 1) {
+                link.textContent = `🟢 ${model.prenom} (en show privé)`;
+                link.style.color = 'limegreen';
+            } 
+            // 🔴 sinon live public
+            else {
+                link.textContent = `🔴 ${model.prenom}`;
+                link.style.color = '#ff4d4d';
             }
-        }
+
+            liveContainer.appendChild(link);
+        });
+    } catch (e) {
+        console.error("Erreur de chargement des lives", e);
+    }
+}
+
 
         fetchLiveModels();
         setInterval(fetchLiveModels, 15000);
