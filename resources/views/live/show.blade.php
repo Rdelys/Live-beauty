@@ -783,11 +783,21 @@ socket.on("connect", () => {
     });
 });
 
+
 window.onunload = window.onbeforeunload = () => {
     socket.emit("watcher-disconnected");
     socket.close();
     peerConnection.close();
 };
+
+// ✅ Activer la protection si c’est une page de show privée existante
+@if(isset($showPriveId))
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🔒 Protection activée automatiquement pour show privé existant (#{{ $showPriveId }})");
+    enablePrivateProtection();
+});
+@endif
+
 
   // Indicateur "en train d'écrire"
 let typingTimeout;
