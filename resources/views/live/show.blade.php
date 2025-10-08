@@ -738,7 +738,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -875,6 +875,7 @@ document.getElementById("privateTotalCost").textContent = coutParMinute * 5;
   },
   body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
 });
+disablePrivateProtection();
 
   }
 });
@@ -883,6 +884,8 @@ function startPrivateShow() {
   socket.emit("switch-to-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
   switchPrivateBtn.textContent = "❌ Annuler le show privée";
   isPrivate = true;
+
+    enablePrivateProtection();
 
   // ✅ Appel au backend pour activer le mode privé
   fetch("{{ route('live.startPrivate') }}", {
@@ -938,6 +941,54 @@ function startPrivateShow() {
   }, 60000);
 }
 
+// 🧩 Protection du show privé : retour / fermeture / refresh
+function enablePrivateProtection() {
+  // Désactive le bouton retour
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.disabled = true;
+    backBtn.style.opacity = "0.5";
+    backBtn.style.cursor = "not-allowed";
+    backBtn.title = "Indisponible pendant le show privé";
+  }
+
+  // Empêche de quitter sans confirmation
+  window.onbeforeunload = function (e) {
+    // Annuler le show côté serveur avant fermeture
+    fetch("{{ route('live.stopPrivate') }}", {
+      method: "POST",
+      headers: {
+        "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+    });
+
+    const confirmationMessage = "⚠️ Le show privé va être arrêté si vous quittez la page.";
+    (e || window.event).returnValue = confirmationMessage;
+    return confirmationMessage;
+  };
+
+  // Si l’utilisateur revient en arrière dans l’historique
+  window.addEventListener("popstate", (e) => {
+    e.preventDefault();
+    alert("⚠️ Vous ne pouvez pas quitter pendant le show privé !");
+    history.pushState(null, null, location.href);
+  });
+}
+
+function disablePrivateProtection() {
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.disabled = false;
+    backBtn.style.opacity = "1";
+    backBtn.style.cursor = "pointer";
+    backBtn.title = "";
+  }
+
+  window.onbeforeunload = null;
+  window.removeEventListener("popstate", () => {});
+}
 
 
 
