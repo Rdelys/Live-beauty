@@ -130,17 +130,41 @@ public function debiterJetonsLive(Request $request)
 public function startPrivate(Request $request)
 {
     $modele = \App\Models\Modele::findOrFail($request->modele_id);
+    $user = Auth::user();
 
-    // 🟢 On passe le modèle en "prive"
+    // 🟢 Passer le modèle en privé
     $modele->prive = 1;
     $modele->save();
 
+    // 💰 Calcul coût par minute
+    if (empty($modele->duree_show_privee) || $modele->duree_show_privee == 0) {
+        return response()->json([
+            'success' => false,
+            'message' => "⛔ Durée du show privée non définie."
+        ]);
+    }
+
+    $coutParMinute = ceil($modele->nombre_jetons_show_privee / $modele->duree_show_privee);
+    $debitInitial = $coutParMinute * 5; // 5 minutes d’avance
+
+    if ($user->jetons < $debitInitial) {
+        return response()->json([
+            'success' => false,
+            'message' => "💸 Vous n’avez pas assez de jetons pour démarrer un show privé (5 min d’avance requises)."
+        ]);
+    }
+
+    // 💸 Débit immédiat
+    $user->jetons -= $debitInitial;
+    $user->save();
+
     return response()->json([
         'success' => true,
-        'message' => 'Le modèle est maintenant en mode privé 🎥',
-        'prive' => $modele->prive
+        'message' => "🎥 Show privé démarré. {$debitInitial} jetons débités pour les 5 premières minutes.",
+        'jetons_restants' => $user->jetons
     ]);
 }
+
 
 public function stopPrivate(Request $request)
 {

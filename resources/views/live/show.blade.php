@@ -721,6 +721,9 @@ video {
           Ce show privé coûte 
           <strong id="privateCost" class="text-warning"></strong> jetons par minute.
         </p>
+        <p class="text-info">
+          💡 En acceptant, 5 minutes (soit <strong id="privateTotalCost"></strong> jetons) seront débitées immédiatement.
+        </p>
         <p>Souhaitez-vous continuer ?</p>
       </div>
       <div class="modal-footer border-0 justify-content-center">
@@ -845,7 +848,9 @@ switchPrivateBtn.addEventListener("click", async () => {
 
     // 🔹 Calcul du coût (identique à canStartPrivate)
     const coutParMinute = Math.ceil({{ $modele->nombre_jetons_show_privee }} / {{ $modele->duree_show_privee }});
-    privateCostElem.textContent = coutParMinute;
+privateCostElem.textContent = coutParMinute;
+document.getElementById("privateTotalCost").textContent = coutParMinute * 5;
+
 
     // 🔹 Ouvrir le modal
     confirmModal.show();
