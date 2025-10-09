@@ -48,7 +48,7 @@
     </svg>
 
     <h1 id="error-title">403 - Accès interdit</h1>
-    <p id="error-desc">Malheureusement, l'accès à ce site n'est pas autorisé depuis votre pays.</p>
+    <p id="error-desc">Malheureusement, l'accès à ce site ou page est interdit pour vous ou votre pays.</p>
     <a href="{{ url('/') }}" class="btn-home" role="button" aria-label="Retour à la page d'accueil">Retour à l'accueil</a>
 </div>
 @endsection
