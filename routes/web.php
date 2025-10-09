@@ -22,13 +22,15 @@ Route::get('/forbidden', function () {
 Route::get('/', function (Request $request) {
     $host = $request->getHost();
 
-    // ✅ Si on est sur le sous-domaine "modeles"
-    if (str_contains($host, 'modeles.livebeautyofficial.com')) {
-        return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
+    // ✅ Sous-domaine modèles
+    if ($host === 'modeles.livebeautyofficial.com') {
+        // Appel direct du contrôleur de login modèle
+        return app(ModeleAuthController::class)->showLoginForm($request);
     }
 
-    // ✅ Sinon (site principal), on affiche la home depuis le contrôleur ModeleController
-    return app(\App\Http\Controllers\ModeleController::class)->accueil();
+    // ✅ Domaine principal
+    // Appel du contrôleur ModeleController@accueil qui prépare bien $modeles
+    return app(ModeleController::class)->accueil();
 })->name('home');
 
 
@@ -92,7 +94,7 @@ Route::middleware(['block.countries'])->group(function () {
 });
 
 
-//Route::get('/', [ModeleController::class, 'accueil'])->name('home');
+Route::get('/', [ModeleController::class, 'accueil'])->name('home');
 
 // ❌ SUPPRIMÉ : Ne jamais redéfinir la route live ici !
 // Route::get('/live/{id}', function (...) { ... });
