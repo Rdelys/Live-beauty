@@ -18,9 +18,17 @@ Route::get('/forbidden', function () {
     return response()->view('errors.403', [], 403);
 })->name('forbidden');
 
-Route::get('/', function () {
+
+Route::get('/', function (Request $request) {
+    // ✅ Si on est sur le sous-domaine "modeles"
+    if ($request->getHost() === 'modeles.livebeautyofficial.com') {
+        return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
+    }
+
+    // ✅ Sinon (site principal), on affiche la home
     return view('home');
 });
+
 
 // Admin routes
 Route::get('/admin', [ModeleController::class, 'index'])->name('admin');
