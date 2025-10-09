@@ -19,20 +19,17 @@ Route::get('/forbidden', function () {
 })->name('forbidden');
 
 
-Route::get('/', function (Request $request) {
+Route::middleware(['block.countries'])->get('/', function (Request $request) {
     $host = $request->getHost();
 
-    // ✅ Sous-domaine modèles
+    // ✅ Sous-domaine modèles → page de login
     if ($host === 'modeles.livebeautyofficial.com') {
-        // Appel direct du contrôleur de login modèle
         return app(ModeleAuthController::class)->showLoginForm($request);
     }
 
-    // ✅ Domaine principal
-    // Appel du contrôleur ModeleController@accueil qui prépare bien $modeles
+    // ✅ Domaine principal → page d’accueil publique avec $modeles
     return app(ModeleController::class)->accueil();
 })->name('home');
-
 
 
 // Admin routes
@@ -87,14 +84,14 @@ Route::post('/register/verify', [AuthController::class, 'verifyCode'])->name('re
 Route::post('/register/resend', [AuthController::class, 'resendCode'])->name('register.resend');
 
 // Middleware blocage pays
-Route::middleware(['block.countries'])->group(function () {
+/*Route::middleware(['block.countries'])->group(function () {
     Route::get('/', function () {
         return view('home');
     });
 });
 
 
-Route::get('/', [ModeleController::class, 'accueil'])->name('home');
+Route::get('/', [ModeleController::class, 'accueil'])->name('home');*/
 
 // ❌ SUPPRIMÉ : Ne jamais redéfinir la route live ici !
 // Route::get('/live/{id}', function (...) { ... });
