@@ -20,14 +20,17 @@ Route::get('/forbidden', function () {
 
 
 Route::get('/', function (Request $request) {
+    $host = $request->getHost();
+
     // ✅ Si on est sur le sous-domaine "modeles"
-    if ($request->getHost() === 'modeles.livebeautyofficial.com') {
+    if (str_contains($host, 'modeles.livebeautyofficial.com')) {
         return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
     }
 
-    // ✅ Sinon (site principal), on affiche la home
-    return view('home');
-});
+    // ✅ Sinon (site principal), on affiche la home depuis le contrôleur ModeleController
+    return app(\App\Http\Controllers\ModeleController::class)->accueil();
+})->name('home');
+
 
 
 // Admin routes
