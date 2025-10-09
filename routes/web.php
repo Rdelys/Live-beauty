@@ -11,6 +11,8 @@ use App\Http\Controllers\ModeleAuth\ResetPasswordController as ModeleResetPasswo
 use App\Http\Controllers\AchatController;
 use App\Models\Modele;
 use App\Models\JetonPropose;
+use Illuminate\Http\Request;
+
 
 Route::get('/forbidden', function () {
     return response()->view('errors.403', [], 403);
@@ -32,7 +34,13 @@ Route::delete('/admin/modeles/{id}', [ModeleController::class, 'destroy'])->name
 Route::post('/jetons/store', [JetonController::class, 'store'])->name('jetons.store');
 
 // Auth pour modèle
-Route::get('/modele/login', [ModeleAuthController::class, 'showLoginForm'])->name('modele.login');
+Route::get('/modele/login', function (Request $request) {
+    if ($request->getHost() !== 'modeles.livebeautyofficial.com') {
+        abort(403, 'Accès interdit');
+    }
+    return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
+})->name('modele.login');
+
 Route::post('/modele/login', [ModeleAuthController::class, 'login'])->name('modele.login.submit');
 Route::post('/modele/logout', [ModeleAuthController::class, 'logout'])->name('modele.logout');
 
