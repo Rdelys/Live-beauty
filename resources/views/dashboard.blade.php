@@ -1025,7 +1025,7 @@ document.addEventListener("click", function(e) {
 </div>
 
 
-<!-- PayPal SDK + Script -->
+<!-- PayPal SDK + Script 
 @if(app()->environment('local'))
     {{-- Environnement local -> Sandbox --}}
     <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_SANDBOX_CLIENT_ID') }}&currency=EUR"></script>
@@ -1079,7 +1079,53 @@ document.addEventListener("click", function(e) {
   });
 
 
+</script>-->
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe("{{ env('STRIPE_KEY') }}");
+
+const packs = [
+  { jetons: 30, prix: 5.49 },
+  { jetons: 60, prix: 9.99 },
+  { jetons: 130, prix: 19.99 },
+  { jetons: 300, prix: 44.99 },
+  { jetons: 700, prix: 99.99 },
+];
+
+packs.forEach(pack => {
+  const container = document.getElementById(`paypal-button-container-${pack.jetons}`);
+  if (container) {
+    container.innerHTML = `
+      <button class="btn btn-danger w-100 fw-bold rounded-pill acheter-stripe" 
+              data-pack='${JSON.stringify(pack)}'>
+        <i class="fas fa-credit-card me-2"></i> Payer avec Stripe
+      </button>`;
+  }
+});
+
+document.addEventListener('click', async e => {
+  const btn = e.target.closest('.acheter-stripe');
+  if (!btn) return;
+
+  const pack = JSON.parse(btn.dataset.pack);
+
+  const res = await fetch("{{ route('stripe.create') }}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": "{{ csrf_token() }}"
+    },
+    body: JSON.stringify({ pack })
+  });
+
+  const data = await res.json();
+
+  const result = await stripe.redirectToCheckout({ sessionId: data.id });
+  if (result.error) alert(result.error.message);
+});
 </script>
+
 
 <div class="modal fade" id="galleryModal" tabindex="-1">
   <div class="modal-dialog modal-fullscreen">

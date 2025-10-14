@@ -12,6 +12,8 @@ use App\Http\Controllers\AchatController;
 use App\Models\Modele;
 use App\Models\JetonPropose;
 use Illuminate\Http\Request;
+use App\Http\Controllers\StripeController;
+
 
 
 Route::get('/forbidden', function () {
@@ -79,7 +81,9 @@ Route::post('/api/live/stop', [LiveController::class, 'stop']);
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/dashboard', [AuthController::class, 'dashboard'])->middleware('auth');
+Route::get('/dashboard', [AuthController::class, 'dashboard'])
+    ->middleware('auth')
+    ->name('dashboard');
 Route::post('/register/verify', [AuthController::class, 'verifyCode'])->name('register.verify');
 Route::post('/register/resend', [AuthController::class, 'resendCode'])->name('register.resend');
 
@@ -259,3 +263,7 @@ Route::post('/live/start-private', [App\Http\Controllers\LiveController::class, 
 
     Route::post('/live/stop-private', [App\Http\Controllers\LiveController::class, 'stopPrivate'])
     ->name('live.stopPrivate');
+
+    Route::post('/stripe/create-session', [StripeController::class, 'createCheckoutSession'])->name('stripe.create');
+Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
