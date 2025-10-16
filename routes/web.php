@@ -13,6 +13,7 @@ use App\Models\Modele;
 use App\Models\JetonPropose;
 use Illuminate\Http\Request;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\GalleryPhotoController;
 
 
 
