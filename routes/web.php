@@ -273,5 +273,5 @@ Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.
 Route::post('/modele/{modele}/gallery-photo', [GalleryPhotoController::class, 'store'])
     ->name('gallery-photo.store');
 
-Route::delete('/gallery-photo/{galleryPhoto}', [GalleryPhotoController::class, 'destroy'])
+Route::delete('/modele/gallery-photo/{galleryPhoto}', [GalleryPhotoController::class, 'destroy'])
     ->name('gallery-photo.destroy');
