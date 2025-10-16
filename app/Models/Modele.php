@@ -82,5 +82,10 @@ public function achats()
     return $this->hasMany(\App\Models\Achat::class);
 }
 
+public function galleryPhotos()
+{
+    return $this->hasMany(GalleryPhoto::class);
+}
+
 
 }

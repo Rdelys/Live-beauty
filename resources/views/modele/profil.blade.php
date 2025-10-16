@@ -384,7 +384,82 @@ label {
 <li class="nav-item" role="presentation">
   <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos" type="button" role="tab">Vidéos</button>
 </li>
+<li class="nav-item" role="presentation">
+  <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery" type="button" role="tab">
+    📷 Gallery Photo
+  </button>
+</li>
+
 </ul>
+
+<div class="tab-pane fade text-start" id="gallery" role="tabpanel" aria-labelledby="gallery-tab">
+  <h4 class="text-white mb-3">📷 Galerie Photo</h4>
+
+  <!-- Formulaire d’ajout -->
+  <form action="{{ route('gallery-photo.store', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
+    @csrf
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Choisir les photos</label>
+        <input type="file" name="photos[]" class="form-control" multiple required accept="image/*">
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Payant ?</label>
+        <select name="payant" class="form-control">
+          <option value="0">Gratuit</option>
+          <option value="1">Payant</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Prix (Jetons)</label>
+        <input type="number" step="0.01" name="prix" class="form-control" placeholder="Ex: 20">
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Type de flou</label>
+        <select name="type_flou" class="form-control">
+          <option value="">Aucun</option>
+          <option value="soft">Flou doux</option>
+          <option value="strong">Flou fort</option>
+          <option value="pixel">Pixelisé</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-success w-100">Ajouter à la galerie</button>
+  </form>
+
+  <!-- Galerie existante -->
+  <div class="row">
+    @foreach($modele->galleryPhotos as $photo)
+      <div class="col-6 col-md-3 mb-4">
+        <div class="card bg-dark text-white border-light">
+          <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
+          <div class="card-body text-center">
+            @if($photo->payant)
+              <span class="badge bg-danger">Payant</span>
+              <p class="mb-1">💰 {{ $photo->prix }} Jetons</p>
+              <small>Flou: {{ $photo->type_flou ?? 'Aucun' }}</small>
+            @else
+              <span class="badge bg-success">Gratuit</span>
+            @endif
+
+            <form action="{{ route('gallery-photo.destroy', $photo->id) }}" method="POST" onsubmit="return confirm('Supprimer cette photo ?')">
+              @csrf
+              @method('DELETE')
+              <button class="btn btn-sm btn-danger mt-2">🗑️ Supprimer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    @endforeach
+  </div>
+
+  @if($modele->galleryPhotos->isEmpty())
+    <p class="text-muted text-center">Aucune photo dans la galerie.</p>
+  @endif
+</div>
 
 
 <div class="tab-content" id="profilTabContent">

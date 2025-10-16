@@ -267,3 +267,10 @@ Route::post('/live/start-private', [App\Http\Controllers\LiveController::class, 
     Route::post('/stripe/create-session', [StripeController::class, 'createCheckoutSession'])->name('stripe.create');
 Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
 Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+
+
+Route::post('/modele/{modele}/gallery-photo', [GalleryPhotoController::class, 'store'])
+    ->name('gallery-photo.store');
+
+Route::delete('/gallery-photo/{galleryPhoto}', [GalleryPhotoController::class, 'destroy'])
+    ->name('gallery-photo.destroy');
