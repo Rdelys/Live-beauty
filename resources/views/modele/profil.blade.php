@@ -392,7 +392,10 @@ label {
 
 </ul>
 
-<div class="tab-pane fade text-start" id="gallery" role="tabpanel" aria-labelledby="gallery-tab">
+
+
+<div class="tab-content" id="profilTabContent">
+  <div class="tab-pane fade text-start" id="gallery" role="tabpanel" aria-labelledby="gallery-tab">
   <h4 class="text-white mb-3">📷 Galerie Photo</h4>
 
   <!-- Formulaire d’ajout -->
@@ -461,8 +464,6 @@ label {
   @endif
 </div>
 
-
-<div class="tab-content" id="profilTabContent">
   <div class="tab-pane fade show active text-start" id="profil" role="tabpanel">
     <p><strong>Nom :</strong> {{ $modele->nom }}</p>
     <p><strong>Email :</strong> {{ $modele->email }}</p>
@@ -558,6 +559,7 @@ label {
 
     <p class="mt-2 text-warning">🔴 En direct - Visible par tous les utilisateurs connectés</p>
 </div>
+
 
   <div class="tab-pane fade text-start" id="jetons" role="tabpanel" aria-labelledby="jetons-tab">
     <h4 class="text-white mb-3">💎 Gestion de vos jetons</h4>
