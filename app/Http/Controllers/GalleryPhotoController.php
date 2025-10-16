@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
+use App\Models\GalleryPhoto;
+use Illuminate\Support\Facades\Storage;
 
 class GalleryPhotoController extends Controller
 {
