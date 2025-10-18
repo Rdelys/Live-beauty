@@ -515,7 +515,7 @@ label {
 
   <!-- Galerie existante -->
   <div class="row">
-    @foreach($modele->galleryPhotos as $photo)
+    @foreach($modele->galleryPhotos->whereNotNull('photo_url') as $photo)
       <div class="col-6 col-md-3 mb-4">
         <div class="card bg-dark text-white border-light">
           <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
@@ -539,7 +539,7 @@ label {
     @endforeach
   </div>
 
-  @if($modele->galleryPhotos->isEmpty())
+  @if($modele->galleryPhotos->whereNotNull('photo_url')->isEmpty())
     <p class="text-muted text-center">Aucune photo dans la galerie.</p>
   @endif
 </div>
