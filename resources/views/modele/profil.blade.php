@@ -475,13 +475,6 @@ label {
     <p><strong>Fesse :</strong> {{ $modele->fesse ?? 'Non définie' }}</p>
     <p><strong>Langues parlées :</strong> {!! $modele->langue ?? 'Non défini' !!}</p>
     <p><strong>Ce qu’elle propose :</strong> {{ $modele->services ?? 'Non défini' }}</p>
-    <p><strong>Mode :</strong> 
-      @if($modele->mode)
-        <span class="badge bg-danger">Payant</span>
-      @else
-        <span class="badge bg-success">Gratuit</span>
-      @endif
-    </p>
 
     @if($modele->mode)
       <p><strong>Type de flou :</strong> 
@@ -1709,28 +1702,7 @@ togglePrivateMicBtn?.addEventListener("click", () => {
   </select>
 </div>
 
-<!-- Toggle Payant / Gratuit -->
-<div class="mb-3">
-  <label class="form-label">Mode</label>
-  <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" id="modeToggle" name="mode" value="1" {{ $modele->mode ? 'checked' : '' }}>
-    <label class="form-check-label" for="modeToggle" id="modeToggleLabel">
-      {{ $modele->mode ? 'Payant' : 'Gratuit' }}
-    </label>
-  </div>
-</div>
 
-<!-- Paramètres payants (affiché uniquement si Payant) -->
-<div id="paySettings" style="display: {{ $modele->mode ? 'block' : 'none' }};">
-  <div class="mb-3">
-    <label class="form-label">Type de flou</label>
-    <select name="type_flou" class="form-control">
-      <option value="">Aucun</option>
-      <option value="soft" {{ $modele->type_flou == 'soft' ? 'selected' : '' }}>Flou doux</option>
-      <option value="strong" {{ $modele->type_flou == 'strong' ? 'selected' : '' }}>Flou fort</option>
-      <option value="pixel" {{ $modele->type_flou == 'pixel' ? 'selected' : '' }}>Pixelisé (approx.)</option>
-    </select>
-  </div>
 
   <div class="mb-3">
     <label class="form-label">Prix pour enlever le flou (Jetons)</label>
