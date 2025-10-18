@@ -651,14 +651,18 @@ video {
       </div>
       <!-- Menu Surprise -->
       <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
-          <div class="menu-title">Envoyer une Surprise</div>
-          <div class="token-grid">
-              <div class="token-item" data-cost="1"><div class="token-emoji">💋</div><div class="token-cost">100</div></div>
-              <div class="token-item" data-cost="5"><div class="token-emoji">🍸</div><div class="token-cost">250</div></div>
-              <div class="token-item" data-cost="10"><div class="token-emoji">👙</div><div class="token-cost">500</div></div>
-              <div class="token-item" data-cost="25"><div class="token-emoji">💄</div><div class="token-cost">750</div></div>
-              <div class="token-item" data-cost="50"><div class="token-emoji">👠</div><div class="token-cost">1000</div></div>
-          </div>
+        <div class="menu-title">Envoyer une Surprise ✨</div>
+        <div class="token-grid">
+            <div class="token-item" data-cost="1"><div class="token-emoji">💌</div><div class="token-cost">1</div></div>
+            <div class="token-item" data-cost="5"><div class="token-emoji">🌹</div><div class="token-cost">5</div></div>
+            <div class="token-item" data-cost="10"><div class="token-emoji">🎀</div><div class="token-cost">10</div></div>
+            <div class="token-item" data-cost="50"><div class="token-emoji">💎</div><div class="token-cost">50</div></div>
+            <div class="token-item" data-cost="100"><div class="token-emoji">💋</div><div class="token-cost">100</div></div>
+            <div class="token-item" data-cost="250"><div class="token-emoji">🍸</div><div class="token-cost">250</div></div>
+            <div class="token-item" data-cost="500"><div class="token-emoji">🎁</div><div class="token-cost">500</div></div>
+            <div class="token-item" data-cost="750"><div class="token-emoji">💄</div><div class="token-cost">750</div></div>
+            <div class="token-item" data-cost="1000"><div class="token-emoji">👑</div><div class="token-cost">1000</div></div>
+        </div>
       </div>
     </div>
     @endauth
@@ -738,7 +742,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1416,7 +1420,7 @@ socket.emit("jeton-sent", {
 
     if (typeof socket !== 'undefined') {
     socket.on("jeton-sent", (data) => {
-        const message = `Jetons - ${data.pseudo || ''} - ${data.name || ''} - ${data.description || ''}`;
+        const message = `Jetons - ${data.pseudo || ''} - ${data.name || ''}`;
         createTokenBubble(message, data.cost, data.isGolden);
             if (soundMessage) soundMessage.play().catch(() => {});
 
