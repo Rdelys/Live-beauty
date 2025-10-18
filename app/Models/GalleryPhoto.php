@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class GalleryPhoto extends Model
 {
-    protected $fillable = ['modele_id', 'photo_url', 'payant', 'prix', 'type_flou'];
+    use HasFactory;
+
+    protected $fillable = [
+        'modele_id',
+        'photo_url',
+        'video_url',   // <-- ajouté
+        'payant',
+        'prix',
+        'type_flou'
+    ];
 
     public function modele()
     {

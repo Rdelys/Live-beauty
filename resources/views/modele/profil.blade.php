@@ -389,12 +389,92 @@ label {
     📷 Gallery Photo
   </button>
 </li>
+<li class="nav-item" role="presentation">
+  <button class="nav-link" id="gallery-video-tab" data-bs-toggle="tab" data-bs-target="#gallery-video" type="button" role="tab">
+    🎬 Gallery Vidéo
+  </button>
+</li>
+
 
 </ul>
 
 
 
 <div class="tab-content" id="profilTabContent">
+  <div class="tab-pane fade text-start" id="gallery-video" role="tabpanel" aria-labelledby="gallery-video-tab">
+  <h4 class="text-white mb-3">🎬 Galerie Vidéo</h4>
+
+  <!-- Formulaire d’ajout de vidéos -->
+  <form action="{{ route('gallery-photo.storeVideo', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
+    @csrf
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Choisir les vidéos</label>
+        <input type="file" name="videos[]" class="form-control" multiple required accept="video/*">
+        <small class="text-muted">Types : mp4, mov, avi, webm — Taille max : 50MB</small>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Payant ?</label>
+        <select name="payant" class="form-control">
+          <option value="0">Gratuit</option>
+          <option value="1">Payant</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Prix (Jetons)</label>
+        <input type="number" step="0.01" name="prix" class="form-control" placeholder="Ex: 20">
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Type de flou</label>
+        <select name="type_flou" class="form-control">
+          <option value="">Aucun</option>
+          <option value="soft">Flou doux</option>
+          <option value="strong">Flou fort</option>
+          <option value="pixel">Pixelisé</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-success w-100">Ajouter à la galerie vidéo</button>
+  </form>
+
+  <!-- Affichage des vidéos existantes -->
+  <div class="row">
+    @foreach($modele->galleryPhotos->whereNotNull('video_url') as $item)
+      <div class="col-12 col-md-6 mb-4">
+        <div class="card bg-dark text-white border-light">
+          <video controls class="w-100 rounded" style="height:250px;object-fit:cover;">
+            <source src="{{ asset('storage/' . $item->video_url) }}" type="video/mp4">
+            Ton navigateur ne supporte pas la balise vidéo.
+          </video>
+
+          <div class="card-body text-center">
+            @if($item->payant)
+              <span class="badge bg-danger">Payant</span>
+              <p class="mb-1">💰 {{ $item->prix }} Jetons</p>
+              <small>Flou: {{ $item->type_flou ?? 'Aucun' }}</small>
+            @else
+              <span class="badge bg-success">Gratuit</span>
+            @endif
+
+            <form action="{{ route('gallery-photo.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Supprimer cette vidéo ?')">
+              @csrf
+              @method('DELETE')
+              <button class="btn btn-sm btn-danger mt-2">🗑️ Supprimer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    @endforeach
+  </div>
+
+  @if($modele->galleryPhotos->whereNotNull('video_url')->isEmpty())
+    <p class="text-muted text-center">Aucune vidéo dans la galerie.</p>
+  @endif
+</div>
+
   <div class="tab-pane fade text-start" id="gallery" role="tabpanel" aria-labelledby="gallery-tab">
   <h4 class="text-white mb-3">📷 Galerie Photo</h4>
 
