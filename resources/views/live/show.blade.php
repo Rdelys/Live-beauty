@@ -401,40 +401,65 @@ video {
   box-shadow: 0 8px 28px rgba(106, 27, 154, 0.25); /* ombre violette douce */
 }
 
-/* small popup menu list */
+/* ==== MENUS TOKENS / SURPRISES PREMIUM ==== */
 .token-menu {
   position: absolute;
   top: 56px;
   right: 0;
-  min-width: 220px;
-  background: rgba(10,10,10,0.85);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  padding: 8px;
+  min-width: 240px;
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 10px;
   display: none;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   z-index: 1150;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 25px rgba(255, 0, 100, 0.25),
+              0 0 45px rgba(255, 255, 255, 0.05);
+  transform-origin: top right;
+  animation: fadeInMenu 0.25s ease-out;
 }
+
+@keyframes fadeInMenu {
+  from { opacity: 0; transform: scale(0.9) translateY(-8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+
 .token-menu .menu-title {
-  font-size: 0.85rem;
-  color: #ddd;
-  padding: 4px 6px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #ffbdf3;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  text-align: center;
+  text-transform: uppercase;
 }
+
 .token-choice {
-  background: transparent;
-  border: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.05);
   color: #fff;
   text-align: left;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background .12s;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.token-choice:hover { background: rgba(255,255,255,0.03); }
+
+.token-choice:hover {
+  background: linear-gradient(135deg, #ff4081, #7c4dff);
+  color: #fff;
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(255,64,129,0.4);
+}
 
 /* BULLES QUI APPARAISSENT SUR LA VIDEO */
 .token-bubble {
@@ -494,28 +519,43 @@ video {
 }
 
 .token-item {
-    background: #222;
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer; /* Cliquable */
-    transition: transform 0.2s, background 0.2s;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 .token-item:hover {
-    background: #444;
-    transform: scale(1.05);
+  background: linear-gradient(135deg, #ff4081, #7c4dff);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 0 25px rgba(255,64,129,0.35);
 }
 
 .token-emoji {
-    font-size: 1.8rem;
-    margin-bottom: 5px;
+  font-size: 1.9rem;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(255,255,255,0.25);
 }
 
 .token-cost {
-    font-size: 0.9rem;
-    color: #ccc;
+  font-size: 0.85rem;
+  color: #ccc;
 }
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,64,129,0.4); }
+  50% { box-shadow: 0 0 25px rgba(255,64,129,0.7); }
+}
+
+.token-menu.open {
+  display: flex !important;
+  animation: fadeInMenu 0.25s ease-out forwards;
+}
+
 @media screen and (max-width: 768px) {
     #videoContainer {
         height: 80vh; /* prend 80% de la hauteur de l'écran */
