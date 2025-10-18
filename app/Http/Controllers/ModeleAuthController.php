@@ -55,7 +55,7 @@ class ModeleAuthController extends Controller
     public function profile()
     {
 $modele = Modele::with('jetons')->findOrFail(session('modele_id'));
-    $jetonsProposes = JetonPropose::all(); // ⚡ récupère tous les jetons proposés
+$jetonsProposes = JetonPropose::where('prise', 0)->get();
 
         return view('modele.profil', compact('modele', 'jetonsProposes'));
     }

@@ -106,7 +106,7 @@ class ModeleController extends Controller
     $jetons = Jeton::all();
     $shows = ShowPrive::with('user','modele')->get();
     $achats = Achat::with(['user','modele'])->latest()->get(); // ✅ ajout
-    $jetonsProposes = JetonPropose::all(); // <-- nouveau
+    $jetonsProposes = JetonPropose::where('prise', 0)->get();
 
     $nombreDeModeles = $modeles->count();
     $nombreDeJetons = $jetons->count();

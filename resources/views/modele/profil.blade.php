@@ -659,6 +659,8 @@ label {
 
           <form action="{{ route('jetons.store') }}" method="POST">
             @csrf
+              <input type="hidden" name="jeton_propose_id" id="jeton_propose_id">
+
             <div class="mb-3">
               <label class="form-label">Nom du jeton</label>
               <input type="text" name="nom" class="form-control" required placeholder="Ex : Jeton VIP">
@@ -1068,22 +1070,23 @@ socket.on("jeton-sent", (data) => {
     console.log("Données reçues (jeton-sent):", data); // Debug 1
     
     const pseudo = data.pseudo || 'Anonyme';
+    const name = data.name || 'Pas de nom';
     const description = data.description || 'Pas de description';
     const cost = data.cost || 0;
     const isGolden = data.isGolden || false;
 
-    console.log("Variables extraites:", { pseudo, description, cost, isGolden }); // Debug 2
+    console.log("Variables extraites:", { pseudo, name, description, cost, isGolden }); // Debug 2
 
     const chatWrapper = document.querySelector(".chat-wrapper");
     if (chatWrapper) {
         const bubble = document.createElement('div');
         bubble.classList.add("chat-bubble");
-        bubble.innerHTML = `💎 <strong>${pseudo}</strong>: ${description} (${cost} jetons)`;
+        bubble.innerHTML = `💎 <strong>${pseudo}</strong>: ${name} (${cost} jetons)`;
         chatWrapper.appendChild(bubble);
         chatWrapper.scrollTop = chatWrapper.scrollHeight;
     }
     if (soundMessage) soundMessage.play().catch(() => {});
-    createTokenBubble(description, cost, isGolden);
+    createTokenBubble(name, description, cost, isGolden);
 });
 
 socket.on("surprise-sent", (data) => {
@@ -1558,11 +1561,11 @@ privateSocket.emit("broadcaster", {
     privateSocket.on("jeton-sent", (data) => {
       const bubble = document.createElement("div");
       bubble.classList.add("chat-bubble");
-      bubble.innerHTML = `💎 <strong>${data.pseudo}</strong>: ${data.description} (${data.cost} jetons)`;
+      bubble.innerHTML = `💎 <strong>${data.pseudo}</strong>: ${data.name} (${data.cost} jetons)`;
       privateMessagesDiv.appendChild(bubble);
       privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
       soundMessage.play().catch(()=>{});
-      createTokenBubble(data.description, data.cost, data.isGolden);
+      createTokenBubble(data.name, data.cost, data.isGolden);
     });
 
     /* SURPRISES */
@@ -1826,49 +1829,48 @@ togglePrivateMicBtn?.addEventListener("click", () => {
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // === Gestion mode payant / gratuit ===
   const modeToggle = document.getElementById('modeToggle');
   const paySettings = document.getElementById('paySettings');
   const label = document.getElementById('modeToggleLabel');
 
-  modeToggle?.addEventListener('change', function() {
-    const checked = this.checked;
-    paySettings.style.display = checked ? 'block' : 'none';
-    label.textContent = checked ? 'Payant' : 'Gratuit';
-  });
-});
+  if (modeToggle && paySettings && label) {
+    modeToggle.addEventListener('change', function() {
+      const checked = this.checked;
+      paySettings.style.display = checked ? 'block' : 'none';
+      label.textContent = checked ? 'Payant' : 'Gratuit';
+    });
+  }
 
-document.addEventListener('DOMContentLoaded', function() {
+  // === Gestion sélection des jetons proposés ===
   const select = document.getElementById('select-jeton-propose');
-  if (!select) return;
+  const hiddenInput = document.getElementById('jeton_propose_id'); // Champ caché ajouté dans le formulaire
 
-  select.addEventListener('change', function() {
-    const id = this.value;
-    if (!id) {
-      // clear the fields if needed
-      document.querySelector('input[name="nom"]').value = '';
-      document.querySelector('textarea[name="description"]').value = '';
-      document.querySelector('input[name="nombre_de_jetons"]').value = '';
-      return;
-    }
+  if (select) {
+    select.addEventListener('change', function() {
+      const opt = this.selectedOptions[0];
 
-    // Option 1: utiliser les data-attributes déjà imprimés
-    const opt = this.selectedOptions[0];
-    document.querySelector('input[name="nom"]').value = opt.dataset.nom || '';
-    document.querySelector('textarea[name="description"]').value = opt.dataset.description || '';
-    document.querySelector('input[name="nombre_de_jetons"]').value = opt.dataset.nombre || '';
+      // Si aucun jeton proposé sélectionné
+      if (!opt || !opt.value) {
+        document.querySelector('input[name="nom"]').value = '';
+        document.querySelector('textarea[name="description"]').value = '';
+        document.querySelector('input[name="nombre_de_jetons"]').value = '';
+        if (hiddenInput) hiddenInput.value = '';
+        return;
+      }
 
-    // Option 2 (plus robuste) : fetch les détails via API
-    // fetch(`/api/jetons-proposes/${id}`)
-    //   .then(r => r.json())
-    //   .then(data => {
-    //     document.querySelector('input[name="nom"]').value = data.nom || '';
-    //     document.querySelector('textarea[name="description"]').value = data.description || '';
-    //     document.querySelector('input[name="nombre_de_jetons"]').value = data.nombre_de_jetons || '';
-    //   });
-  });
+      // Remplissage automatique des champs à partir des data-attributes
+      document.querySelector('input[name="nom"]').value = opt.dataset.nom || '';
+      document.querySelector('textarea[name="description"]').value = opt.dataset.description || '';
+      document.querySelector('input[name="nombre_de_jetons"]').value = opt.dataset.nombre || '';
+
+      // On sauvegarde aussi l'ID du jeton proposé sélectionné
+      if (hiddenInput) hiddenInput.value = opt.value;
+    });
+  }
 });
-
 </script>
+
 
 </body>
 </html>
