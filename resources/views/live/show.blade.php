@@ -12,12 +12,14 @@
 
   <style>
     .fullscreen-icon {
-  background: linear-gradient(135deg, #263238, #37474f);
-  color: #fff;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+  background: linear-gradient(135deg, #212121, #333);
+  color: #e0e0e0;
+  box-shadow: 0 0 15px rgba(255,255,255,0.05);
 }
+
 .fullscreen-icon:hover {
-  transform: translateY(-3px);
+  background: linear-gradient(135deg, #444, #111);
+  box-shadow: 0 0 18px rgba(255,255,255,0.15);
 }
 @keyframes pulseFinished {
   0%   { transform: scale(1); opacity: 1; }
@@ -339,14 +341,13 @@ video {
 /* ICONS & MENUS POUR JETONS */
 .video-top-icons {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
   display: flex;
-  flex-direction: column; /* empile les icônes verticalement */
-  gap: 8px;
-  z-index: 1100;
+  flex-direction: column;
   align-items: center;
-  pointer-events: auto;
+  gap: 10px;
+  z-index: 1200;
 }
 
 /* Adapter pour mobile */
@@ -370,35 +371,78 @@ video {
 
 
 /* Icones */
+/* Base commune aux icônes */
 .token-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   border: none;
-  background: rgba(0,0,0,0.45);
+  background: rgba(25,25,25,0.75);
   color: #fff;
-  font-size: 20px;
+  font-size: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
   cursor: pointer;
-  transition: transform .12s ease, background .12s ease;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.5),
+    inset 0 0 8px rgba(255,255,255,0.1);
+}
+
+/* Effet général au survol */
+.token-icon:hover {
+  transform: translateY(-4px) scale(1.05);
+  filter: brightness(1.2);
 }
 .token-icon:active { transform: scale(.96); }
-.token-icon:hover { transform: translateY(-3px); }
 
 /* Gold style for model tokens */
 .golden-icon {
-  background: linear-gradient(135deg,#b8860b,#ffd54f);
-  color: #2b1600;
-  box-shadow: 0 8px 28px rgba(189,137,9,0.25);
+  background: linear-gradient(135deg, #ffb300, #ff9800);
+  color: #3a2300;
+  font-weight: bold;
+  box-shadow:
+    0 0 15px rgba(255,193,7,0.35),
+    inset 0 0 8px rgba(255,255,255,0.25);
+  animation: glowGold 3s infinite ease-in-out;
+}
+
+@keyframes glowGold {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,193,7,0.4); }
+  50% { box-shadow: 0 0 25px rgba(255,215,64,0.8); }
+}
+
+.golden-icon:hover {
+  background: linear-gradient(135deg, #ffd740, #ffb300);
+  transform: translateY(-4px) scale(1.1);
 }
 
 .surprise-icon {
-  background: linear-gradient(135deg, #6a1b9a, #ba68c8); /* violet -> lavande */
-  color: #fff; /* blanc pour contraste */
-  box-shadow: 0 8px 28px rgba(106, 27, 154, 0.25); /* ombre violette douce */
+  background: linear-gradient(135deg, #6a1b9a, #ba68c8);
+  color: #fff;
+  box-shadow:
+    0 0 18px rgba(186,104,200,0.35),
+    inset 0 0 8px rgba(255,255,255,0.25);
+  animation: pulseViolet 3s infinite ease-in-out;
+}
+
+@keyframes pulseViolet {
+  0%, 100% { box-shadow: 0 0 15px rgba(186,104,200,0.35); }
+  50% { box-shadow: 0 0 30px rgba(186,104,200,0.7); }
+}
+
+.surprise-icon:hover {
+  background: linear-gradient(135deg, #8e24aa, #ce93d8);
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 0 25px rgba(206,147,216,0.6);
+}
+
+/* === Petites animations au clic === */
+.token-icon:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
 }
 
 /* ==== MENUS TOKENS / SURPRISES PREMIUM ==== */
@@ -493,8 +537,18 @@ video {
 
 /* responsive adjustments */
 @media (max-width: 576px) {
-  .video-top-icons { top: 8px; right: 8px; gap: 6px; }
-  .token-icon { width: 38px; height: 38px; font-size: 18px; }
+  .video-top-icons {
+    top: 10px;
+    right: 10px;
+    gap: 8px;
+  }
+
+  .token-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
   .token-menu { right: -6px; min-width: 180px; top: 48px; }
   .token-bubble { bottom: 150px; font-size: 0.9rem; padding: 8px 12px; }
 }
@@ -644,16 +698,17 @@ video {
 
     <video id="liveVideo" autoplay playsinline controls></video>
     @auth
+     <!-- Default tokens icon -->
+      <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
+        💠
+      </button>-->
+
   <div class="video-top-icons" aria-hidden="false">
     <button id="fullscreenBtn" class="token-icon fullscreen-icon" title="Plein écran" type="button">
     ⛶
 </button>
 
-      <!-- Default tokens icon -->
-      <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
-        💠
-      </button>-->
-
+     
       <!-- Model personal tokens icon (gold) -->
       <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
         ✨
