@@ -707,7 +707,6 @@ video {
 </script>
 @endif
 
-      <p class="mt-3">{{ $modele->description }}</p>
     </div>
 
   </div>
