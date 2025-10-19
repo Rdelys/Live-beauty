@@ -79,4 +79,18 @@ class GalleryPhotoController extends Controller
 
         return back()->with('success', 'Élément supprimé avec succès.');
     }
+
+    public function getGallery($modeleId)
+{
+    $photos = \App\Models\GalleryPhoto::where('modele_id', $modeleId)->get();
+
+    $photoItems = $photos->whereNotNull('photo_url')->values();
+    $videoItems = $photos->whereNotNull('video_url')->values();
+
+    return response()->json([
+        'photos' => $photoItems,
+        'videos' => $videoItems,
+    ]);
+}
+
 }
