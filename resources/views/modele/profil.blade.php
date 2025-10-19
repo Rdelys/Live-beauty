@@ -458,6 +458,17 @@ label {
             @else
               <span class="badge bg-success">Gratuit</span>
             @endif
+            <br>
+            <button class="btn btn-sm btn-warning mt-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editGalleryModal"
+                    data-id="{{ $item->id }}"
+                    data-type="video"
+                    data-payant="{{ $item->payant }}"
+                    data-prix="{{ $item->prix }}"
+                    data-type_flou="{{ $item->type_flou }}">
+              ✏️ Modifier
+            </button>
 
             <form action="{{ route('gallery-photo.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Supprimer cette vidéo ?')">
               @csrf
@@ -527,6 +538,17 @@ label {
             @else
               <span class="badge bg-success">Gratuit</span>
             @endif
+<!-- Bouton Modifier -->
+            <button class="btn btn-sm btn-warning mt-2" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#editGalleryModal" 
+                    data-id="{{ $photo->id }}"
+                    data-type="photo"
+                    data-payant="{{ $photo->payant }}"
+                    data-prix="{{ $photo->prix }}"
+                    data-type_flou="{{ $photo->type_flou }}">
+              ✏️ Modifier
+            </button>
 
             <form action="{{ route('gallery-photo.destroy', $photo->id) }}" method="POST" onsubmit="return confirm('Supprimer cette photo ?')">
               @csrf
@@ -1855,6 +1877,77 @@ document.addEventListener('DOMContentLoaded', function() {
       if (hiddenInput) hiddenInput.value = opt.value;
     });
   }
+});
+</script>
+<!-- Modal Modification Photo/Vidéo -->
+<div class="modal fade" id="editGalleryModal" tabindex="-1" aria-labelledby="editGalleryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editGalleryModalLabel">Modifier l’élément</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="editGalleryForm" method="POST" action="">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <input type="hidden" name="type" id="editType">
+
+          <div class="mb-3">
+            <label class="form-label">Payant ?</label>
+            <select name="payant" id="editPayant" class="form-control">
+              <option value="0">Gratuit</option>
+              <option value="1">Payant</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Prix (Jetons)</label>
+            <input type="number" name="prix" id="editPrix" class="form-control" step="0.01">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Type de flou</label>
+            <select name="type_flou" id="editTypeFlou" class="form-control">
+              <option value="">Aucun</option>
+              <option value="soft">Flou doux</option>
+              <option value="strong">Flou fort</option>
+              <option value="pixel">Pixelisé</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const editGalleryModal = document.getElementById('editGalleryModal');
+  const form = document.getElementById('editGalleryForm');
+
+  editGalleryModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const id = button.getAttribute('data-id');
+    const type = button.getAttribute('data-type');
+    const payant = button.getAttribute('data-payant');
+    const prix = button.getAttribute('data-prix');
+    const typeFlou = button.getAttribute('data-type_flou');
+
+    // Remplissage
+    document.getElementById('editType').value = type;
+    document.getElementById('editPayant').value = payant;
+    document.getElementById('editPrix').value = prix;
+    document.getElementById('editTypeFlou').value = typeFlou;
+
+    // Cible du formulaire
+    form.action = `/gallery-photo/update/${id}`;
+  });
 });
 </script>
 

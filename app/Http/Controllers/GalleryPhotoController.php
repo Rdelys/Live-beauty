@@ -93,4 +93,18 @@ class GalleryPhotoController extends Controller
     ]);
 }
 
+
+public function update(Request $request, $id)
+{
+    $item = GalleryPhoto::findOrFail($id);
+
+    $item->update([
+        'payant' => $request->payant,
+        'prix' => $request->prix,
+        'type_flou' => $request->type_flou,
+    ]);
+
+    return redirect()->back()->with('success', 'Élément mis à jour avec succès !');
+}
+
 }
