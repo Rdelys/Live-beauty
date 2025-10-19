@@ -356,30 +356,48 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 }
 
 /* Wrappers */
-.blur-wrapper { position: relative; overflow: hidden; display:block; }
-.blur-wrapper img, .blur-wrapper video { width:100%; height:100%; object-fit:cover; display:block; }
+.blur-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
 
-/* Types */
-/* Flou léger */
+.blur-wrapper img,
+.blur-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: filter 0.35s ease, transform 0.35s ease;
+}
+
+/* Flou léger (quasi imperceptible, effet doux) */
 .blur-wrapper.soft img,
 .blur-wrapper.soft video {
-  filter: blur(6px);
-  transition: filter .25s ease;
+  filter: blur(12px);
 }
 
-/* Flou fort */
+/* Flou fort (image difficile à distinguer) */
 .blur-wrapper.strong img,
 .blur-wrapper.strong video {
-  filter: blur(20px);
-  transition: filter .25s ease;
+  filter: blur(35px);
 }
 
-/* Pixelisé (approx. pour images seulement) */
-.blur-wrapper.pixel img {
-  filter: blur(3px);
-  image-rendering: pixelated;
-  transform: scale(1.05);
+/* Flou extrême (presque invisible) */
+.blur-wrapper.hidden img,
+.blur-wrapper.hidden video {
+  filter: blur(60px);
+  opacity: 0.8;
 }
+
+/* Pixelisé (effet rétro/invisible à distance) */
+.blur-wrapper.pixel img {
+  filter: blur(5px);
+  image-rendering: pixelated;
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
 
 /* Overlay */
 .blur-overlay {
@@ -574,25 +592,45 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 </div>
 
 <!-- SECTION GALERIE PHOTOS -->
+<!-- SECTION GALERIE (image de card = photo du modèle, contenu modal = gallery_photos) -->
 <div class="row g-4 section-galerie d-none">
   @foreach($modeles as $modele)
     @php
-      $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+      // --- Image principale du modèle ---
+      $photos = is_array($modele->photos)
+        ? $modele->photos
+        : json_decode($modele->photos ?? '[]', true);
       $photo = $photos[0] ?? null;
-      $videos = [];
 
+      $videos = [];
       if (!empty($modele->video_file) && is_array($modele->video_file)) {
-        foreach ($modele->video_file as $file) $videos[] = asset('storage/' . $file);
+        foreach ($modele->video_file as $file) {
+          $videos[] = asset('storage/' . $file);
+        }
       }
       if (!empty($modele->video_link) && is_array($modele->video_link)) {
-        foreach ($modele->video_link as $link) $videos[] = $link;
+        foreach ($modele->video_link as $link) {
+          $videos[] = $link;
+        }
+      }
+
+      // --- Données depuis gallery_photos ---
+      $gallery = $modele->galleryPhotos ?? $modele->galleryPhotos()->get();
+      $photoItems = $gallery->whereNotNull('photo_url')->values();
+      $videoItems = $gallery->whereNotNull('video_url')->values();
+
+      // --- Sauter les modèles sans contenu galerie ---
+      if ($photoItems->isEmpty() && $videoItems->isEmpty()) {
+        continue;
       }
     @endphp
 
     <div class="col-md-4">
       <div class="model-card card-photo position-relative">
+
+        {{-- ✅ Image du modèle (pas celle de gallery_photo) --}}
         @if($photo)
-          <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+          <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo du modèle">
         @else
           <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
         @endif
@@ -602,33 +640,36 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
           <span class="model-name">{{ $modele->prenom }}</span>
         </div>
 
-        <div class="position-absolute bottom-0 end-0 p-2">
-          <button class="btn btn-sm btn-light rounded-pill open-gallery"
-            data-modele="{{ $modele->id }}"
-            data-media='@json($photos)'
-            data-type="photo"
-            data-bs-toggle="modal"
-            data-bs-target="#galleryModal">
-            <i class="fas fa-camera"></i>
-            <span>{{ count($photos) }}</span>
-          </button>
-
-          @if(count($videos) > 0)
+        {{-- ✅ Boutons galerie photo / vidéo --}}
+        <div class="position-absolute bottom-0 end-0 p-2 d-flex gap-2">
+          @if($photoItems->count() > 0)
             <button class="btn btn-sm btn-light rounded-pill open-gallery"
               data-modele="{{ $modele->id }}"
-              data-media='@json($videos)'
+              data-type="photo"
+              data-bs-toggle="modal"
+              data-bs-target="#galleryModal">
+              <i class="fas fa-camera"></i>
+              <span>{{ $photoItems->count() }}</span>
+            </button>
+          @endif
+
+          @if($videoItems->count() > 0)
+            <button class="btn btn-sm btn-light rounded-pill open-gallery"
+              data-modele="{{ $modele->id }}"
               data-type="video"
               data-bs-toggle="modal"
               data-bs-target="#galleryModal">
               <i class="fas fa-video"></i>
-              <span>{{ count($videos) }}</span>
+              <span>{{ $videoItems->count() }}</span>
             </button>
           @endif
         </div>
+
       </div>
     </div>
   @endforeach
 </div>
+
 
             </div>
 
