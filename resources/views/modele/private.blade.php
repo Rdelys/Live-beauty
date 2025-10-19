@@ -130,38 +130,29 @@
     @endphp
 
     @if ($firstPhoto)
-        <div class="photo-principale-container">
-            <img id="photoPrincipale"
-                 src="{{ asset('storage/' . $firstPhoto) }}"
-                 alt="Photo principale de {{ $modele->prenom }}"
-                 class="photo-principale" />
-        </div>
+    <div class="photo-principale-container">
+        <img id="photoPrincipale"
+             src="{{ asset('storage/' . $firstPhoto) }}"
+             alt="Photo principale de {{ $modele->prenom }}"
+             class="photo-principale" />
+    </div>
 
-        <div class="d-flex flex-wrap gap-2">
-            @foreach ($photos as $index => $photo)
-                @if ($modele->mode ===  1)  {{-- Mode payant --}}
-                    {{-- Toutes les vignettes floutées si le mode est payant --}}
-                    <div class="vignette-locked">
-                        <img src="{{ asset('storage/' . $photo) }}"
-                             alt="Photo verrouillée"
-                             class="photo-vignette" />
-                        <div class="overlay-lock">🔒</div>
-                    </div>
-                @else
-                    {{-- Vignettes normales si le mode est gratuit --}}
-                    <img src="{{ asset('storage/' . $photo) }}"
-                         alt="Photo de {{ $modele->prenom }}"
-                         class="photo-vignette {{ $index === 0 ? 'active' : '' }}"
-                         onclick="changePhoto(this)" />
-                @endif
-            @endforeach
-        </div>
-    @else
-        <div class="photo-principale-container">
-            <img src="https://via.placeholder.com/600x400?text=Pas+de+photo"
-                 class="photo-principale rounded shadow" />
-        </div>
-    @endif
+    {{-- ✅ Affichage direct de toutes les photos, sans flou ni verrou --}}
+    <div class="d-flex flex-wrap gap-2">
+        @foreach ($photos as $index => $photo)
+            <img src="{{ asset('storage/' . $photo) }}"
+                 alt="Photo de {{ $modele->prenom }}"
+                 class="photo-vignette {{ $index === 0 ? 'active' : '' }}"
+                 onclick="changePhoto(this)" />
+        @endforeach
+    </div>
+@else
+    <div class="photo-principale-container">
+        <img src="https://via.placeholder.com/600x400?text=Pas+de+photo"
+             class="photo-principale rounded shadow" />
+    </div>
+@endif
+
 </div>
 
 
