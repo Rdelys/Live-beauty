@@ -509,157 +509,127 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
             <!-- Cartes -->
             <div class="col-md-10 p-4">
-                <div class="row g-4">
-                  @foreach($modeles as $modele)
-                  @php
-    $dejaAcheteGlobal = in_array($modele->id, $achatsGlobal ?? []);
-@endphp
-
-                    <div class="col-md-4 card-item fille">
-                    <div class="model-card card-default">
-                      <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
-                    @csrf
-                    <button type="submit" class="btn btn-sm {{ Auth::user()->favoris->contains($modele->id) ? 'btn-warning' : 'btn-outline-light' }}">
-                        @if(Auth::user()->favoris->contains($modele->id))
-                            <i class="fas fa-heart text-danger"></i>
-                        @else
-                            <i class="far fa-heart text-white"></i>
-                        @endif
-                    </button>
-                </form>
-
-<a href="{{ route('modele.private', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
+                <!-- SECTION MODÈLES -->
+<div class="row g-4 section-modeles">
+  @foreach($modeles as $modele)
     @php
+      $dejaAcheteGlobal = in_array($modele->id, $achatsGlobal ?? []);
       $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
       $photo = $photos[0] ?? null;
       $hasVideo = $modele->video_file || $modele->video_link;
     @endphp
 
-    <div class="media-container">
-      {{-- IMAGE PRINCIPALE --}}
-      @if($photo)
-        <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
-      @else
-        <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
-      @endif
+    <div class="col-md-4 card-item fille">
+      <div class="model-card card-default">
+        {{-- Bouton favoris --}}
+        <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
+          @csrf
+          <button type="submit" class="btn btn-sm {{ Auth::user()->favoris->contains($modele->id) ? 'btn-warning' : 'btn-outline-light' }}">
+            @if(Auth::user()->favoris->contains($modele->id))
+              <i class="fas fa-heart text-danger"></i>
+            @else
+              <i class="far fa-heart text-white"></i>
+            @endif
+          </button>
+        </form>
 
-      {{-- VIDÉO AU HOVER --}}
-      @if($hasVideo)
-  <div class="model-video">
-    @if(!empty($modele->video_file) && is_array($modele->video_file))
-  <video autoplay muted loop playsinline preload="none">
-    <source src="{{ asset('storage/' . $modele->video_file[0]) }}" type="video/mp4">
-    Votre navigateur ne supporte pas la vidéo.
-  </video>
-@elseif(!empty($modele->video_link) && is_array($modele->video_link))
-  <iframe
-    src="{{ $modele->video_link[0] }}?autoplay=1&mute=1&controls=0&loop=1"
-    frameborder="0"
-    allow="autoplay; encrypted-media"
-    allowfullscreen
-    style="width: 100%; height: 100%;">
-  </iframe>
-@endif
-  </div>
-@endif
+        {{-- Lien vers le profil --}}
+        <a href="{{ route('modele.private', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
+          <div class="media-container">
+            @if($photo)
+              <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+            @else
+              <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+            @endif
 
+            {{-- Vidéo au hover --}}
+            @if($hasVideo)
+              <div class="model-video">
+                @if(!empty($modele->video_file) && is_array($modele->video_file))
+                  <video autoplay muted loop playsinline preload="none">
+                    <source src="{{ asset('storage/' . $modele->video_file[0]) }}" type="video/mp4">
+                  </video>
+                @elseif(!empty($modele->video_link) && is_array($modele->video_link))
+                  <iframe
+                    src="{{ $modele->video_link[0] }}?autoplay=1&mute=1&controls=0&loop=1"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen
+                    style="width: 100%; height: 100%;">
+                  </iframe>
+                @endif
+              </div>
+            @endif
 
-      {{-- STATUT + NOM --}}
-      <div class="status-name">
-        <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
-        <span class="model-name">{{ $modele->prenom }}</span>
+            {{-- Statut + Nom --}}
+            <div class="status-name">
+              <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
+              <span class="model-name">{{ $modele->prenom }}</span>
+            </div>
+          </div>
+        </a>
       </div>
     </div>
-</a>
+  @endforeach
 </div>
-<div class="model-card card-photo d-none position-relative" data-modele-id="{{ $modele->id }}">
-        @php
-    $videos = [];
 
-    if (!empty($modele->video_file) && is_array($modele->video_file)) {
-        foreach ($modele->video_file as $file) {
-            $videos[] = asset('storage/' . $file);
-        }
-    }
+<!-- SECTION GALERIE PHOTOS -->
+<div class="row g-4 section-galerie d-none">
+  @foreach($modeles as $modele)
+    @php
+      $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
+      $photo = $photos[0] ?? null;
+      $videos = [];
 
-    if (!empty($modele->video_link) && is_array($modele->video_link)) {
-        foreach ($modele->video_link as $link) {
-            $videos[] = $link;
-        }
-    }
-@endphp
+      if (!empty($modele->video_file) && is_array($modele->video_file)) {
+        foreach ($modele->video_file as $file) $videos[] = asset('storage/' . $file);
+      }
+      if (!empty($modele->video_link) && is_array($modele->video_link)) {
+        foreach ($modele->video_link as $link) $videos[] = $link;
+      }
+    @endphp
 
-
+    <div class="col-md-4">
+      <div class="model-card card-photo position-relative">
         @if($photo)
-            <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+          <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
         @else
-            <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+          <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
         @endif
-<div class="status-name">
-    <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
-    <span class="model-name">{{ $modele->prenom }}</span>
-</div>
+
+        <div class="status-name">
+          <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
+          <span class="model-name">{{ $modele->prenom }}</span>
+        </div>
 
         <div class="position-absolute bottom-0 end-0 p-2">
-    <button class="btn btn-sm btn-light rounded-pill open-gallery"
-    data-modele="{{ $modele->id }}"
-    data-media='@json($photos)'
-    data-type="photo"
-    data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
-    data-flou="{{ $modele->type_flou ?? 'soft' }}"
-    data-prix-global="{{ $modele->prix_flou ?? 0 }}"
-    data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
-    data-bs-toggle="modal"
-    data-bs-target="#galleryModal"
-    data-dejaachete="{{ $dejaAcheteGlobal ? '1' : '0' }}"
-    title="Voir les photos">
-    <i class="fas fa-camera"></i>
-    <span>{{ count($photos) }}</span>
-</button>
+          <button class="btn btn-sm btn-light rounded-pill open-gallery"
+            data-modele="{{ $modele->id }}"
+            data-media='@json($photos)'
+            data-type="photo"
+            data-bs-toggle="modal"
+            data-bs-target="#galleryModal">
+            <i class="fas fa-camera"></i>
+            <span>{{ count($photos) }}</span>
+          </button>
 
-
-
-    @php
-    $videos = [];
-
-    if (!empty($modele->video_file) && is_array($modele->video_file)) {
-        foreach ($modele->video_file as $file) {
-            $videos[] = asset('storage/' . $file);
-        }
-    }
-
-    if (!empty($modele->video_link) && is_array($modele->video_link)) {
-        foreach ($modele->video_link as $link) {
-            $videos[] = $link;
-        }
-    }
-@endphp
-
-
-    @if(count($videos) > 0)
-        <button class="btn btn-sm btn-light rounded-pill open-gallery"
-    data-modele="{{ $modele->id }}"
-    data-media='@json($videos)'
-    data-type="video"
-    data-payant="{{ $modele->mode == 1 ? '1' : '0' }}"
-    data-flou="{{ $modele->type_flou ?? 'soft' }}"
-    data-prix-global="{{ $modele->prix_flou ?? 0 }}"
-    data-prix-detail="{{ $modele->prix_flou_detail ?? 0 }}"
-    data-bs-toggle="modal"
-    data-bs-target="#galleryModal"
-    title="Voir les vidéos">
-    <i class="fas fa-video"></i>
-    <span>{{ count($videos) }}</span>
-</button>
-    @endif
-</div>
-
+          @if(count($videos) > 0)
+            <button class="btn btn-sm btn-light rounded-pill open-gallery"
+              data-modele="{{ $modele->id }}"
+              data-media='@json($videos)'
+              data-type="video"
+              data-bs-toggle="modal"
+              data-bs-target="#galleryModal">
+              <i class="fas fa-video"></i>
+              <span>{{ count($videos) }}</span>
+            </button>
+          @endif
+        </div>
+      </div>
     </div>
+  @endforeach
 </div>
-@endforeach
 
-
-                </div>
             </div>
 
         </div>
@@ -709,14 +679,15 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         fetchLiveModels();
         setInterval(fetchLiveModels, 15000);
         document.querySelectorAll('.nav-link[data-type]').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const type = this.dataset.type;
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const type = this.dataset.type;
 
-        document.querySelectorAll('.card-default').forEach(el => el.classList.toggle('d-none', type !== 'default'));
-        document.querySelectorAll('.card-photo').forEach(el => el.classList.toggle('d-none', type !== 'photo'));
-    });
-});
+            document.querySelector('.section-modeles').classList.toggle('d-none', type !== 'default');
+            document.querySelector('.section-galerie').classList.toggle('d-none', type !== 'photo');
+          });
+        });
+
 
 // Ouvrir la modal galerie
 document.addEventListener('click', async function(e) {
