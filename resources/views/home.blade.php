@@ -467,9 +467,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                 <li class="nav-item">
     <a class="nav-link" href="#" data-type="default">Modèles</a>
 </li>
-<li class="nav-item">
-    <a class="nav-link" href="#" data-type="photo">Galerie photo</a>
-</li>
+
 
                 <li class="nav-item">
                     <a class="nav-link" href="#">Nouveaux Modèles</a>
