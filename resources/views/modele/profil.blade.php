@@ -1784,19 +1784,6 @@ togglePrivateMicBtn?.addEventListener("click", () => {
     <option value="NL" {{ (old('langue', $modele->langue) == 'NL') ? 'selected' : '' }}>Néerlandais</option>
   </select>
 </div>
-
-
-
-  <div class="mb-3">
-    <label class="form-label">Prix pour enlever le flou (Jetons)</label>
-    <input type="number" step="0.01" name="prix_flou" value="{{ old('prix_flou', $modele->prix_flou) }}" class="form-control" min="0">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Prix flou détail (Jetons)</label>
-    <input type="number" step="0.01" name="prix_flou_detail" 
-          value="{{ old('prix_flou_detail', $modele->prix_flou_detail) }}" 
-          class="form-control" min="0">
-  </div>
 </div>
 
 
