@@ -276,9 +276,9 @@ Route::post('/modele/{modele}/gallery-photo', [GalleryPhotoController::class, 's
 Route::delete('/modele/gallery-photo/{galleryPhoto}', [GalleryPhotoController::class, 'destroy'])
     ->name('gallery-photo.destroy');
 
-Route::post('/gallery-photo/store/{modele}', [GalleryPhotoController::class, 'store'])->name('gallery-photo.store');
-Route::post('/gallery-photo/video/{modele}', [GalleryPhotoController::class, 'storeVideo'])->name('gallery-photo.storeVideo');
-Route::delete('/gallery-photo/{galleryPhoto}', [GalleryPhotoController::class, 'destroy'])->name('gallery-photo.destroy');
+Route::post('/modele//gallery-photo/store/{modele}', [GalleryPhotoController::class, 'store'])->name('gallery-photo.store');
+Route::post('/modele//gallery-photo/video/{modele}', [GalleryPhotoController::class, 'storeVideo'])->name('gallery-photo.storeVideo');
+Route::delete('/modele/gallery-photo/{galleryPhoto}', [GalleryPhotoController::class, 'destroy'])->name('gallery-photo.destroy');
 
 Route::get('/api/modele/{id}/gallery', [GalleryPhotoController::class, 'getGallery'])
     ->middleware('auth')
