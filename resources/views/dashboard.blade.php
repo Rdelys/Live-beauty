@@ -764,10 +764,12 @@ document.addEventListener('click', async function(e) {
     }
 
     // Conditions flou/payant
-    const dejaAchete = dejaAcheteGlobal || dejaAcheteDetail.includes(item.url);
-    if (!item.payant || dejaAchete) {
-      return `<div class="carousel-item ${i === 0 ? 'active' : ''}">${content}</div>`;
-    }
+    // ✅ Pas de flou si gratuit (payant = 0 ou "0") ou déjà acheté
+const dejaAchete = dejaAcheteGlobal || dejaAcheteDetail.includes(item.url);
+if (item.payant == 0 || item.payant === "0" || dejaAchete) {
+  return `<div class="carousel-item ${i === 0 ? 'active' : ''}">${content}</div>`;
+}
+
 
     // Flouté
     return `
