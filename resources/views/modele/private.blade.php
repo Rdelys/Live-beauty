@@ -3,108 +3,93 @@
 @section('title', "Profil de $modele->prenom")
 @section('content')
 <style>
-    .modele-container {
-        background-color: #121212;
-        color: #eee;
-        min-height: 100vh;
-    }
-
-    .photo-principale-container {
-        width: 100%;
-        height: 400px;
-        border-radius: 6px;
-        box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
-        overflow: hidden;
-        margin-bottom: 1rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #222;
-    }
-
-    .photo-principale {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        border-radius: 6px;
-        display: block;
-    }
-
+.modele-container {
+    background-color: #121212;
+    color: #eee;
+    min-height: 100vh;
+}
+.photo-principale-container {
+    width: 100%;
+    height: 400px;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #222;
+}
+.photo-principale {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    display: block;
+}
+.photo-vignette {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+.photo-vignette:hover, .photo-vignette.active {
+    border-color: #28a745;
+}
+.btn-private {
+    background-color: transparent;
+    color: #28a745;
+    border: 1px solid #28a745;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+.btn-private:hover {
+    background-color: #28a745;
+    color: #fff;
+}
+.badge-online {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #28a745;
+    color: #fff;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+}
+.badge-offline {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #6c757d;
+    color: #fff;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+}
+@media (max-width: 767px) {
     .photo-vignette {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 4px;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: border-color 0.3s ease;
+        width: 48px;
+        height: 48px;
     }
-
-    .photo-vignette:hover,
-    .photo-vignette.active {
-        border-color: #28a745;
+    .photo-principale-container {
+        height: 300px;
     }
-
-    .btn-private {
-        background-color: transparent;
-        color: #28a745;
-        border: 1px solid #28a745;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-        border-radius: 20px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
-
-    .btn-private:hover {
-        background-color: #28a745;
-        color: #fff;
-    }
-
-    .badge-online {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        background-color: #28a745;
-        color: #fff;
-        border-radius: 12px;
-        margin-left: 0.5rem;
-    }
-
-    .badge-offline {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        background-color: #6c757d;
-        color: #fff;
-        border-radius: 12px;
-        margin-left: 0.5rem;
-    }
-
-    @media (max-width: 767px) {
-        .photo-vignette {
-            width: 48px;
-            height: 48px;
-        }
-
-        .photo-principale-container {
-            height: 300px;
-        }
-    }
-
-    ul.list-unstyled li {
-        padding: 0.25rem 0;
-        font-size: 1rem;
-    }
-
- .vignette-locked {
+}
+ul.list-unstyled li {
+    padding: 0.25rem 0;
+    font-size: 1rem;
+}
+.vignette-locked {
     position: relative;
     display: inline-block;
 }
-
 .vignette-locked img {
     filter: blur(6px);
-    pointer-events: none; /* empêche le clic */
+    pointer-events: none;
 }
-
 .vignette-locked .overlay-lock {
     position: absolute;
     top: 50%;
@@ -117,7 +102,75 @@
     border-radius: 6px;
 }
 
+/* --- Galerie premium --- */
+.gallery-container {
+    margin-top: 3rem;
+    background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 0 25px rgba(40, 167, 69, 0.25);
+}
+.gallery-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+}
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+.gallery-item {
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
+}
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
 
+/* Lightbox */
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+}
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+.lightbox.show {
+    display: flex;
+}
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+}
 </style>
 
 <div class="container modele-container py-5">
@@ -241,6 +294,19 @@
 
         </div>
     </div>
+    <!-- === Galerie photo premium === -->
+    @if(!empty($photos))
+    <div class="gallery-container mt-5">
+        <h3 class="gallery-title">📸 Galerie Photos</h3>
+        <div class="gallery-grid">
+            @foreach($photos as $photo)
+                <div class="gallery-item" onclick="openLightbox('{{ asset('storage/' . $photo) }}')">
+                    <img src="{{ asset('storage/' . $photo) }}" alt="Photo de {{ $modele->prenom }}">
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 
 <script>
