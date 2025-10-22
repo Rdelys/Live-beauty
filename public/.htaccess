@@ -1,12 +1,6 @@
 <IfModule mod_headers.c>
-    Header set Content-Security-Policy "default-src 'self' https: data: blob:; 
-                                        script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; 
-                                        style-src 'self' 'unsafe-inline' https:; 
-                                        img-src 'self' data: blob: https:; 
-                                        font-src 'self' https: data:; 
-                                        connect-src 'self' wss://livebeautyofficial.com https:;"
+    Header set Content-Security-Policy "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' https: data:; connect-src 'self' wss://livebeautyofficial.com https:;"
 </IfModule>
-
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
