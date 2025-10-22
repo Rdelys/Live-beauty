@@ -295,18 +295,130 @@ ul.list-unstyled li {
         </div>
     </div>
     <!-- === Galerie photo premium === -->
-    @if(!empty($photos))
-    <div class="gallery-container mt-5">
-        <h3 class="gallery-title">📸 Galerie Photos</h3>
-        <div class="gallery-grid">
-            @foreach($photos as $photo)
-                <div class="gallery-item" onclick="openLightbox('{{ asset('storage/' . $photo) }}')">
-                    <img src="{{ asset('storage/' . $photo) }}" alt="Photo de {{ $modele->prenom }}">
-                </div>
-            @endforeach
-        </div>
+    <!-- === Galerie photo & vidéo sécurisée === -->
+@php
+    use App\Models\GalleryPhoto;
+
+    $galleryItems = GalleryPhoto::where('modele_id', $modele->id)->get();
+    $photos = $galleryItems->whereNotNull('photo_url');
+    $videos = $galleryItems->whereNotNull('video_url');
+@endphp
+
+<style>
+/* --- Styles améliorés pour le bouton Acheter --- */
+.btn-buy {
+    background: linear-gradient(135deg, #28a745, #0f5132);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.5rem 1.4rem;
+    border-radius: 25px;
+    box-shadow: 0 0 15px rgba(40,167,69,0.4);
+    transition: all 0.3s ease;
+}
+.btn-buy:hover {
+    background: linear-gradient(135deg, #34ce57, #145a32);
+    box-shadow: 0 0 25px rgba(72,255,100,0.6);
+    transform: scale(1.05);
+}
+.video-locked {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #000;
+}
+.video-locked .blur-overlay {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+.no-right-click {
+    -webkit-user-select: none;
+    user-select: none;
+}
+</style>
+
+<div class="gallery-container mt-5">
+    <h3 class="gallery-title">📸 Galerie Photos</h3>
+    <div class="gallery-grid">
+        @forelse($photos as $item)
+            @php
+                $flou = $item->type_flou;
+                $blurStyle = match($flou) {
+                    'strong' => 'filter: blur(10px);',
+                    'soft'   => 'filter: blur(4px);',
+                    'pixel'  => 'image-rendering: pixelated; filter: blur(2px);',
+                    default  => '',
+                };
+            @endphp
+
+            <div class="gallery-item text-center position-relative no-right-click" oncontextmenu="return false;">
+                <img src="{{ asset('storage/' . $item->photo_url) }}"
+                     alt="Photo"
+                     style="{{ $blurStyle }}">
+                
+                @if($item->payant)
+                    <div class="position-absolute top-50 start-50 translate-middle text-center">
+                        <span class="badge bg-success mb-2">{{ $item->prix }} jetons</span><br>
+                        <button class="btn btn-buy">Acheter</button>
+                    </div>
+                @endif
+            </div>
+        @empty
+            <p class="text-muted text-center">Aucune photo disponible.</p>
+        @endforelse
     </div>
-    @endif
+</div>
+
+@if($videos->count() > 0)
+<div class="gallery-container mt-5">
+    <h3 class="gallery-title">🎬 Vidéos</h3>
+    <div class="gallery-grid">
+        @foreach($videos as $video)
+            @if($video->payant)
+                {{-- ✅ Vidéo payante : miniature floutée --}}
+                <div class="gallery-item video-locked no-right-click" oncontextmenu="return false;">
+                    <video muted preload="metadata"
+                           style="width: 100%; height: 100%; object-fit: cover; filter: blur(10px);">
+                        <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
+                    </video>
+                    <div class="blur-overlay text-center text-white">
+                        <span class="badge bg-success mb-2">{{ $video->prix }} jetons</span>
+                        <button class="btn btn-buy">Acheter</button>
+                    </div>
+                </div>
+            @else
+                {{-- ✅ Vidéo gratuite : visible et lisible --}}
+                <div class="gallery-item text-center no-right-click" oncontextmenu="return false;">
+                    <video controls
+                           controlslist="nodownload noplaybackrate"
+                           disablepictureinpicture
+                           style="width: 100%; border-radius: 10px;">
+                        <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
+                        Votre navigateur ne supporte pas la vidéo.
+                    </video>
+                </div>
+            @endif
+        @endforeach
+    </div>
+</div>
+@endif
+
+<script>
+// === Sécurité front-end ===
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+    if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key))) {
+        e.preventDefault();
+    }
+});
+</script>
+
 </div>
 
 <script>
