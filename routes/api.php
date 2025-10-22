@@ -37,5 +37,5 @@ Route::get('/live/active', function () {
     });
 });
 
-Route::post('/live/start', [LiveController::class, 'start']);
-Route::post('/live/stop', [LiveController::class, 'stop']);
+/*Route::post('/live/start', [LiveController::class, 'start']);
+Route::post('/live/stop', [LiveController::class, 'stop']);*/
