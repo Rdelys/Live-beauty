@@ -26,7 +26,18 @@ class HostFilter
                 '#^password(/.*)?$#',             // /password ou /password/...
                 '#^login$#',                      // /login
                 '#^logout$#',                     // /logout
+
+                // ✅ autoriser les actions live
+                '#^live/start$#',
+                '#^live/stop$#',
+                '#^live/start-private$#',
+                '#^live/stop-private$#',
+
+                // ✅ autoriser API Live
+                '#^api/live/start$#',
+                '#^api/live/stop$#',
             ];
+
 
             $path = ltrim($request->path(), '/');
 
