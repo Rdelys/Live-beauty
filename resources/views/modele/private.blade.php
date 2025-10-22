@@ -357,18 +357,25 @@ ul.list-unstyled li {
                 };
             @endphp
 
-            <div class="gallery-item text-center position-relative no-right-click" oncontextmenu="return false;">
-                <img src="{{ asset('storage/' . $item->photo_url) }}"
-                     alt="Photo"
-                     style="{{ $blurStyle }}">
-                
-                @if($item->payant)
-                    <div class="position-absolute top-50 start-50 translate-middle text-center">
-                        <span class="badge bg-success mb-2">{{ $item->prix }} jetons</span><br>
-                        <button class="btn btn-buy">Acheter</button>
-                    </div>
-                @endif
-            </div>
+            <!-- Photo payante -->
+<div class="gallery-item text-center position-relative no-right-click" oncontextmenu="return false;">
+    <img src="{{ asset('storage/' . $item->photo_url) }}" alt="Photo"
+         style="{{ $blurStyle }}" data-path="{{ $item->photo_url }}" />
+
+    @if($item->payant)
+        <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
+            <span class="badge bg-success mb-2">{{ $item->prix }} jetons</span><br>
+            <button class="btn btn-buy btn-buy-detail"
+                    data-modeleid="{{ $modele->id }}"
+                    data-path="{{ $item->photo_url }}"
+                    data-prix="{{ $item->prix }}"
+                    data-type="photo">
+                Acheter
+            </button>
+        </div>
+    @endif
+</div>
+
         @empty
             <p class="text-muted text-center">Aucune photo disponible.</p>
         @endforelse
@@ -383,15 +390,22 @@ ul.list-unstyled li {
             @if($video->payant)
                 {{-- ✅ Vidéo payante : miniature floutée --}}
                 <div class="gallery-item video-locked no-right-click" oncontextmenu="return false;">
-                    <video muted preload="metadata"
-                           style="width: 100%; height: 100%; object-fit: cover; filter: blur(10px);">
-                        <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
-                    </video>
-                    <div class="blur-overlay text-center text-white">
-                        <span class="badge bg-success mb-2">{{ $video->prix }} jetons</span>
-                        <button class="btn btn-buy">Acheter</button>
-                    </div>
-                </div>
+    <video muted preload="metadata" style="width: 100%; height: 100%; object-fit: cover; filter: blur(10px);" 
+           data-path="{{ $video->video_url }}">
+        <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
+    </video>
+    <div class="blur-overlay text-center text-white buy-overlay">
+        <span class="badge bg-success mb-2">{{ $video->prix }} jetons</span>
+        <button class="btn btn-buy btn-buy-detail"
+                data-modeleid="{{ $modele->id }}"
+                data-path="{{ $video->video_url }}"
+                data-prix="{{ $video->prix }}"
+                data-type="video">
+            Acheter
+        </button>
+    </div>
+</div>
+
             @else
                 {{-- ✅ Vidéo gratuite : visible et lisible --}}
                 <div class="gallery-item text-center no-right-click" oncontextmenu="return false;">
@@ -536,6 +550,114 @@ document.getElementById("showPriveeForm").addEventListener("submit", function() 
     </div>
   </div>
 </div>
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+  function findMediaElementByPath(path) {
+    const selImg = document.querySelectorAll('img[data-path], img');
+    for (let el of selImg) {
+      if ((el.dataset.path && el.dataset.path === path) || (el.src && el.src.includes(path))) return el;
+    }
+    const selVid = document.querySelectorAll('video[data-path], video');
+    for (let el of selVid) {
+      if ((el.dataset.path && el.dataset.path === path) || Array.from(el.querySelectorAll('source')).some(s => s.src.includes(path))) return el;
+    }
+    return null;
+  }
+
+  function unlockMedia(path, type) {
+    const media = findMediaElementByPath(path);
+    if (!media) return;
+
+    // retire le flou
+    media.style.filter = '';
+    media.style.removeProperty('filter');
+
+    // si c’est une vidéo
+    if (media.tagName.toLowerCase() === 'video') {
+      media.setAttribute('controls', ''); 
+      media.muted = false;
+      try { media.load(); } catch(e) {}
+    }
+
+    // supprime overlay
+    const overlay = media.closest('.gallery-item')?.querySelector('.buy-overlay');
+    if (overlay) overlay.remove();
+  }
+
+  async function acheterDetail(modeleId, path, prix, type, btn) {
+    try {
+      btn.disabled = true;
+      btn.innerText = 'Traitement...';
+
+      const resp = await fetch(`/acheter-detail/${modeleId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ photo: path, prix: prix })
+      });
+
+      const json = await resp.json();
+
+      if (!resp.ok) {
+        const err = json.error || json.message || 'Erreur';
+        alert('Achat échoué : ' + err);
+        btn.disabled = false;
+        btn.innerText = 'Acheter';
+        return;
+      }
+
+      // succès → maj solde
+      if (json.new_balance !== undefined) {
+        const span = document.getElementById('userJetons');
+        if (span) span.textContent = json.new_balance;
+      }
+
+      unlockMedia(path, type);
+
+      // feedback utilisateur — personnalisé selon le type
+      // feedback utilisateur — personnalisé selon le type
+const message = type === 'video' ? '✅ Vidéo achetée avec succès !' : '✅ Photo achetée avec succès !';
+alert(message);
+
+btn.innerText = message.replace('✅ ', ''); // juste "Photo achetée"
+btn.classList.add('disabled');
+btn.disabled = true;
+btn.style.backgroundColor = '#28a745';
+btn.style.color = '#fff';
+
+    } catch (e) {
+      console.error(e);
+      alert('Erreur réseau ou serveur');
+      btn.disabled = false;
+      btn.innerText = 'Acheter';
+    }
+  }
+
+  document.querySelectorAll('.btn-buy-detail').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const modeleId = btn.dataset.modeleid;
+      const path = btn.dataset.path;
+      const prix = parseInt(btn.dataset.prix || 0, 10);
+      const type = btn.dataset.type || 'photo';
+
+      if (!modeleId || !path) {
+        return alert('Données manquantes pour l\'achat');
+      }
+
+      acheterDetail(modeleId, path, prix, type, btn);
+    });
+  });
+});
+</script>
 
 
 @endsection

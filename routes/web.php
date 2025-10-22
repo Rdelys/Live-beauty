@@ -285,3 +285,9 @@ Route::get('/api/modele/{id}/gallery', [GalleryPhotoController::class, 'getGalle
     ->name('api.gallery');
 
 Route::put('/gallery-photo/update/{id}', [GalleryPhotoController::class, 'update'])->name('gallery-photo.update');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/acheter/{modele}', [AchatController::class, 'acheter'])->name('acheter.global');
+    // pour achats "detail" (photo ou vidéo individuelle)
+    Route::post('/acheter-detail/{modele}', [AchatController::class, 'acheterDetail'])->name('acheter.detail');
+});
