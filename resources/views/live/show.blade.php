@@ -906,7 +906,7 @@ video {
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -952,11 +952,17 @@ socket.on("connect", () => {
 });
 
 
-window.onunload = window.onbeforeunload = () => {
-    socket.emit("watcher-disconnected");
-    socket.close();
-    peerConnection.close();
-};
+// ✅ Nettoyage moderne sans "unload" (évite les violations Chrome)
+window.addEventListener("pagehide", () => {
+    try {
+        socket.emit("watcher-disconnected");
+        socket.close();
+        peerConnection.close();
+    } catch (e) {
+        console.warn("Erreur nettoyage pagehide:", e);
+    }
+});
+
 
 // ✅ Activer la protection si c’est une page de show privée existante
 @if(isset($showPriveId))
@@ -1131,21 +1137,22 @@ function enablePrivateProtection() {
   }
 
   // Empêche de quitter sans confirmation
-  window.onbeforeunload = function (e) {
-    // Annuler le show côté serveur avant fermeture
+  window.addEventListener("beforeunload", (e) => {
+    // ✅ envoi sûr même pendant fermeture
     fetch("{{ route('live.stopPrivate') }}", {
-      method: "POST",
-      headers: {
-        "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ modele_id: "{{ $modele->id }}" }),
+        keepalive: true
     });
 
-    const confirmationMessage = "⚠️ Le show privé va être arrêté si vous quittez la page.";
-    (e || window.event).returnValue = confirmationMessage;
-    return confirmationMessage;
-  };
+    e.preventDefault();
+    e.returnValue = "⚠️ Le show privé va être arrêté si vous quittez la page.";
+});
+
 
   // Si l’utilisateur revient en arrière dans l’historique
   window.addEventListener("popstate", (e) => {
@@ -1535,10 +1542,15 @@ socket.on("broadcaster", () => {
 
 
   // Nettoyage à la fermeture ou rechargement de la page
-  window.onunload = window.onbeforeunload = () => {
-    socket.close();
-    peerConnection.close();
-  };
+  window.addEventListener("pagehide", () => {
+    try {
+        socket.close();
+        peerConnection.close();
+    } catch (e) {
+        console.warn("Erreur fermeture pagehide:", e);
+    }
+});
+
 
   
   const messageInput = document.getElementById("messageInput");
