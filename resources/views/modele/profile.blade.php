@@ -262,7 +262,246 @@
         </div>
     </div>
 </div>
+@php
+    use App\Models\GalleryPhoto;
 
+    $galleryItems = GalleryPhoto::where('modele_id', $modele->id)->get();
+    $photos = $galleryItems->whereNotNull('photo_url');
+    $videos = $galleryItems->whereNotNull('video_url');
+@endphp
+
+<style>
+/* --- Styles améliorés pour le bouton Acheter --- */
+.btn-buy {
+    background: linear-gradient(135deg, #28a745, #0f5132);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.5rem 1.4rem;
+    border-radius: 25px;
+    box-shadow: 0 0 15px rgba(40,167,69,0.4);
+    transition: all 0.3s ease;
+}
+.btn-buy:hover {
+    background: linear-gradient(135deg, #34ce57, #145a32);
+    box-shadow: 0 0 25px rgba(72,255,100,0.6);
+    transform: scale(1.05);
+}
+.video-locked {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #000;
+}
+.video-locked .blur-overlay {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+.no-right-click {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+@media (max-width: 767px) {
+    .photo-vignette {
+        width: 48px;
+        height: 48px;
+    }
+    .photo-principale-container {
+        height: 300px;
+    }
+}
+ul.list-unstyled li {
+    padding: 0.25rem 0;
+    font-size: 1rem;
+}
+.vignette-locked {
+    position: relative;
+    display: inline-block;
+}
+.vignette-locked img {
+    filter: blur(6px);
+    pointer-events: none;
+}
+.vignette-locked .overlay-lock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: #fff;
+    background: rgba(0,0,0,0.6);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* --- Galerie premium --- */
+.gallery-container {
+    margin-top: 3rem;
+    background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 0 25px rgba(40, 167, 69, 0.25);
+}
+.gallery-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+}
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+.gallery-item {
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
+}
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+/* Lightbox */
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+}
+.lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+.lightbox.show {
+    display: flex;
+}
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+}
+</style>
+
+<div class="gallery-container mt-5">
+    <h3 class="gallery-title">📸 Galerie Photos</h3>
+    <div class="gallery-grid">
+        @forelse($photos as $item)
+            @php
+                $flou = $item->type_flou;
+                $blurStyle = match($flou) {
+                    'strong' => 'filter: blur(10px);',
+                    'soft'   => 'filter: blur(4px);',
+                    'pixel'  => 'image-rendering: pixelated; filter: blur(2px);',
+                    default  => '',
+                };
+            @endphp
+
+            <!-- Photo payante -->
+<div class="gallery-item text-center position-relative no-right-click" oncontextmenu="return false;">
+    <img src="{{ asset('storage/' . $item->photo_url) }}" alt="Photo"
+         style="{{ $blurStyle }}" data-path="{{ $item->photo_url }}" />
+
+    @if($item->payant)
+        <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
+            <span class="badge bg-success mb-2">{{ $item->prix }} jetons</span><br>
+        </div>
+    @endif
+</div>
+
+        @empty
+            <p class="text-muted text-center">Aucune photo disponible.</p>
+        @endforelse
+    </div>
+</div>
+
+@if($videos->count() > 0)
+<div class="gallery-container mt-5">
+    <h3 class="gallery-title">🎬 Vidéos</h3>
+    <div class="gallery-grid">
+        @foreach($videos as $video)
+            @if($video->payant)
+                {{-- ✅ Vidéo payante : miniature floutée --}}
+                <div class="gallery-item video-locked no-right-click" oncontextmenu="return false;">
+    <video muted preload="metadata" style="width: 100%; height: 100%; object-fit: cover; filter: blur(10px);" 
+           data-path="{{ $video->video_url }}">
+        <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
+    </video>
+    <div class="blur-overlay text-center text-white buy-overlay">
+        <span class="badge bg-success mb-2">{{ $video->prix }} jetons</span>
+    </div>
+</div>
+
+            @else
+                {{-- ✅ Vidéo gratuite : visible et lisible --}}
+                <div class="gallery-item text-center no-right-click" oncontextmenu="return false;">
+                    <video controls
+                           controlslist="nodownload noplaybackrate"
+                           disablepictureinpicture
+                           style="width: 100%; border-radius: 10px;">
+                        <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
+                        Votre navigateur ne supporte pas la vidéo.
+                    </video>
+                </div>
+            @endif
+        @endforeach
+    </div>
+</div>
+@endif
+
+<script>
+// === Sécurité front-end ===
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+    if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key))) {
+        e.preventDefault();
+    }
+});
+</script>
+
+</div>
+
+<script>
+    function changePhoto(img) {
+        document.getElementById('photoPrincipale').src = img.src;
+        document.querySelectorAll('.photo-vignette').forEach(v => v.classList.remove('active'));
+        img.classList.add('active');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const firstVignette = document.querySelector('.photo-vignette');
+        if (firstVignette) firstVignette.classList.add('active');
+    });
+</script>
 <script>
     function changePhoto(img) {
         const principale = document.getElementById('photoPrincipale');
