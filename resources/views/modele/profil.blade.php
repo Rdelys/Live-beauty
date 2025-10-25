@@ -647,10 +647,34 @@ label {
 <div id="incomingClientContainer" style="position:absolute; top:10px; left:10px; z-index:999;">
   <video id="incomingClientVideo" autoplay playsinline muted
          style="width:160px; height:120px; object-fit:cover; border:2px solid rgba(255,255,255,0.3);
-                border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.3); display:none;">
+                border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.25); display:none;">
   </video>
-  <button id="stopViewingClientBtn" class="btn btn-sm btn-danger mt-1" style="display:none;">Masquer le flux client</button>
+
+  <button id="stopViewingClientBtn" 
+          style="
+            display:none;
+            margin-top:6px;
+            width:160px;
+            padding:8px 0;
+            border:none;
+            border-radius:12px;
+            background:linear-gradient(135deg, #ff4b2b, #ff416c);
+            color:white;
+            font-weight:600;
+            font-family:'Inter', sans-serif;
+            font-size:14px;
+            letter-spacing:0.3px;
+            box-shadow:0 3px 8px rgba(255, 65, 108, 0.4);
+            backdrop-filter:blur(6px);
+            cursor:pointer;
+            transition:all 0.25s ease;
+          "
+          onmouseover="this.style.transform='translateY(-2px) scale(1.03)'; this.style.boxShadow='0 6px 14px rgba(255,65,108,0.5)'"
+          onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 3px 8px rgba(255,65,108,0.4)'">
+    🔒 Masquer le flux client
+  </button>
 </div>
+
 
 
     <!-- Overlay messages -->
@@ -1022,12 +1046,10 @@ const incomingClientVideo = document.getElementById('incomingClientVideo');
 const stopViewingClientBtn = document.getElementById('stopViewingClientBtn');
 const clientPeerConnections = {};
 
+// modèle: réception offre client
 socket.on('client-offer', async (data) => {
   const clientId = data.from;
-  const pc = new RTCPeerConnection({
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-  });
-
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
   clientPeerConnections[clientId] = pc;
 
   pc.ontrack = (event) => {
@@ -1043,71 +1065,21 @@ socket.on('client-offer', async (data) => {
   await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
-
   socket.emit('client-answer', { toClientSocketId: clientId, description: pc.localDescription });
 });
 
-socket.on('client-candidate', (data) => {
-  const c = new RTCIceCandidate(data.candidate);
-  Object.values(clientPeerConnections).forEach(pc => pc.addIceCandidate(c).catch(() => {}));
-});
-
-socket.on('client-disconnect', (data) => {
-  incomingClientVideo.srcObject = null;
-  incomingClientVideo.style.display = 'none';
-  stopViewingClientBtn.style.display = 'none';
-});
-
-stopViewingClientBtn.addEventListener('click', () => {
-  incomingClientVideo.srcObject = null;
-  incomingClientVideo.style.display = 'none';
-  stopViewingClientBtn.style.display = 'none';
-});
-
-// candidates from client -> add to modele pc
-socket.on('client-candidate', (data) => {
-  // data: { candidate, to } -- here modele receives candidate from client for a given client id
-  // if candidate has a 'from' field or was forwarded, adapt accordingly.
-  // We'll try to find a pc with matching client id in candidate.sdpMid or via data.from
-  // For safety, try to add candidate to all pcs (acceptable for small scale)
-  try {
-    const c = new RTCIceCandidate(data.candidate);
-    // if we have pc for the client (data.from)
-    if (data.from && clientPeerConnections[data.from]) {
-      clientPeerConnections[data.from].addIceCandidate(c).catch(e=>console.warn(e));
-    } else {
-      // fallback: add to all
-      Object.values(clientPeerConnections).forEach(pc => pc.addIceCandidate(c).catch(e=>{}));
-    }
-  } catch(e) { console.warn('client-candidate add failed', e); }
-});
-
-// client stopped -> close and hide
-socket.on('client-disconnect', (data) => {
-  const clientId = data.from;
-  if (clientPeerConnections[clientId]) {
-    clientPeerConnections[clientId].close();
-    delete clientPeerConnections[clientId];
-  }
-  incomingClientVideo.srcObject = null;
-  incomingClientVideo.style.display = 'none';
-  incomingClientControls.style.display = 'none';
-});
-
-// bouton Stopper côté modèle
+// model stops viewing -> inform client(s)
 stopViewingClientBtn?.addEventListener('click', () => {
-  // notifie le serveur qu'on veut couper (optionnel)
-  // ferme toutes les connexions clients
   Object.keys(clientPeerConnections).forEach(clientId => {
-    clientPeerConnections[clientId].close();
+    clientPeerConnections[clientId]?.close();
     delete clientPeerConnections[clientId];
-    // informe le client côté server
     socket.emit('client-disconnect', { to: clientId });
   });
   incomingClientVideo.srcObject = null;
   incomingClientVideo.style.display = 'none';
-  incomingClientControls.style.display = 'none';
+  stopViewingClientBtn.style.display = 'none';
 });
+
 
 socket.on("stopTyping", () => {
     const typingIndicator = document.getElementById("typingIndicator");

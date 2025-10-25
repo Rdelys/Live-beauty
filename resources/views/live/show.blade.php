@@ -13,6 +13,49 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
+    #clientCamControls {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#clientCamControls button {
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  color: rgba(255,255,255,0.85);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#clientCamControls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#clientCamControls button:not(:disabled):hover {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+  color: white;
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(255,65,108,0.5);
+}
+
+#clientCamControls i {
+  pointer-events: none;
+}
+
     .fullscreen-icon {
   background: linear-gradient(135deg, #212121, #333);
   color: #e0e0e0;
@@ -838,20 +881,66 @@ video {
       </button>
 
       <!-- === Client: Camera / Voix Buttons (sous Surprise) === -->
-<div id="clientCamControls" style="margin-top: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-  <button id="clientCameraBtn" class="clientCamBtn" disabled title="Vous devez être en show privée">
-    📷 Caméra
-    <span class="tooltip-text">Vous devez être en show privée</span>
+<!-- Inclure Font Awesome (si pas déjà présent dans ta page) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div id="clientCamControls" style="margin-top:8px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+
+  <button id="clientCameraBtn" disabled title="Vous devez être en show privée"
+    style="
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      color:rgba(255,255,255,0.85);
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 10px rgba(0,0,0,0.3);
+      backdrop-filter:blur(8px);
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      overflow:hidden;
+    "
+    onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
+    onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
+  >
+    <i class="fa-solid fa-video" style="pointer-events:none;"></i>
   </button>
 
-  <button id="clientAudioBtn" class="clientCamBtn" disabled title="Vous devez être en show privée">
-    🎤 Voix
-    <span class="tooltip-text">Vous devez être en show privée</span>
+  <button id="clientAudioBtn" disabled title="Vous devez être en show privée"
+    style="
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      color:rgba(255,255,255,0.85);
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 10px rgba(0,0,0,0.3);
+      backdrop-filter:blur(8px);
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      overflow:hidden;
+    "
+    onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
+    onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
+  >
+    <i class="fa-solid fa-microphone" style="pointer-events:none;"></i>
   </button>
+
 </div>
 
+
 <!-- Mini preview locale (en bas à gauche du player) -->
-<video id="localPreview" autoplay muted playsinline></video>
+<video id="localPreview" autoplay muted playsinline style="width:160px;height:120px;object-fit:cover;border-radius:8px;display:none;"></video>
 
 
       <!-- Menus (remplis via Blade) -->
@@ -1251,38 +1340,38 @@ socket.on("redirect-dashboard", () => {
     }
 });
 
-/* ===== Client -> modèle (petit flux caméra) =====
-   - active la caméra locale
-   - crée une RTCPeerConnection et send offer via server (client-offer)
-   - gère answer / candidates
-   - voix toggling mute/unmute sur la track audio
-*/
-
-/* références DOM */
+// ---------- Variables DOM ----------
 const clientCameraBtn = document.getElementById('clientCameraBtn');
 const clientAudioBtn  = document.getElementById('clientAudioBtn');
 const localPreview    = document.getElementById('localPreview');
 
+// ---------- State ----------
 let clientStream = null;
 let clientPc = null;
 let isAudioEnabled = true;
-let isPrivateEnabled = false; // sera true si le client a cliqué sur 'Passer en show privée' ou si showPriveId existe
-let clientSocketId = null; // socket.id du client (fourni par socket.io)
+let isPrivateEnabled = false; // true si le client a passé en show privée
+let clientSocketId = null;    // remplie au connect
+// si ta blade définit showPriveId (page de show privé), tu peux injecter sa valeur côté serveur:
+const showPriveId = typeof SHOW_PRIVE_ID !== 'undefined' ? SHOW_PRIVE_ID : null; // ou remplacer côté Blade
 
-/* activer / désactiver boutons selon show privé */
+// ---------- Socket.IO (déjà présent sur la page) ----------
+socket.on('connect', () => {
+  clientSocketId = socket.id;
+});
+
+// helper: met à jour l'état des boutons
 function updateClientButtonsState() {
   if (isPrivateEnabled) {
     clientCameraBtn.removeAttribute('disabled');
     clientCameraBtn.title = "Activer votre caméra";
     clientAudioBtn.removeAttribute('disabled');
     clientAudioBtn.title = "Activer / Désactiver le son de la caméra";
-    // cacher tooltip si ouvert
     document.querySelectorAll('#clientCamControls .tooltip-text').forEach(t => t.style.display = 'none');
   } else {
     clientCameraBtn.setAttribute('disabled', 'true');
     clientAudioBtn.setAttribute('disabled', 'true');
-    // show tooltip on hover
-    document.querySelectorAll('#clientCamControls .btn').forEach(btn => {
+    // montre tooltip si hover (optionnel)
+    document.querySelectorAll('#clientCamControls .clientCamBtn').forEach(btn => {
       btn.addEventListener('mouseenter', () => {
         const tt = btn.querySelector('.tooltip-text');
         if (tt) tt.style.display = 'block';
@@ -1294,34 +1383,25 @@ function updateClientButtonsState() {
     });
   }
 }
-
-// initial
 updateClientButtonsState();
 
-// si ton app met showPriveId côté Blade (si page private), détecte automatiquement
+// si la page est un show privé côté Blade, on active directement
 @if(isset($showPriveId))
   isPrivateEnabled = true;
   updateClientButtonsState();
 @endif
 
-// si il y a un bouton 'Passer en show privée' utilisable côté client
+// si tu as un bouton "Passer en show privée" client-side, écoute le clic
 if (switchPrivateBtn) {
-  switchPrivateBtn.addEventListener('click', async (e) => {
-    // logique existante de ton application pour passer en privé devrait être appelée ici.
-    // On met juste à jour l'UI côté client.
+  switchPrivateBtn.addEventListener('click', () => {
     isPrivateEnabled = true;
     updateClientButtonsState();
   });
 }
 
-/* --- Helpers WebRTC signaling pour envoyer l'offer au modèle --- */
-socket.on('connect', () => {
-  clientSocketId = socket.id;
-});
-
-// Serveur enverra 'client-answer' quand le modèle aura répondu
+// ---------- Signaling listeners (reçoivent du modèle via serveur) ----------
 socket.on('client-answer', async (data) => {
-  // { from: modeleSocketId, to: clientSocketId, description }
+  // data: { from: modeleSocketId, description }
   try {
     if (!clientPc) return console.warn('Pas de clientPc pour recevoir answer');
     await clientPc.setRemoteDescription(new RTCSessionDescription(data.description));
@@ -1331,10 +1411,9 @@ socket.on('client-answer', async (data) => {
   }
 });
 
-// candidats reçus depuis le modèle via serveur
 socket.on('client-candidate', async (data) => {
   // { to: clientSocketId, candidate }
-  if (data.to !== clientSocketId) return;
+  if (data.to && data.to !== clientSocketId) return;
   if (!clientPc) return;
   try {
     await clientPc.addIceCandidate(new RTCIceCandidate(data.candidate));
@@ -1343,13 +1422,12 @@ socket.on('client-candidate', async (data) => {
   }
 });
 
-// quand le modèle met fin au flux client
+// si le modèle ou serveur demande d'arrêter la caméra du client
 socket.on('client-disconnect', (data) => {
-  // ferme la pc locale si demandé
   stopClientCam();
 });
 
-/* --- START camera (client -> modele) --- */
+// ---------- Start / Stop caméra client ----------
 async function startClientCam() {
   if (!isPrivateEnabled) return alert('Vous devez être en show privée pour activer votre caméra.');
 
@@ -1359,37 +1437,43 @@ async function startClientCam() {
     localPreview.srcObject = clientStream;
     localPreview.style.display = 'block';
 
-    // build pc
+    // create RTCPeerConnection
     clientPc = new RTCPeerConnection({
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
+        // si tu as un TURN, garde-le ici
         { urls: "turn:livebeautyofficial.com:3478", username: "webrtc", credential: "password123" }
       ]
     });
 
-    // send ice candidates to modele via server
+    // envoyer candidats au modèle via serveur
     clientPc.onicecandidate = event => {
       if (event.candidate) {
-        socket.emit('client-candidate', { toRoom: isPrivateEnabled ? `prive-{{ $showPriveId ?? '' }}` : 'public', candidate: event.candidate, from: clientSocketId });
+        socket.emit('client-candidate', {
+          toRoom: isPrivateEnabled && showPriveId ? `prive-${showPriveId}` : 'public',
+          candidate: event.candidate,
+          from: clientSocketId
+        });
       }
     };
 
     // add tracks
     clientStream.getTracks().forEach(t => clientPc.addTrack(t, clientStream));
 
-    // create offer and send to server, server forward to modèle
+    // create offer
     const offer = await clientPc.createOffer();
     await clientPc.setLocalDescription(offer);
 
-    // tell server: I want the modèle to receive my offer
+    // envoi de l'offer au serveur (qui forwarde au modèle)
     socket.emit('client-offer', {
-      showPriveId: {{ isset($showPriveId) ? json_encode($showPriveId) : 'null' }},
+      showPriveId: showPriveId ?? null,
       offer: clientPc.localDescription,
       from: clientSocketId
     });
 
-    clientCameraBtn.textContent = '📷 On';
-    clientAudioBtn.textContent  = '🎤✅';
+    // UI
+    clientCameraBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
+    clientAudioBtn.innerHTML  = '<i class="fa-solid fa-microphone"></i>';
     isAudioEnabled = true;
   } catch (err) {
     console.error('Erreur startClientCam:', err);
@@ -1407,120 +1491,49 @@ function stopClientCam() {
     }
     localPreview.srcObject = null;
     localPreview.style.display = 'none';
-    clientCameraBtn.textContent = '📷 Camera';
-    clientAudioBtn.textContent = '🎤 Voix';
-    // inform server to let modèle remove it
-    socket.emit('client-stop', { from: clientSocketId });
+    clientCameraBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
+    clientAudioBtn.innerHTML  = '<i class="fa-solid fa-microphone"></i>';
+    // informer le serveur / modèle
+    socket.emit('client-stop', { showPriveId: showPriveId ?? null, from: clientSocketId });
   } catch (e) {
     console.warn(e);
   }
 }
-
-/* --- toggle audio of local camera (client side) --- */
+// toggle audio local
 function toggleClientAudio() {
   if (!clientStream) return alert('Activez d\'abord la caméra (Camera).');
   const audioTrack = clientStream.getAudioTracks()[0];
   if (!audioTrack) return alert('Aucun flux audio trouvé.');
-
   audioTrack.enabled = !audioTrack.enabled;
   isAudioEnabled = audioTrack.enabled;
   clientAudioBtn.textContent = isAudioEnabled ? '🎤✅' : '🎤🔇';
 
-  // optionnel : informe le modèle via chat message
+  // optionnel: avertir le modèle via chat
   socket.emit('chat-message', {
     message: isAudioEnabled ? '🔊 Le client a activé sa voix.' : '🔇 Le client a coupé sa voix.',
     pseudo: '{{ Auth::check() ? Auth::user()->pseudo : "Client" }}'
   });
 }
 
-/* --- Events sur boutons --- */
+// events boutons
 clientCameraBtn?.addEventListener('click', () => {
-  if (clientStream) {
-    // déjà activé -> couper
-    stopClientCam();
-  } else {
-    startClientCam();
-  }
+  if (clientStream) stopClientCam();
+  else startClientCam();
 });
-
 clientAudioBtn?.addEventListener('click', () => {
   if (!clientStream) return alert('Activez la caméra d\'abord.');
   toggleClientAudio();
 });
 
-socket.emit("join-public", { pseudo: "{{ Auth::user()->pseudo }}" });
+// Si le client annule le show privé depuis l'UI (ex: bouton "Annuler le show privé")
+// il faut forcer stop + désactiver boutons
+function onClientCancelPrivate() {
+  // stop local camera if any
+  stopClientCam();
+  isPrivateEnabled = false;
+  updateClientButtonsState();
+}
 
-// côté serveur, à l'intérieur de io.on('connection', socket => { ... })
-
-/**
- * Quand un client veut envoyer sa caméra au modèle
- * client envoie 'client-offer' { showPriveId, offer, from }
- * -> on forwarde vers le modèle (broadcasters[room]) en émettant 'client-offer' (target: modele socket)
- */
-socket.on('client-offer', (data) => {
-  const room = data.showPriveId ? `prive-${data.showPriveId}` : 'public';
-  const modeleSocketId = broadcasters[room];
-  if (!modeleSocketId) {
-    console.warn('Pas de modèle trouvé pour room', room);
-    return;
-  }
-  // forward offer to modele with client's socket id
-  io.to(modeleSocketId).emit('client-offer', {
-    from: socket.id,
-    offer: data.offer
-  });
-});
-
-/**
- * modèle répond (answer) -> serveur forwarde vers client
- * payload: { toClientSocketId, description }
- */
-socket.on('client-answer', (data) => {
-  const target = data.toClientSocketId;
-  if (target) {
-    io.to(target).emit('client-answer', {
-      from: socket.id,
-      description: data.description
-    });
-  }
-});
-
-/**
- * forwarding ICE candidates:
- * client -> server -> modele (event 'client-candidate')
- * modele -> server -> client (event 'client-candidate') same name
- */
-socket.on('client-candidate', (data) => {
-  // si data.to (explicit) forward à ce socket, sinon forward au modele de la room
-  if (data.to) {
-    io.to(data.to).emit('client-candidate', {
-      candidate: data.candidate,
-      to: data.to
-    });
-  } else if (data.toRoom) {
-    const modeleSocketId = broadcasters[data.toRoom];
-    if (modeleSocketId) {
-      io.to(modeleSocketId).emit('client-candidate', {
-        candidate: data.candidate,
-        to: data.from
-      });
-    }
-  }
-});
-
-/**
- * client-stop : client arrête d'envoyer sa caméra
- */
-socket.on('client-stop', (data) => {
-  // avertir le modèle pour qu'il coupe la vue
-  // on recherche toutes les rooms où ce socket est présent ? on forward au modèle public / privé
-  // si data.showPriveId envoyé, on le forwarde à ce room
-  const room = data.showPriveId ? `prive-${data.showPriveId}` : 'public';
-  const modeleSocketId = broadcasters[room];
-  if (modeleSocketId) {
-    io.to(modeleSocketId).emit('client-disconnect', { from: socket.id });
-  }
-});
 
 socket.on("typing", (data) => {
     const typingIndicator = document.getElementById("typingIndicator");
@@ -2020,3 +2033,4 @@ document.getElementById("backBtn").addEventListener("click", function() {
 });
 
 </script>
+
