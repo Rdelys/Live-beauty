@@ -5,6 +5,8 @@
   <title>Profil Modèle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <audio id="soundMessage" src="{{ asset('sounds/notificationAction.mp3') }}" preload="auto"></audio>
@@ -954,8 +956,6 @@ label {
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   document.getElementById("fullscreenBtn")?.addEventListener("click", () => {
     const container = document.getElementById("videoContainer");
@@ -980,7 +980,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com", {
+socket = io("http://localhost:3000/", {
     path: '/socket.io',
     transports: ['websocket']
 });

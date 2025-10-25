@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Live de {{ $modele->prenom }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <audio id="soundMessage" src="{{ asset('sounds/notificationAction.mp3') }}" preload="auto"></audio>
   <audio id="soundSurprise" src="{{ asset('sounds/cadeau.mp3') }}" preload="auto"></audio>
@@ -697,6 +699,70 @@ video {
   .clientCamBtn:hover:disabled .tooltip-text {
     display: block;
   }
+
+  /* ==== MODALE PREMIUM ==== */
+.modal-premium {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #000000 100%);
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(255, 64, 129, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-premium h4 {
+  font-size: 1.5rem;
+  background: linear-gradient(90deg, #ff4081, #ff80ab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.modal-premium .premium-icon {
+  font-size: 3rem;
+  animation: pulseHeart 2s infinite ease-in-out;
+}
+
+@keyframes pulseHeart {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Effet de glow rose doux */
+.modal-premium .modal-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255,64,129,0.15), transparent 70%);
+  z-index: 0;
+  animation: rotateGlow 8s linear infinite;
+}
+
+@keyframes rotateGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Bouton Quitter */
+.btn-premium-quit {
+  background: linear-gradient(90deg, #ff4081, #f50057);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 15px rgba(255, 64, 129, 0.4);
+  position: relative;
+  z-index: 2;
+}
+
+.btn-premium-quit:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 64, 129, 0.6);
+  background: linear-gradient(90deg, #f50057, #ff80ab);
+}
+
   </style>
 </head>
 <body>
@@ -902,11 +968,9 @@ video {
   </div>
 </div>
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -940,6 +1004,7 @@ const peerConnection = new RTCPeerConnection({
       socket.emit("candidate", broadcasterId, event.candidate);
     }
   };
+
 
   // Dans la partie où vous émettez "watcher"
 socket.on("connect", () => {
@@ -1680,6 +1745,83 @@ document.addEventListener("keydown", (e) => {
 </script>
 <x-private-live-popup />
 
+
+<!-- Modal Premium : modèle a quitté -->
+<div class="modal fade" id="modelLeftModal" tabindex="-1" aria-labelledby="modelLeftLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-premium text-center text-white border-0 shadow-lg position-relative overflow-hidden">
+
+      <!-- Glow effect -->
+      <div class="modal-glow"></div>
+
+      <div class="modal-body py-5 px-4">
+        <div class="premium-icon mb-3">💋</div>
+        <h4 class="fw-bold mb-3">La camgirl a terminé le show</h4>
+        <p class="text-light opacity-75 mb-4">
+          Merci d’avoir participé à ce moment.  
+          Vous pouvez quitter le live en toute sécurité.
+        </p>
+        <button id="quitShowBtn" class="btn-premium-quit px-5 py-2 fw-bold">
+          Quitter le live
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * 📡 Quand le modèle (broadcaster) se déconnecte,
+ * on affiche une modale avec un bouton "Quitter".
+ */
+socket.on("modele-deconnecte", (data) => {
+  console.log("⚠️ Le modèle a quitté le show :", data);
+
+  // 1️⃣ Stop vidéo & fermeture connexion WebRTC
+  try {
+    const liveVideo = document.getElementById("liveVideo");
+    if (liveVideo) {
+      const stream = liveVideo.srcObject;
+      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+      liveVideo.pause();
+      liveVideo.srcObject = null;
+      liveVideo.style.filter = "grayscale(70%)";
+      liveVideo.style.opacity = "0.7";
+    }
+
+    if (typeof peerConnection !== "undefined" && peerConnection) {
+      peerConnection.close();
+    }
+
+    socket.close();
+  } catch (err) {
+    console.warn("Erreur cleanup:", err);
+  }
+
+  // 2️⃣ Affiche la modale Bootstrap
+  const modalEl = document.getElementById("modelLeftModal");
+  if (modalEl) {
+    const modal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+    modal.show();
+
+    // 3️⃣ Gestion du bouton Quitter
+    const quitBtn = document.getElementById("quitShowBtn");
+    if (quitBtn) {
+      quitBtn.onclick = () => {
+        window.location.href = "/dashboard"; // 🔁 redirection (tu peux changer ici)
+      };
+    }
+
+    // Si la modale se ferme autrement (Esc ou clic), on redirige aussi
+    modalEl.addEventListener("hidden.bs.modal", () => {
+      window.location.href = "/dashboard";
+    });
+  } else {
+    // Fallback : redirection si la modale est absente
+    window.location.href = "/dashboard";
+  }
+});
+</script>
 
 
 </body>
