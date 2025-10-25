@@ -8,6 +8,52 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
+
+      /* 💎 MODAL STYLE PREMIUM */
+.premium-modal {
+  background: #0d0d0d;
+  border: 1px solid #ff0000;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.5px;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.premium-modal .modal-title {
+  color: #ff2a2a;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
+.glow-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #ff2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff2a2a;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 10px rgba(255, 0, 0, 0.4); }
+  to { box-shadow: 0 0 25px rgba(255, 0, 0, 0.9); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.glow-circle i {
+  color: #ff2a2a;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
        :root {
     --primary: #e91e63;
     --primary-light: #ff80ab;
@@ -695,18 +741,25 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 
         lives.forEach(model => {
             const link = document.createElement('a');
-            link.href = `/live/${model.id}`;
             link.classList.add('d-block', 'mb-1', 'fw-bold');
 
-            // 🟢 si show privé
             if (model.prive === 1) {
+                // 🟢 Show privé
                 link.textContent = `🟢 ${model.prenom} (en show privé)`;
                 link.style.color = 'limegreen';
-            } 
-            // 🔴 sinon live public
-            else {
+                link.href = '#'; // empêche la navigation
+
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // 👉 ouvre le modal
+                    const modal = new bootstrap.Modal(document.getElementById('privateShowModal'));
+                    modal.show();
+                });
+            } else {
+                // 🔴 Show public
                 link.textContent = `🔴 ${model.prenom}`;
                 link.style.color = '#ff4d4d';
+                link.href = `/live/${model.id}`;
             }
 
             liveContainer.appendChild(link);
@@ -715,6 +768,8 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         console.error("Erreur de chargement des lives", e);
     }
 }
+
+
 
 
         fetchLiveModels();
@@ -1003,6 +1058,29 @@ document.addEventListener("click", function(e) {
     </div>
   </div>
 </div>
+
+<!-- 💎 MODAL PREMIUM SHOW PRIVÉ -->
+<div class="modal fade" id="privateShowModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content premium-modal text-center p-4">
+      <div class="modal-body">
+        <div class="glow-circle mx-auto mb-3">
+          <i class="fa-solid fa-eye-slash fa-2x"></i>
+        </div>
+        <h4 class="modal-title mb-3 text-uppercase fw-bold">Show Privé</h4>
+        <p class="text-light mb-4">
+          🔒 Ce show est actuellement en <span class="text-danger fw-bold">mode privé</span>.<br>
+          Seuls les membres autorisés peuvent y accéder.
+        </p>
+        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 
 <!-- PayPal SDK + Script 
