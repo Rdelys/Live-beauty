@@ -9,6 +9,7 @@
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <audio id="soundMessage" src="{{ asset('sounds/notificationAction.mp3') }}" preload="auto"></audio>
   <audio id="soundSurprise" src="{{ asset('sounds/cadeau.mp3') }}" preload="auto"></audio>
   <audio id="soundEnter" src="{{ asset('sounds/rentreShow.mp3') }}" preload="auto"></audio>
@@ -634,7 +635,7 @@ label {
         style="position:absolute;top:10px;right:10px;z-index:10;background:rgba(0,0,0,0.5);border:none;color:white;padding:6px 10px;border-radius:6px;cursor:pointer;">
     ⛶
 </button>
-    <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 400px;"></video>
+    <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 700px;"></video>
 
     <!-- Overlay spectateurs -->
     <div id="viewersOverlay" style="position:absolute;top:10px;left:10px;z-index:10;color:white;">
@@ -644,36 +645,48 @@ label {
 
     <!-- Small remote client video (arrive quand un client active sa cam) -->
 <!-- Miniature du client -->
-<div id="incomingClientContainer" style="position:absolute; top:10px; left:10px; z-index:999;">
+<div id="incomingClientContainer" 
+     style="position:absolute; top:10px; left:10px; z-index:999; display:flex; flex-direction:column; align-items:center; gap:6px;">
+
   <video id="incomingClientVideo" autoplay playsinline muted
-         style="width:160px; height:120px; object-fit:cover; border:2px solid rgba(255,255,255,0.3);
-                border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.25); display:none;">
+         style="
+           width:130px;
+           height:95px;
+           object-fit:cover;
+           border-radius:10px;
+           border:1.5px solid rgba(255,255,255,0.25);
+           box-shadow:0 4px 10px rgba(0,0,0,0.3);
+           background:rgba(0,0,0,0.15);
+           backdrop-filter:blur(8px);
+           display:none;
+           transition:opacity 0.3s ease, transform 0.3s ease;
+         ">
   </video>
 
-  <button id="stopViewingClientBtn" 
+  <button id="toggleClientViewBtn" 
           style="
             display:none;
-            margin-top:6px;
-            width:160px;
-            padding:8px 0;
+            width:40px;
+            height:40px;
             border:none;
             border-radius:12px;
-            background:linear-gradient(135deg, #ff4b2b, #ff416c);
-            color:white;
-            font-weight:600;
-            font-family:'Inter', sans-serif;
-            font-size:14px;
-            letter-spacing:0.3px;
-            box-shadow:0 3px 8px rgba(255, 65, 108, 0.4);
-            backdrop-filter:blur(6px);
+            background:linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            color:rgba(255,255,255,0.85);
+            font-size:16px;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter:blur(10px);
             cursor:pointer;
             transition:all 0.25s ease;
           "
-          onmouseover="this.style.transform='translateY(-2px) scale(1.03)'; this.style.boxShadow='0 6px 14px rgba(255,65,108,0.5)'"
-          onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 3px 8px rgba(255,65,108,0.4)'">
-    🔒 Masquer le flux client
+          onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
+          onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}">
+    <i class="fa-solid fa-eye-slash" style="pointer-events:none;"></i>
   </button>
+
 </div>
+
 
 
 
@@ -1053,10 +1066,11 @@ socket.on('client-offer', async (data) => {
   clientPeerConnections[clientId] = pc;
 
   pc.ontrack = (event) => {
-    incomingClientVideo.srcObject = event.streams[0];
-    incomingClientVideo.style.display = 'block';
-    stopViewingClientBtn.style.display = 'block';
-  };
+  incomingClientVideo.srcObject = event.streams[0];
+  incomingClientVideo.style.display = 'block';
+  toggleClientViewBtn.style.display = 'block'; // ✅ au lieu de stopViewingClientBtn
+};
+
 
   pc.onicecandidate = (ev) => {
     if (ev.candidate) socket.emit('client-candidate', { to: clientId, candidate: ev.candidate });
@@ -1080,6 +1094,24 @@ stopViewingClientBtn?.addEventListener('click', () => {
   stopViewingClientBtn.style.display = 'none';
 });
 
+const toggleClientViewBtn = document.getElementById('toggleClientViewBtn');
+let isClientHidden = false;
+
+toggleClientViewBtn?.addEventListener('click', () => {
+  if (!incomingClientVideo.srcObject) return; // pas de flux
+
+  if (isClientHidden) {
+    // Réafficher la vidéo
+    incomingClientVideo.style.display = 'block';
+    toggleClientViewBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+    isClientHidden = false;
+  } else {
+    // Masquer la vidéo
+    incomingClientVideo.style.display = 'none';
+    toggleClientViewBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+    isClientHidden = true;
+  }
+});
 
 socket.on("stopTyping", () => {
     const typingIndicator = document.getElementById("typingIndicator");
