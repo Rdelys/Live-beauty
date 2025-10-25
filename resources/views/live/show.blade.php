@@ -1214,6 +1214,7 @@ document.getElementById("privateTotalCost").textContent = coutParMinute * 5;
   body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
 });
 disablePrivateProtection();
+    onClientCancelPrivate();
 
   }
 });
