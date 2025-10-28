@@ -73,12 +73,20 @@
 }
 
     body {
-  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-  color: #fff;
-  font-family: 'Segoe UI', sans-serif;
-  padding: 2rem 1rem;
   margin: 0;
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+  background: linear-gradient(135deg, #0b0014 0%, #22011f 35%, #3a004a 70%, #0b0014 100%);
+  background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: bgSexy 20s ease infinite;
   overflow-x: hidden;
+}
+
+@keyframes bgSexy {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .container-live {
@@ -91,11 +99,12 @@
 
 .left-live {
   flex: 2;
-  background-color: #212121;
+  background-color: transparent;
   border-radius: 12px;
   padding: 2rem;
   min-width: 320px;
 }
+
 
 .right-jetons {
   flex: 1;
@@ -858,7 +867,11 @@ video {
   ▶️ Cliquez pour démarrer le live avec son
   </div>
 
-    <video id="liveVideo" autoplay playsinline controls></video>
+  <video id="liveVideo" autoplay playsinline controls></video>
+  <img id="fallbackImage"
+     src="{{ asset('modele.jpg') }}"
+     alt="En attente de live"
+     style="width:100%; border-radius:12px; display:none; object-fit:cover;">
     @auth
      <!-- Default tokens icon -->
       <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
@@ -1094,6 +1107,27 @@ const peerConnection = new RTCPeerConnection({
     }
   };
 
+const fallbackImage = document.getElementById("fallbackImage");
+
+// Si aucun flux n’arrive au bout de 5 secondes → on affiche la photo
+setTimeout(() => {
+  if (!video.srcObject) {
+    video.style.display = "none";
+    fallbackImage.style.display = "block";
+  }
+}, 5000);
+
+// Quand un flux arrive → on affiche la vidéo et cache la photo
+peerConnection.ontrack = event => {
+  video.srcObject = event.streams[0];
+  video.style.display = "block";
+  fallbackImage.style.display = "none";
+
+  video.muted = true;
+  video.play().catch(err => {
+    console.warn("Autoplay bloqué :", err);
+  });
+};
 
   // Dans la partie où vous émettez "watcher"
 socket.on("connect", () => {
