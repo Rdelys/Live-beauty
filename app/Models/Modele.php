@@ -3,53 +3,74 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // ← pour guard
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Auth\Passwords\CanResetPassword;
-use Illuminate\Notifications\Notifiable; // ← pour notify()
+use Illuminate\Notifications\Notifiable;
 
 class Modele extends Authenticatable implements CanResetPasswordContract
 {
     use HasFactory, Notifiable, CanResetPassword;
 
-    protected $fillable = [
-    'nom',
-    'prenom',
-    'description',
-    'video_link',
-    'video_file',
-    'photos',
-    'email',
-    'password',
-    'en_ligne',
-    'nombre_jetons_show_privee',
-    'duree_show_privee',
-    'age',
-    'taille',
-    'silhouette',
-    'poitrine',
-    'fesse',
-    'langue',
-    'services',
-    'mode',           // <-- ajouté
-    'type_flou',      // <-- ajouté
-    'prix_flou',
-    'prix_flou_detail', // ✅ ajouté
-        'prive', // ✅ ajouté ici
-];
-
-protected $casts = [
-    'photos'     => 'array',
-    'video_link' => 'array',
-    'video_file' => 'array',
-    'mode'       => 'integer', // <-- ajouté
-    'prix_flou'  => 'float',
-    'prix_flou_detail' => 'float', // ✅ ajouté
-        'prive'      => 'integer', // ✅ ajouté ici
-];
-
-
     protected $table = 'modeles';
+
+    protected $fillable = [
+        'nom',
+        'prenom',
+        'description',
+        'video_link',
+        'video_file',
+        'photos',
+        'email',
+        'password',
+        'en_ligne',
+        'nombre_jetons_show_privee',
+        'duree_show_privee',
+        'age',
+        'taille',
+        'silhouette',
+        'poitrine',
+        'fesse',
+        'langue',
+        'services',
+        'mode',
+        'type_flou',
+        'prix_flou',
+        'prix_flou_detail',
+        'prive',
+    ];
+
+    protected $casts = [
+        'photos'     => 'array',
+        'video_link' => 'array',
+        'video_file' => 'array',
+        'mode'       => 'boolean',
+        'prix_flou'  => 'float',
+        'prix_flou_detail' => 'float',
+        'prive'      => 'boolean',
+    ];
+
+    // 🔥 Optionnel : protéger le mot de passe à la sortie
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    // 🔥 Hash automatique du mot de passe quand on le définit
+    public function setPasswordAttribute($value)
+    {
+        if ($value && strlen($value) < 60) { // évite de re-hasher un mot de passe déjà hashé
+            $this->attributes['password'] = bcrypt($value);
+        } else {
+            $this->attributes['password'] = $value;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations
+    |--------------------------------------------------------------------------
+    */
 
     public function jetons()
     {
@@ -62,30 +83,34 @@ protected $casts = [
     }
 
     public function showPrives()
-{
-    return $this->hasMany(ShowPrive::class, 'modele_id');
-}
+    {
+        return $this->hasMany(ShowPrive::class, 'modele_id');
+    }
 
-protected static function booted()
-{
-    static::updated(function ($modele) {
-        if ($modele->isDirty('en_ligne') && $modele->en_ligne == 1) {
-            \App\Models\ModeleHistorique::create([
-                'modele_id' => $modele->id,
-                'jour'      => now()->toDateString(),
-            ]);
-        }
-    });
-}
-public function achats()
-{
-    return $this->hasMany(\App\Models\Achat::class);
-}
+    public function achats()
+    {
+        return $this->hasMany(\App\Models\Achat::class);
+    }
 
-public function galleryPhotos()
-{
-    return $this->hasMany(GalleryPhoto::class);
-}
+    public function galleryPhotos()
+    {
+        return $this->hasMany(GalleryPhoto::class);
+    }
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Hooks Eloquent
+    |--------------------------------------------------------------------------
+    */
+    protected static function booted()
+    {
+        static::updated(function ($modele) {
+            if ($modele->isDirty('en_ligne') && $modele->en_ligne == 1) {
+                \App\Models\ModeleHistorique::create([
+                    'modele_id' => $modele->id,
+                    'jour'      => now()->toDateString(),
+                ]);
+            }
+        });
+    }
 }

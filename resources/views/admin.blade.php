@@ -691,7 +691,12 @@ footer {
 
 
           <td>
-  <a href="{{ route('modeles.edit', $modele->id) }}" class="btn btn-sm btn-primary">Modifier</a>
+<a href="{{ route('modeles.edit', $modele->id) }}" 
+   class="btn btn-sm btn-primary" 
+   target="_blank" 
+   rel="noopener noreferrer">
+   Modifier
+</a>
 
   <form action="{{ route('modeles.destroy', $modele->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?')">
     @csrf
