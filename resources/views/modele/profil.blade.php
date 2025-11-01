@@ -1859,82 +1859,89 @@ togglePrivateMicBtn?.addEventListener("click", () => {
         <h5 class="modal-title" id="editProfilModalLabel">Modifier mes informations</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
+
       <form method="POST" action="{{ route('modele.update', $modele->id) }}">
         @csrf
         @method('PUT')
+
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Nom</label>
             <input type="text" name="nom" value="{{ $modele->nom }}" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Prénom</label>
             <input type="text" name="prenom" value="{{ $modele->prenom }}" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control">{{ $modele->description }}</textarea>
           </div>
+
           <div class="mb-3">
-  <label class="form-label">Âge</label>
-  <input type="number" name="age" value="{{ $modele->age ?? '' }}" class="form-control" min="18" max="99">
-</div>
+            <label class="form-label">Âge</label>
+            <input type="number" name="age" value="{{ $modele->age ?? '' }}" class="form-control" min="18" max="99">
+          </div>
 
-<div class="mb-3">
-  <label class="form-label">Taille (cm)</label>
-  <input type="text" name="taille" value="{{ $modele->taille ?? '' }}" class="form-control">
-</div>
+          <div class="mb-3">
+            <label class="form-label">Taille (cm)</label>
+            <input type="text" name="taille" value="{{ $modele->taille ?? '' }}" class="form-control">
+          </div>
 
-<div class="mb-3">
-  <label class="form-label">Silhouette</label>
-  <input type="text" name="silhouette" value="{{ $modele->silhouette ?? '' }}" class="form-control">
-</div>
+          <div class="mb-3">
+            <label class="form-label">Silhouette</label>
+            <input type="text" name="silhouette" value="{{ $modele->silhouette ?? '' }}" class="form-control">
+          </div>
 
-<div class="mb-3">
-  <label class="form-label">Poitrine</label>
-  <input type="text" name="poitrine" value="{{ $modele->poitrine ?? '' }}" class="form-control">
-</div>
+          <div class="mb-3">
+            <label class="form-label">Poitrine</label>
+            <input type="text" name="poitrine" value="{{ $modele->poitrine ?? '' }}" class="form-control">
+          </div>
 
-<div class="mb-3">
-  <label class="form-label">Fesse</label>
-  <input type="text" name="fesse" value="{{ $modele->fesse ?? '' }}" class="form-control">
-</div>
+          <div class="mb-3">
+            <label class="form-label">Fesse</label>
+            <input type="text" name="fesse" value="{{ $modele->fesse ?? '' }}" class="form-control">
+          </div>
 
-<div class="mb-3">
-  <label class="form-label">Langues parlées</label>
-  <select name="langue" class="form-control">
-    <option value="" disabled selected>{{ $modele->langue ? $modele->langue : 'Sélectionnez une langue' }}</option>
-    <option value="FR" {{ (old('langue', $modele->langue) == 'FR') ? 'selected' : '' }}>Francais</option>
-    <option value="EN" {{ (old('langue', $modele->langue) == 'EN') ? 'selected' : '' }}>Anglais</option>
-    <option value="DE" {{ (old('langue', $modele->langue) == 'DE') ? 'selected' : '' }}>Allemand</option>
-    <option value="ES" {{ (old('langue', $modele->langue) == 'ES') ? 'selected' : '' }}>Espagnol</option>
-    <option value="IT" {{ (old('langue', $modele->langue) == 'IT') ? 'selected' : '' }}>Italien</option>
-    <option value="PT" {{ (old('langue', $modele->langue) == 'PT') ? 'selected' : '' }}>Portugais</option>
-    <option value="NL" {{ (old('langue', $modele->langue) == 'NL') ? 'selected' : '' }}>Néerlandais</option>
-  </select>
-</div>
-</div>
+          <div class="mb-3">
+            <label class="form-label">Langues parlées</label>
+            <select name="langue" class="form-control">
+              <option value="" disabled selected>
+                {{ $modele->langue ? $modele->langue : 'Sélectionnez une langue' }}
+              </option>
+              <option value="FR" {{ (old('langue', $modele->langue) == 'FR') ? 'selected' : '' }}>Français</option>
+              <option value="EN" {{ (old('langue', $modele->langue) == 'EN') ? 'selected' : '' }}>Anglais</option>
+              <option value="DE" {{ (old('langue', $modele->langue) == 'DE') ? 'selected' : '' }}>Allemand</option>
+              <option value="ES" {{ (old('langue', $modele->langue) == 'ES') ? 'selected' : '' }}>Espagnol</option>
+              <option value="IT" {{ (old('langue', $modele->langue) == 'IT') ? 'selected' : '' }}>Italien</option>
+              <option value="PT" {{ (old('langue', $modele->langue) == 'PT') ? 'selected' : '' }}>Portugais</option>
+              <option value="NL" {{ (old('langue', $modele->langue) == 'NL') ? 'selected' : '' }}>Néerlandais</option>
+            </select>
+          </div>
 
-
-<div class="mb-3">
-  <label class="form-label">Ce qu’elle propose</label>
-  <textarea name="services" class="form-control" rows="3">{{ $modele->services ?? '' }}</textarea>
-</div>
+          <div class="mb-3">
+            <label class="form-label">Ce qu’elle propose</label>
+            <textarea name="services" class="form-control" rows="3">{{ $modele->services ?? '' }}</textarea>
+          </div>
 
           <div class="mb-3">
             <label class="form-label">Email</label>
             <input type="email" name="email" value="{{ $modele->email }}" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Nombre de jetons pour show privée</label>
             <input type="number" name="nombre_jetons_show_privee" value="{{ $modele->nombre_jetons_show_privee ?? '' }}" class="form-control">
           </div>
-          <div class="mb-3">
-  <label class="form-label">Durée du show privée (minutes)</label>
-  <input type="number" name="duree_show_privee" value="{{ $modele->duree_show_privee ?? '' }}" class="form-control">
-</div>
 
-        </div>
+          <div class="mb-3">
+            <label class="form-label">Durée du show privée (minutes)</label>
+            <input type="number" name="duree_show_privee" value="{{ $modele->duree_show_privee ?? '' }}" class="form-control">
+          </div>
+        </div> <!-- FIN modal-body -->
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
           <button type="submit" class="btn btn-success">Enregistrer</button>
@@ -1943,6 +1950,7 @@ togglePrivateMicBtn?.addEventListener("click", () => {
     </div>
   </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   // === Gestion mode payant / gratuit ===
