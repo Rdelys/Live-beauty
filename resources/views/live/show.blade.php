@@ -855,7 +855,7 @@ video {
 
 
 <div id="videoContainer" style="position: relative;">
-  
+  @auth
   <div id="startOverlay" style="
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.8); color: white;
@@ -866,12 +866,10 @@ video {
   ">
   ▶️ Cliquez pour démarrer le live avec son
   </div>
+      @endauth
+
 
   <video id="liveVideo" autoplay playsinline controls></video>
-  <img id="fallbackImage"
-     src="{{ asset('modele.jpg') }}"
-     alt="En attente de live"
-     style="width:100%; border-radius:12px; display:none; object-fit:cover;">
     @auth
      <!-- Default tokens icon -->
       <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
@@ -1072,7 +1070,7 @@ video {
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
 
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1106,29 +1104,6 @@ const peerConnection = new RTCPeerConnection({
       socket.emit("candidate", broadcasterId, event.candidate);
     }
   };
-
-const fallbackImage = document.getElementById("fallbackImage");
-
-// Si aucun flux n’arrive au bout de 5 secondes → on affiche la photo
-setTimeout(() => {
-  if (!video.srcObject) {
-    video.style.display = "none";
-    fallbackImage.style.display = "block";
-  }
-}, 5000);
-
-// Quand un flux arrive → on affiche la vidéo et cache la photo
-peerConnection.ontrack = event => {
-  video.srcObject = event.streams[0];
-  video.style.display = "block";
-  fallbackImage.style.display = "none";
-
-  video.muted = true;
-  video.play().catch(err => {
-    console.warn("Autoplay bloqué :", err);
-  });
-};
-
   // Dans la partie où vous émettez "watcher"
 socket.on("connect", () => {
     socket.emit("watcher", {
@@ -1196,62 +1171,96 @@ const userJetonsSpan = document.getElementById("userJetons");
 const messagesDive = document.getElementById("messages");
 let isPrivate = false;
 
+// ✅ Sécurisation : vérifier si le bouton et la modale existent
 const switchPrivateBtn = document.getElementById("switchPrivateBtn");
-const confirmModal = new bootstrap.Modal(document.getElementById("confirmPrivateModal"));
+const confirmModalEl = document.getElementById("confirmPrivateModal");
 const privateCostElem = document.getElementById("privateCost");
 
-switchPrivateBtn.addEventListener("click", async () => {
-  if (!isPrivate) {
-    // 🔹 Récupérer le tarif avant d'afficher le modal
-    const res = await fetch("{{ route('live.canStart') }}", {
-      method: "POST",
-      headers: {
-        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
-    });
-    const data = await res.json();
+let confirmModal = null;
+if (confirmModalEl) {
+  confirmModal = new bootstrap.Modal(confirmModalEl);
+}
 
-    if (!data.canStart && data.message) {
-      alert(data.message);
-      return;
+// ✅ Si le bouton existe (uniquement pour les utilisateurs connectés)
+if (switchPrivateBtn) {
+  switchPrivateBtn.addEventListener("click", async () => {
+    if (!isPrivate) {
+      // 🧱 Protection invités (aucune action sans compte)
+      @guest
+        alert("🔒 Vous devez être connecté pour démarrer un show privé.");
+        return;
+      @endguest
+
+      @auth
+      try {
+        // 🔹 Récupérer le tarif avant d'afficher le modal
+        const res = await fetch("{{ route('live.canStart') }}", {
+          method: "POST",
+          headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+        });
+
+        if (!res.ok) {
+          alert("⚠️ Une erreur est survenue lors de la vérification du show privé.");
+          return;
+        }
+
+        const data = await res.json().catch(() => null);
+        if (!data || !data.canStart) {
+          alert(data?.message || "Impossible de démarrer le show privé.");
+          return;
+        }
+
+        // 🔹 Calcul du coût du show privé
+        const coutParMinute = Math.ceil({{ $modele->nombre_jetons_show_privee }} / {{ $modele->duree_show_privee }});
+        privateCostElem.textContent = coutParMinute;
+        document.getElementById("privateTotalCost").textContent = coutParMinute * 5;
+
+        // 🔹 Ouvrir le modal de confirmation
+        confirmModal.show();
+
+        // 🔹 Attendre la confirmation utilisateur
+        const confirmBtn = document.getElementById("confirmPrivateYes");
+        if (confirmBtn) {
+          confirmBtn.onclick = () => {
+            confirmModal.hide();
+            startPrivateShow();
+          };
+        }
+      } catch (err) {
+        console.error("Erreur vérification show privé :", err);
+        alert("❌ Erreur inattendue. Réessayez plus tard.");
+      }
+      @endauth
+    } 
+    else {
+      // 🔹 Annuler le show privé
+      socket.emit("cancel-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
+      switchPrivateBtn.textContent = "🚪 Passer en show privée";
+      isPrivate = false;
+
+      if (debitInterval) clearInterval(debitInterval);
+
+      // Arrêt du show côté serveur
+      fetch("{{ route('live.stopPrivate') }}", {
+        method: "POST",
+        headers: {
+          "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
+      }).catch(err => console.warn("Erreur stopPrivate :", err));
+
+      disablePrivateProtection();
+      onClientCancelPrivate();
     }
+  });
+}
 
-    // 🔹 Calcul du coût (identique à canStartPrivate)
-    const coutParMinute = Math.ceil({{ $modele->nombre_jetons_show_privee }} / {{ $modele->duree_show_privee }});
-privateCostElem.textContent = coutParMinute;
-document.getElementById("privateTotalCost").textContent = coutParMinute * 5;
-
-
-    // 🔹 Ouvrir le modal
-    confirmModal.show();
-
-    // 🔹 Attendre la confirmation utilisateur
-    document.getElementById("confirmPrivateYes").onclick = () => {
-      confirmModal.hide();
-      startPrivateShow();
-    };
-  } else {
-    // 🔹 Annuler le show privé
-    socket.emit("cancel-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
-    switchPrivateBtn.textContent = "🚪 Passer en show privée";
-    isPrivate = false;
-    if (debitInterval) clearInterval(debitInterval);
-    fetch("{{ route('live.stopPrivate') }}", {
-  method: "POST",
-  headers: {
-    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-  },
-  body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
-});
-disablePrivateProtection();
-    onClientCancelPrivate();
-
-  }
-});
 
 function startPrivateShow() {
   socket.emit("switch-to-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
@@ -1283,6 +1292,7 @@ function startPrivateShow() {
   .catch(err => console.error("Erreur:", err));
 
   // 🔁 Début du débit automatique
+  @auth
   debitInterval = setInterval(() => {
     fetch("{{ route('live.debiter') }}", {
       method: "POST",
@@ -1312,7 +1322,9 @@ function startPrivateShow() {
       }
     });
   }, 60000);
+  @endauth
 }
+
 
 // 🧩 Protection du show privé : retour / fermeture / refresh
 function enablePrivateProtection() {
@@ -1396,29 +1408,48 @@ socket.on('connect', () => {
 
 // helper: met à jour l'état des boutons
 function updateClientButtonsState() {
+  // ✅ Vérifie d’abord que les éléments existent
+  if (!window.clientCameraBtn || !window.clientAudioBtn) {
+    console.warn("⛔ Boutons caméra/audio non trouvés dans le DOM — fonction ignorée.");
+    return;
+  }
+
   if (isPrivateEnabled) {
     clientCameraBtn.removeAttribute('disabled');
     clientCameraBtn.title = "Activer votre caméra";
     clientAudioBtn.removeAttribute('disabled');
     clientAudioBtn.title = "Activer / Désactiver le son de la caméra";
-    document.querySelectorAll('#clientCamControls .tooltip-text').forEach(t => t.style.display = 'none');
+
+    // Cache les tooltips s’il y en avait
+    document.querySelectorAll('#clientCamControls .tooltip-text').forEach(t => {
+      t.style.display = 'none';
+    });
   } else {
     clientCameraBtn.setAttribute('disabled', 'true');
     clientAudioBtn.setAttribute('disabled', 'true');
-    // montre tooltip si hover (optionnel)
-    document.querySelectorAll('#clientCamControls .clientCamBtn').forEach(btn => {
-      btn.addEventListener('mouseenter', () => {
-        const tt = btn.querySelector('.tooltip-text');
-        if (tt) tt.style.display = 'block';
+
+    // ✅ Vérifie aussi que le conteneur existe avant d’ajouter des listeners
+    const camControls = document.querySelectorAll('#clientCamControls .clientCamBtn');
+    if (camControls.length) {
+      camControls.forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+          const tt = btn.querySelector('.tooltip-text');
+          if (tt) tt.style.display = 'block';
+        });
+        btn.addEventListener('mouseleave', () => {
+          const tt = btn.querySelector('.tooltip-text');
+          if (tt) tt.style.display = 'none';
+        });
       });
-      btn.addEventListener('mouseleave', () => {
-        const tt = btn.querySelector('.tooltip-text');
-        if (tt) tt.style.display = 'none';
-      });
-    });
+    }
   }
 }
-updateClientButtonsState();
+
+// ✅ Appelle la fonction seulement quand le DOM est prêt
+document.addEventListener("DOMContentLoaded", () => {
+  updateClientButtonsState();
+});
+
 
 // si la page est un show privé côté Blade, on active directement
 @if(isset($showPriveId))
@@ -2062,10 +2093,13 @@ socket.emit("jeton-sent", {
 
 })();
 // Écoute le clic sur chaque surprise
-document.getElementById("backBtn").addEventListener("click", function() {
-    // Retourne à la page précédente
+const backBtnEl = document.getElementById("backBtn");
+if (backBtnEl) {
+  backBtnEl.addEventListener("click", function() {
     window.history.back();
-});
+  });
+}
+
 
 </script>
 
