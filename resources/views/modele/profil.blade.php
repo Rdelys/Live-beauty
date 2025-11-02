@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -271,23 +271,61 @@ label {
 }
 
 .chat-bubble {
-  background: transparent !important;
-  border: none;
-  box-shadow: none;
-  padding: 2px 6px;
-  font-size: 13.5px;
-  color: white;
-  margin-bottom: 4px;
+  display: inline-block;
+  background: rgba(0,0,0,0.28);        /* léger fond sombre pour contraste */
+  backdrop-filter: blur(6px);          /* flou derrière (si supporté) */
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 6px 10px;
+  font-size: 14px;
+  color: white;                        /* fallback si aucune couleur inline */
+  margin-bottom: 6px;
   width: fit-content;
   max-width: 90%;
-  line-height: 1.4;
+  line-height: 1.3;
   word-break: break-word;
   pointer-events: auto;
-  animation: fadeIn 0.3s ease-in-out;
+  font-weight: 700;
+
+  /* Lisibilité forte: stroke + shadow + neon halo basé sur currentColor */
+  -webkit-text-stroke: 0.6px rgba(0,0,0,0.75); /* contour sombre pour lisibilité */
+  text-stroke: 0.6px rgba(0,0,0,0.75);
+
+  text-shadow:
+    0 0 2px rgba(0,0,0,0.9),           /* contour sombre immédiat */
+    0 0 6px currentColor,              /* halo coloré autour (utilise la couleur du texte) */
+    0 0 12px currentColor,
+    0 6px 18px rgba(0,0,0,0.6);        /* ombre portée pour séparer du fond */
+
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45); /* profondeur */
+  transition: transform 160ms cubic-bezier(.2,.9,.3,1), opacity 160ms;
+  transform-origin: left bottom;
+  animation: chatPop 260ms ease forwards;
 }
+
+/* petit 'pop' à l'apparition */
+@keyframes chatPop {
+  0%   { transform: translateY(6px) scale(.98); opacity: 0; }
+  60%  { transform: translateY(0) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* Hover léger */
+.chat-bubble:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+
+/* Scrollbar (desktop) */
 .chat-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  width: 6px;
 }
+.chat-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+}
+
 
 
 
@@ -1017,7 +1055,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com", {
+socket = io("http://localhost:3000/", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1242,12 +1280,14 @@ socket.on("chat-message", (data) => {
     if (chatWrapper) {
         const bubble = document.createElement("div");
         bubble.classList.add("chat-bubble");
+        bubble.style.color = data.color || "#fff"; // 🎨 couleur aléatoire reçue
         bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
         chatWrapper.appendChild(bubble);
         chatWrapper.scrollTop = chatWrapper.scrollHeight;
     }
     if (soundMessage) soundMessage.play().catch(() => {});
 });
+
 
 const toggleMicBtn = document.getElementById("toggleMicBtn");
 let isMicMuted = false;
@@ -1406,13 +1446,36 @@ function sendMessage(e) {
     const msg = document.getElementById("messageInput").value.trim();
     if (!msg) return;
 
+    const color = getRandomColor(); // 🎨 couleur aléatoire
+
     socket.emit("chat-message", {
         pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
-        message: msg
+        message: msg,
+        color: color
     });
 
     document.getElementById("messageInput").value = '';
 }
+
+
+// === COULEUR ALÉATOIRE POUR LES MESSAGES ===
+// === COULEUR ALÉATOIRE POUR LES MESSAGES (haute visibilité) ===
+function getRandomColor() {
+    const colors = [
+        "#ff1744", // rouge néon
+        "#00e5ff", // cyan vif
+        "#00ff6a", // vert fluo
+        "#ffea00", // jaune vif
+        "#d500f9", // violet éclatant
+        "#ff6d00", // orange profond
+        "#2979ff", // bleu saturé
+        "#f50057", // rose punchy
+        "#76ff03", // vert lime
+        "#18ffff"  // turquoise clair
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
 
 /* === PREVIEW IMAGES === */
 function previewImages(event) {
