@@ -383,6 +383,40 @@ label {
     50% { opacity: 0.9; }
     100% { opacity: 0.5; }
 }
+
+.show-status-btn {
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  padding: 0.6rem 1.4rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  color: white;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
+
+/* 🔓 Mode public */
+.show-status-btn.public {
+  background: linear-gradient(135deg, #28a745, #34d058);
+  animation: pulsePublic 2s infinite;
+}
+
+@keyframes pulsePublic {
+  0%, 100% { box-shadow: 0 0 10px #28a745; }
+  50% { box-shadow: 0 0 25px #34d058; }
+}
+
+/* 🔒 Mode privé */
+.show-status-btn.private {
+  background: linear-gradient(135deg, #ff1744, #d50000);
+  animation: pulsePrivate 1.5s infinite;
+}
+
+@keyframes pulsePrivate {
+  0%, 100% { box-shadow: 0 0 10px #ff1744; }
+  50% { box-shadow: 0 0 25px #ff5252; }
+}
+
   </style>
 </head>
 <body>
@@ -650,6 +684,12 @@ label {
 
   <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
     <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
+    <div id="showStatusContainer" class="text-center my-3">
+    <button id="showStatusBtn" class="btn show-status-btn public">
+        🔓 Public
+    </button>
+</div>
+
     <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
     <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
 <div id="liveSection" style="display:none;">
@@ -1274,6 +1314,34 @@ socket.on("surprise-sent", (data) => {
     createTokenBubble(`Surprise ${data.emoji}`, data.cost, false);
 });
 
+const showStatusBtn = document.getElementById('showStatusBtn');
+
+  function setShowStatus(isPrivate, pseudo = null) {
+    if (isPrivate) {
+      showStatusBtn.textContent = `🔒 En privée ${pseudo ? 'avec ' + pseudo : ''}`;
+      showStatusBtn.classList.remove('public');
+      showStatusBtn.classList.add('private');
+    } else {
+      showStatusBtn.textContent = '🔓 Public';
+      showStatusBtn.classList.remove('private');
+      showStatusBtn.classList.add('public');
+    }
+  }
+
+  // 🟢 Par défaut
+  setShowStatus(false);
+
+  // 🛰️ Quand un modèle ou client passe en show privé
+  socket.on("switch-to-private", (data) => {
+    setShowStatus(true, data?.pseudo);
+    console.log("🔒 Le show est passé en privé :", data);
+  });
+
+  // 🛰️ Quand le show redevient public
+  socket.on("cancel-private", () => {
+    setShowStatus(false);
+    console.log("🔓 Le show est redevenu public");
+  });
 
 socket.on("chat-message", (data) => {
     const chatWrapper = document.querySelector(".chat-wrapper");
