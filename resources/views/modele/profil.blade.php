@@ -1344,17 +1344,23 @@ const showStatusBtn = document.getElementById('showStatusBtn');
   });
 
 socket.on("chat-message", (data) => {
-    const chatWrapper = document.querySelector(".chat-wrapper");
-    if (chatWrapper) {
-        const bubble = document.createElement("div");
-        bubble.classList.add("chat-bubble");
-        bubble.style.color = data.color || "#fff"; // 🎨 couleur aléatoire reçue
-        bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
-        chatWrapper.appendChild(bubble);
-        chatWrapper.scrollTop = chatWrapper.scrollHeight;
-    }
-    if (soundMessage) soundMessage.play().catch(() => {});
+  const chatWrapper = document.querySelector(".chat-wrapper");
+  if (chatWrapper) {
+      const bubble = document.createElement("div");
+      bubble.classList.add("chat-bubble");
+      bubble.style.color = data.color || "#fff";
+      bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+      chatWrapper.appendChild(bubble);
+      chatWrapper.scrollTop = chatWrapper.scrollHeight;
+  }
+
+  // 🔇 Ne joue le son que si le message vient d’un client
+  const modelePrenom = "{{ $modele->prenom ?? '' }}".trim();
+  if (soundMessage && data.pseudo.trim() !== modelePrenom) {
+      soundMessage.play().catch(() => {});
+  }
 });
+
 
 
 const toggleMicBtn = document.getElementById("toggleMicBtn");
