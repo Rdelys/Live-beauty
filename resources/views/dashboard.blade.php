@@ -743,7 +743,7 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
             const link = document.createElement('a');
             link.classList.add('d-block', 'mb-1', 'fw-bold');
 
-            if (model.prive === 1) {
+            if (model.prive) {
                 // 🟢 Show privé
                 link.textContent = `🟢 ${model.prenom} (en show privé)`;
                 link.style.color = 'limegreen';
