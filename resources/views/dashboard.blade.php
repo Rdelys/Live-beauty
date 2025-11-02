@@ -756,9 +756,9 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
                     modal.show();
                 });
             } else {
-                // 🔴 Show public
-                link.textContent = `🔴 ${model.prenom}`;
-                link.style.color = '#ff4d4d';
+                // 🟢 Show public
+                link.textContent = `🟢 ${model.prenom}`;
+                link.style.color = 'limegreen';
                 link.href = `/live/${model.id}`;
             }
 
