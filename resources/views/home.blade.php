@@ -687,24 +687,42 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
         }
 
         async function fetchLiveModels() {
-    try {
-      const response = await fetch('/api/live/active'); // à créer en Laravel côté backend
-      const lives = await response.json();
+          try {
+              const response = await fetch('/api/live/active');
+              const lives = await response.json();
 
-      const liveContainer = document.getElementById('activeLives');
-      liveContainer.innerHTML = '';
+              const liveContainer = document.getElementById('activeLives');
+              liveContainer.innerHTML = '';
 
-      lives.forEach(model => {
-        const link = document.createElement('a');
-        link.href = `/live/${model.id}`;
-        link.textContent = `🔴 ${model.prenom}`;
-        link.classList.add('d-block', 'mb-1');
-        liveContainer.appendChild(link);
-      });
-    } catch (e) {
-      console.error("Erreur de chargement des lives", e);
-    }
-  }
+              lives.forEach(model => {
+                  const link = document.createElement('a');
+                  link.classList.add('d-block', 'mb-1', 'fw-bold');
+
+                  if (model.prive) {
+                      // 🟢 Show privé
+                      link.textContent = `🟢 ${model.prenom} (en show privé)`;
+                      link.style.color = 'limegreen';
+                      link.href = '#'; // empêche la navigation
+
+                      link.addEventListener('click', (e) => {
+                          e.preventDefault();
+                          // 👉 ouvre le modal
+                          const modal = new bootstrap.Modal(document.getElementById('privateShowModal'));
+                          modal.show();
+                      });
+                  } else {
+                      // 🟢 Show public
+                      link.textContent = `🟢 ${model.prenom}`;
+                      link.style.color = 'limegreen';
+                      link.href = `/live/${model.id}`;
+                  }
+
+                  liveContainer.appendChild(link);
+              });
+          } catch (e) {
+              console.error("Erreur de chargement des lives", e);
+          }
+      }
 
   fetchLiveModels();
   setInterval(fetchLiveModels, 15000); // actualisation toutes les 15 sec
