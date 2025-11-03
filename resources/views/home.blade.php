@@ -267,16 +267,44 @@ text-shadow: 0 0 6px #66ff66, 0 0 10px #66ff66; /* Vert clair lumineux autour du
 .media-container {
   position: relative;
   width: 100%;
-  height: 300px;
+  aspect-ratio: 4 / 5;
+  max-height: 260px;
+  border-radius: var(--border-radius);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Arrière-plan flouté */
+.media-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--photo-bg);
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px) brightness(0.6);
+  transform: scale(1.2);
+  z-index: 0;
+}
+
+/* Image principale */
 .model-photo {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
+  object-fit: contain;
+  object-position: center;
+  border-radius: inherit;
+  transition: transform 0.3s ease-in-out;
 }
+
+.model-card:hover .model-photo {
+  transform: scale(1.03);
+}
+
 
 .model-video {
   position: absolute;
@@ -1025,5 +1053,16 @@ document.addEventListener("dragstart", function(e) {
     }
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".media-container").forEach(container => {
+    const img = container.querySelector(".model-photo");
+    if (img) {
+      container.style.setProperty("--photo-bg", `url('${img.src}')`);
+    }
+  });
+});
+</script>
+
 </body>
 </html>
