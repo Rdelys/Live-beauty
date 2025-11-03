@@ -256,6 +256,69 @@ body {
   color: var(--accent);
 }
 
+/* 💖 STYLE PREMIUM DU COEUR FAVORIS */
+.btn-favori {
+  position: relative;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+  z-index: 10;
+}
+
+.btn-favori i {
+  font-size: 1.6rem;
+  color: #bbb;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+  transition: all 0.35s ease;
+}
+
+.btn-favori:hover i {
+  color: #ff2a2a;
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
+}
+
+/* ❤️ Cœur activé (en favori) */
+.btn-favori.active i {
+  color: #ff003c;
+  text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+  animation: pulseHeart 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseHeart {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 16px rgba(255, 100, 100, 1));
+  }
+}
+
+/* 💫 Effet de halo autour du cœur (premium) */
+.btn-favori::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38px;
+  height: 38px;
+  background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, rgba(255,0,0,0) 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  border-radius: 50%;
+  transition: all 0.3s ease-out;
+  pointer-events: none;
+}
+
+.btn-favori.active::after {
+  transform: translate(-50%, -50%) scale(1.2);
+  opacity: 1;
+}
+
 /* Flous payants */
 .blur-wrapper { position: relative; overflow: hidden; display: block; }
 .blur-wrapper img,
@@ -428,16 +491,16 @@ body {
     <div class="col-md-4 card-item fille">
       <div class="model-card card-default">
         {{-- Bouton favoris --}}
-        <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST" class="position-absolute top-0 end-0 m-2 z-3">
-          @csrf
-          <button type="submit" class="btn btn-sm {{ Auth::user()->favoris->contains($modele->id) ? 'btn-warning' : 'btn-outline-light' }}">
-            @if(Auth::user()->favoris->contains($modele->id))
-              <i class="fas fa-heart text-danger"></i>
-            @else
-              <i class="far fa-heart text-white"></i>
-            @endif
-          </button>
-        </form>
+        <form action="{{ route('favoris.toggle', $modele->id) }}" method="POST"
+      class="position-absolute top-0 end-0 m-2 z-3">
+        @csrf
+        <button type="submit"
+                class="btn-favori {{ Auth::user()->favoris->contains($modele->id) ? 'active' : '' }}"
+                title="{{ Auth::user()->favoris->contains($modele->id) ? 'Retirer des favoris' : 'Ajouter aux favoris' }}">
+          <i class="{{ Auth::user()->favoris->contains($modele->id) ? 'fas' : 'far' }} fa-heart"></i>
+        </button>
+      </form>
+
 
         {{-- Lien vers le profil --}}
         <a href="{{ route('modele.private', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
@@ -1320,6 +1383,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (img) {
       container.style.setProperty("--photo-bg", `url('${img.src}')`);
     }
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.btn-favori').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const icon = btn.querySelector('i');
+      icon.classList.add('fa-bounce');
+      setTimeout(() => icon.classList.remove('fa-bounce'), 600);
+    });
   });
 });
 </script>
