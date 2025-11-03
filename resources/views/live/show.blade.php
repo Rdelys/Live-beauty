@@ -815,6 +815,11 @@ video {
   background: linear-gradient(90deg, #f50057, #ff80ab);
 }
 
+@keyframes pulsePause {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+}
+
   </style>
 </head>
 <body>
@@ -870,6 +875,31 @@ video {
 
 
   <video id="liveVideo" autoplay playsinline controls></video>
+  <!-- ✅ Overlay Premium quand la vidéo est en pause -->
+<div id="pauseOverlay" style="
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  color: #ff4081;
+  font-size: 1.8rem;
+  font-weight: 600;
+  z-index: 2000;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+">
+  <div style="animation: pulsePause 1.5s infinite;">
+    🔒 Live en pause
+  </div>
+  <div style="font-size:1rem; color:#fff; margin-top:8px; opacity:0.8;">
+    Touchez l’écran pour reprendre
+  </div>
+</div>
+
     @auth
      <!-- Default tokens icon -->
       <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
@@ -2100,6 +2130,27 @@ if (backBtnEl) {
   });
 }
 
+// === 🎬 Gestion du message premium quand la vidéo est mise en pause ===
+const pauseOverlay = document.getElementById("pauseOverlay");
+
+// Quand la vidéo est mise en pause
+video.addEventListener("pause", () => {
+  // N'afficher que si la vidéo a déjà été démarrée une première fois
+  if (video.currentTime > 0 && !video.ended) {
+    pauseOverlay.style.display = "flex";
+  }
+});
+
+// Quand la vidéo repart
+video.addEventListener("play", () => {
+  pauseOverlay.style.display = "none";
+});
+
+// Reprendre la vidéo si on clique sur le texte
+pauseOverlay.addEventListener("click", () => {
+  video.play().catch(() => {});
+  pauseOverlay.style.display = "none";
+});
 
 </script>
 
