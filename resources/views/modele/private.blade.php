@@ -171,6 +171,54 @@ ul.list-unstyled li {
     color: white;
     cursor: pointer;
 }
+
+/* === LIGHTBOX AGRANDISSEMENT === */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+  cursor: zoom-out;
+}
+
+.lightbox.show {
+  display: flex;
+}
+
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 40px rgba(255,255,255,0.2);
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 35px;
+  font-size: 2.5rem;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10000;
+  transition: transform 0.2s ease;
+}
+.lightbox-close:hover {
+  transform: scale(1.2);
+  color: #ff0000;
+}
+
 </style>
 
 <div class="container modele-container py-5">
@@ -657,7 +705,41 @@ btn.style.color = '#fff';
     });
   });
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImage");
+  const closeBtn = document.querySelector(".lightbox-close");
+
+  // ✅ Ouvre en plein écran les photos non floutées et gratuites
+  document.querySelectorAll(".gallery-item img").forEach(img => {
+    const style = img.getAttribute("style") || "";
+    const isFlou = style.includes("blur(");
+    const overlay = img.closest(".gallery-item")?.querySelector(".buy-overlay");
+    const isPayant = !!overlay;
+
+    if (!isFlou && !isPayant) {
+      img.addEventListener("click", () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add("show");
+      });
+    }
+  });
+
+  // ✅ Fermer le lightbox (clic fond noir ou croix)
+  lightbox.addEventListener("click", e => {
+    if (e.target === lightbox || e.target === closeBtn) {
+      lightbox.classList.remove("show");
+      lightboxImg.src = "";
+    }
+  });
+});
 </script>
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox">
+  <span class="lightbox-close">&times;</span>
+  <img id="lightboxImage" src="" alt="Agrandissement photo">
+</div>
 
 
 @endsection
