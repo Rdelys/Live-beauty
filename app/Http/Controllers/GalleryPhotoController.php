@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\GalleryPhoto;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class GalleryPhotoController extends Controller
 {
@@ -23,6 +24,10 @@ class GalleryPhotoController extends Controller
         foreach ($request->file('photos') as $photo) {
             $path = $photo->store('gallery_photos', 'public');
 
+            // calcule position suivante pour ce modèle
+            $max = GalleryPhoto::where('modele_id', $modeleId)->max('position_photo') ?? 0;
+            $position = $max + 1;
+
             GalleryPhoto::create([
                 'modele_id' => $modeleId,
                 'photo_url' => $path,
@@ -30,6 +35,7 @@ class GalleryPhotoController extends Controller
                 'payant' => $request->input('payant', 0),
                 'prix' => $request->input('prix', 0),
                 'type_flou' => $request->input('type_flou'),
+                'position_photo' => $position,
             ]);
         }
 
@@ -50,6 +56,9 @@ class GalleryPhotoController extends Controller
         foreach ($request->file('videos') as $video) {
             $path = $video->store('gallery_videos', 'public');
 
+            $max = GalleryPhoto::where('modele_id', $modeleId)->max('position_photo') ?? 0;
+            $position = $max + 1;
+
             GalleryPhoto::create([
                 'modele_id' => $modeleId,
                 'photo_url' => null,
@@ -57,7 +66,9 @@ class GalleryPhotoController extends Controller
                 'payant' => $request->input('payant', 0),
                 'prix' => $request->input('prix', 0),
                 'type_flou' => $request->input('type_flou'),
+                'position_photo' => $position,
             ]);
+
         }
 
         return back()->with('success', 'Vidéos ajoutées avec succès !');
@@ -76,6 +87,17 @@ class GalleryPhotoController extends Controller
         }
 
         $galleryPhoto->delete();
+        // après suppression -> réindexe les positions pour ce modele
+        $modeleId = $galleryPhoto->modele_id;
+        $photos = GalleryPhoto::where('modele_id', $modeleId)
+            ->orderBy('position_photo', 'asc')
+            ->get();
+
+        $pos = 1;
+        foreach ($photos as $p) {
+            $p->position_photo = $pos++;
+            $p->saveQuietly();
+        }
 
         return back()->with('success', 'Élément supprimé avec succès.');
     }
@@ -105,6 +127,25 @@ public function update(Request $request, $id)
     ]);
 
     return redirect()->back()->with('success', 'Élément mis à jour avec succès !');
+}
+
+public function reorder(Request $request)
+{
+    $data = $request->validate([
+        'order' => 'required|array',
+        'order.*.id' => 'required|integer|exists:gallery_photos,id',
+        'order.*.position_photo' => 'required|integer|min:1',
+    ]);
+
+    // Option A: simple update dans une transaction
+    DB::transaction(function () use ($data) {
+        foreach ($data['order'] as $item) {
+            \App\Models\GalleryPhoto::where('id', $item['id'])
+                ->update(['position_photo' => $item['position_photo']]);
+        }
+    });
+
+    return response()->json(['success' => true]);
 }
 
 }

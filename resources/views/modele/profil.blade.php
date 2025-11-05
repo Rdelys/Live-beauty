@@ -600,12 +600,12 @@ label {
   </form>
 
   <!-- Galerie existante -->
-  <div class="row">
-    @foreach($modele->galleryPhotos->whereNotNull('photo_url') as $photo)
-      <div class="col-6 col-md-3 mb-4">
-        <div class="card bg-dark text-white border-light">
-          <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
-          <div class="card-body text-center">
+  <div class="row gallery-sortable" id="gallerySortable">
+  @foreach($modele->galleryPhotos->whereNotNull('photo_url')->sortBy('position_photo') as $photo)
+    <div class="col-6 col-md-3 mb-4 sortable-item" data-id="{{ $photo->id }}">
+      <div class="card bg-dark text-white border-light">
+        <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
+        <div class="card-body text-center">
             @if($photo->payant)
               <span class="badge bg-danger">Payant</span>
               <p class="mb-1">💰 {{ $photo->prix }} Jetons</p>
@@ -614,6 +614,7 @@ label {
               <span class="badge bg-success">Gratuit</span>
             @endif
 <!-- Bouton Modifier -->
+           <small class="text-muted d-block">Ordre : <span class="photo-position">{{ $photo->position_photo }}</span></small>
             <button class="btn btn-sm btn-warning mt-2" 
                     data-bs-toggle="modal" 
                     data-bs-target="#editGalleryModal" 
@@ -630,11 +631,11 @@ label {
               @method('DELETE')
               <button class="btn btn-sm btn-danger mt-2">🗑️ Supprimer</button>
             </form>
-          </div>
-        </div>
+           </div>
       </div>
-    @endforeach
-  </div>
+    </div>
+  @endforeach
+</div>
 
   @if($modele->galleryPhotos->whereNotNull('photo_url')->isEmpty())
     <p class="text-muted text-center">Aucune photo dans la galerie.</p>
@@ -2203,6 +2204,53 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<!-- SortableJS (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('gallerySortable');
+  if (!el) return;
+
+  const sortable = new Sortable(el, {
+    animation: 180,
+    handle: '.card', // la poignée (ou précise `.card-img-top` si tu veux)
+    draggable: '.sortable-item',
+    onEnd: function (evt) {
+      // rebuild order
+      const order = [];
+      document.querySelectorAll('.sortable-item').forEach((item, index) => {
+        order.push({ id: item.dataset.id, position_photo: index + 1 });
+        // update UI immediate
+        const posSpan = item.querySelector('.photo-position');
+        if (posSpan) posSpan.textContent = index + 1;
+      });
+
+      // POST to server
+      fetch("{{ route('gallery-photo.reorder') }}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ order })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) {
+          console.error('Erreur reorder:', data);
+          alert('Impossible d\'enregistrer l\'ordre. Voir console.');
+        }
+      })
+      .catch(err => {
+        console.error('Fetch reorder error:', err);
+        alert('Erreur réseau lors de l\'enregistrement de l\'ordre.');
+      });
+    }
+  });
+});
+</script>
 
 </body>
 </html>

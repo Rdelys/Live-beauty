@@ -294,3 +294,5 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/admin/historique-jetons', [App\Http\Controllers\JetonController::class, 'historiqueJetons'])
     ->name('admin.historique-jetons');
+Route::post('/gallery-photo/reorder', [GalleryPhotoController::class, 'reorder'])
+    ->name('gallery-photo.reorder');

@@ -10,13 +10,15 @@ class GalleryPhoto extends Model
     use HasFactory;
 
     protected $fillable = [
-        'modele_id',
-        'photo_url',
-        'video_url',   // <-- ajouté
-        'payant',
-        'prix',
-        'type_flou'
-    ];
+    'modele_id',
+    'photo_url',
+    'video_url',
+    'payant',
+    'prix',
+    'type_flou',
+    'position_photo'   // <- ajouté
+];
+
 
     public function modele()
     {
