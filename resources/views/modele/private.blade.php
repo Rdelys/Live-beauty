@@ -347,10 +347,18 @@ ul.list-unstyled li {
 @php
     use App\Models\GalleryPhoto;
 
-    $galleryItems = GalleryPhoto::where('modele_id', $modele->id)->get();
-    $photos = $galleryItems->whereNotNull('photo_url');
-    $videos = $galleryItems->whereNotNull('video_url');
+    // ✅ On trie par position_photo (ordre croissant)
+    $photos = GalleryPhoto::where('modele_id', $modele->id)
+                ->whereNotNull('photo_url')
+                ->orderBy('position_photo', 'asc')
+                ->get();
+
+    $videos = GalleryPhoto::where('modele_id', $modele->id)
+                ->whereNotNull('video_url')
+                ->orderBy('position_photo', 'asc')
+                ->get();
 @endphp
+
 
 <style>
 /* --- Styles améliorés pour le bouton Acheter --- */

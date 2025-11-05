@@ -314,10 +314,19 @@
 @php
     use App\Models\GalleryPhoto;
 
-    $galleryItems = GalleryPhoto::where('modele_id', $modele->id)->get();
-    $photos = $galleryItems->whereNotNull('photo_url');
-    $videos = $galleryItems->whereNotNull('video_url');
+    // ✅ Photos triées selon position_photo (ordre croissant)
+    $photos = GalleryPhoto::where('modele_id', $modele->id)
+                ->whereNotNull('photo_url')
+                ->orderBy('position_photo', 'asc')
+                ->get();
+
+    // ✅ Vidéos triées selon position_photo
+    $videos = GalleryPhoto::where('modele_id', $modele->id)
+                ->whereNotNull('video_url')
+                ->orderBy('position_photo', 'asc')
+                ->get();
 @endphp
+
 
 <style>
 /* --- Styles améliorés pour le bouton Acheter --- */
