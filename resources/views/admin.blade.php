@@ -12,6 +12,9 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     rel="stylesheet"
   />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
   <style>
    /* GLOBAL */
     body {
@@ -776,8 +779,8 @@ footer {
 
 <div class="mb-3">
   <label class="form-label">Langues parlées</label>
-  <select name="langue" class="form-control">
-    <option value="FR">Francais</option>
+  <select id="langue" name="langue[]" class="form-control" multiple>
+    <option value="FR">Français</option>
     <option value="EN">Anglais</option>
     <option value="DE">Allemand</option>
     <option value="ES">Espagnol</option>
@@ -786,6 +789,7 @@ footer {
     <option value="NL">Néerlandais</option>
   </select>
 </div>
+
 
 
 <div class="mb-3">
@@ -1540,6 +1544,17 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-nom').value = nom;
     document.getElementById('edit-description').value = description;
     document.getElementById('edit-nombre').value = nombre;
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const langueSelect = document.getElementById('langue');
+  new Choices(langueSelect, {
+    removeItemButton: true,
+    placeholderValue: 'Sélectionnez les langues',
+    searchPlaceholderValue: 'Rechercher...',
+    shouldSort: false,
   });
 });
 </script>
