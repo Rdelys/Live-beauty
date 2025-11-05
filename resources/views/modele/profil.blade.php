@@ -372,6 +372,26 @@ label {
   }
 }
 
+/* Badge d'ordre sur les photos */
+.photo-order-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+
 #typingIndicator {
     opacity: 0.7;
     font-size: 0.9em;
@@ -603,9 +623,11 @@ label {
   <div class="row gallery-sortable" id="gallerySortable">
   @foreach($modele->galleryPhotos->whereNotNull('photo_url')->sortBy('position_photo') as $photo)
     <div class="col-6 col-md-3 mb-4 sortable-item" data-id="{{ $photo->id }}">
-      <div class="card bg-dark text-white border-light">
-        <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
-        <div class="card-body text-center">
+      <div class="card bg-dark text-white border-light position-relative">
+  <!-- 🏷️ Badge d'ordre -->
+  <div class="photo-order-badge">{{ $photo->position_photo }}</div>
+  <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
+ <div class="card-body text-center">
             @if($photo->payant)
               <span class="badge bg-danger">Payant</span>
               <p class="mb-1">💰 {{ $photo->prix }} Jetons</p>
@@ -614,7 +636,6 @@ label {
               <span class="badge bg-success">Gratuit</span>
             @endif
 <!-- Bouton Modifier -->
-           <small class="text-muted d-block">Ordre : <span class="photo-position">{{ $photo->position_photo }}</span></small>
             <button class="btn btn-sm btn-warning mt-2" 
                     data-bs-toggle="modal" 
                     data-bs-target="#editGalleryModal" 
@@ -2222,8 +2243,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.sortable-item').forEach((item, index) => {
         order.push({ id: item.dataset.id, position_photo: index + 1 });
         // update UI immediate
-        const posSpan = item.querySelector('.photo-position');
-        if (posSpan) posSpan.textContent = index + 1;
+        // met à jour badge et texte "Ordre"
+const posSpan = item.querySelector('.photo-position');
+const badge = item.querySelector('.photo-order-badge');
+if (posSpan) posSpan.textContent = index + 1;
+if (badge) badge.textContent = index + 1;
+
       });
 
       // POST to server
