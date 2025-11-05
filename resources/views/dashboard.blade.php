@@ -1,478 +1,902 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIVE BEAUTY - Tableau de bord</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <style>
+  <style>
+    /* 💎 MODAL PREMIUM — STYLE NETFLIX COMPACT & ÉLÉGANT */
+    .premium-modal {
+      background: rgba(15, 15, 15, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 0.9rem;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.25);
+      color: #fff;
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      padding: 1.6rem;
+      animation: fadeInUp 0.4s ease-out;
+      max-width: 580px;
+      margin: auto;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+    }
 
-/* 💎 STYLE MODAL PREMIUM */
-.premium-modal {
-  background: #0d0d0d;
-  border: 1px solid #ff0000;
-  border-radius: 20px;
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
-  color: #fff;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: 0.5px;
-  animation: fadeInUp 0.4s ease-out;
-}
+    .premium-modal .modal-title {
+      color: var(--accent);
+      text-align: center;
+      text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
 
-.premium-modal .modal-title {
-  color: #ff2a2a;
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
-}
+    .glow-circle {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      margin: 0.8rem auto 1.2rem;
+      box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+      animation: pulseGlow 1.5s infinite alternate;
+      font-size: 0.85rem;
+    }
 
-.glow-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 2px solid #ff2a2a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ff2a2a;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
-  animation: pulseGlow 1.5s infinite alternate;
-}
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 8px rgba(255, 0, 0, 0.4); }
+      to { box-shadow: 0 0 18px rgba(255, 0, 0, 0.9); }
+    }
 
-@keyframes pulseGlow {
-  from { box-shadow: 0 0 10px rgba(255, 0, 0, 0.4); }
-  to { box-shadow: 0 0 25px rgba(255, 0, 0, 0.9); }
-}
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    /* 🎨 VARIABLES GLOBALES */
+    :root {
+      --primary: #e50914;
+      --primary-light: #ff1f3d;
+      --dark-bg: #0b0b0b;
+      --card-bg: #181818;
+      --text-light: #f5f5f5;
+      --accent: #ff0000;
+      --border-radius: 0.9rem;
+      --transition: all 0.3s ease;
+    }
 
-:root {
-  --primary: #e91e63;
-  --primary-light: #ff80ab;
-  --dark-bg: #121212;
-  --card-bg: #1e1e1e;
-  --text-light: #f5f5f5;
-  --accent: gold;
-  --border-radius: 1rem;
-}
+    /* 🌑 BODY */
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      font-size: 0.85rem;
+    }
 
-body {
-  background-color: var(--dark-bg);
-  color: var(--text-light);
-  font-family: 'Segoe UI', sans-serif;
-}
+    /* 🔝 NAVBAR */
+    .navbar {
+      background: linear-gradient(90deg, #a40010, var(--primary));
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+      padding: 0.5rem 1rem;
+      height: 58px;
+      display: flex;
+      align-items: center;
+    }
 
-/* Navbar */
-.navbar {
-  background: linear-gradient(90deg, var(--primary), #c2185b);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-}
-.navbar-brand {
-  font-size: 2rem;
-  font-weight: bold;
-  letter-spacing: 2px;
-}
-.navbar-brand .live { color: #fff; }
-.navbar-brand .beauty { color: #000; }
-.nav-link {
-  color: white !important;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-.nav-link:hover { color: var(--accent) !important; }
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-/* Sidebar */
-.sidebar {
-  background-color: #181818;
-  padding: 2rem 1rem;
-  min-height: 100vh;
-  border-right: 1px solid #333;
-  overflow-y: auto;
-}
-.sidebar h5 {
-  color: var(--primary-light);
-  text-transform: uppercase;
-  margin-bottom: 1.2rem;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-}
-.sidebar a {
-  display: block;
-  color: #ccc;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #292929;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-.sidebar a:hover {
-  color: var(--primary-light);
-  padding-left: 8px;
-}
+    /* Le mot .beauty reste grand et visible */
+    .navbar-brand .beauty {
+      color: #000;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-weight: 700;
+      font-size: 1.8rem;
+      line-height: 1.2;
+    }
 
-/* Boutons */
-.btn-genre {
-  background-color: var(--primary);
-  color: white;
-  font-weight: bold;
-  width: 100%;
-  border-radius: 0.7rem;
-  transition: background 0.3s ease;
-}
-.btn-genre:hover { background-color: var(--primary-light); }
+    .navbar-brand .live {
+      color: #fff;
+      text-shadow: 0 0 6px var(--accent);
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
 
-/* 🖼️ Cartes Modèle */
-.model-card {
-  background-color: var(--card-bg);
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 0 10px rgba(255, 20, 147, 0.15);
-}
-.model-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
-}
+    .nav-link {
+      color: var(--text-light) !important;
+      font-weight: 500;
+      font-size: 0.82rem;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.25px;
+      padding: 0.4rem 0.6rem !important;
+    }
 
-/* 🌟 Fond flouté uniforme */
-.media-container,
-.card-photo {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  border-radius: var(--border-radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #111;
-}
-.media-container::before,
-.card-photo::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--photo-bg);
-  background-size: cover;
-  background-position: center;
-  filter: blur(15px) brightness(0.6);
-  transform: scale(1.2);
-  z-index: 0;
-}
+    .nav-link:hover {
+      color: var(--accent) !important;
+      transform: scale(1.05);
+    }
 
-/* Image */
-.model-photo {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  background: transparent !important;
-  transition: transform 0.3s ease-in-out;
-  pointer-events: none; /* ✅ permet de cliquer sur les boutons au-dessus */
-}
+    /* Icônes et boutons à droite */
+    .nav-icons {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
 
-.card-photo .open-gallery,
-.card-photo .btn {
-  position: relative;
-  z-index: 5; /* ✅ au-dessus de la photo */
-}
+    .nav-icons .icon {
+      font-size: 1rem;
+      color: #fff;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .nav-icons .icon:hover {
+      color: var(--accent);
+      transform: scale(1.15);
+    }
+
+    /* Bouton Achat Jetons */
+    .btn-achat {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 2rem;
+      padding: 0.45rem 1rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-achat:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Jetons */
+    .jetons {
+      font-weight: 600;
+      color: #ffd966;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 📚 SIDEBAR */
+    .sidebar {
+      background-color: var(--card-bg);
+      padding: 1.4rem 1rem;
+      min-height: 100vh;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      overflow-y: auto;
+      box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
+      font-size: 0.85rem;
+    }
+
+    .sidebar h5 {
+      color: var(--primary-light);
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #bdbdbd;
+      padding: 0.45rem 0.7rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 0.85rem;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 0, 0, 0.08);
+      color: var(--primary-light);
+      transform: translateX(5px);
+    }
+
+    /* 🎬 BOUTONS */
+    .btn-genre {
+      background-color: var(--primary);
+      color: #fff;
+      font-weight: 500;
+      width: 100%;
+      border-radius: 0.6rem;
+      transition: var(--transition);
+      border: none;
+      box-shadow: 0 0 8px rgba(255, 0, 0, 0.15);
+      font-size: 0.8rem;
+      padding: 0.4rem 0.7rem;
+    }
+
+    .btn-genre:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+    }
+
+    /* 💃 CARTES MODÈLE */
+    .model-card {
+      border-radius: var(--border-radius);
+      background-color: var(--card-bg);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .model-card:hover {
+      transform: translateY(-4px) scale(1.015);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.25);
+    }
+
+    /* 🧱 RESPONSIVE DESIGN */
+    @media (max-width: 992px) {
+      .navbar {
+        height: auto;
+        padding: 0.6rem 1rem;
+      }
+      .navbar-brand {
+        font-size: 1.4rem;
+      }
+      .navbar-brand .beauty {
+        font-size: 1.5rem;
+      }
+      .nav-link {
+        font-size: 0.8rem;
+      }
+      .btn-achat {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+      }
+      .sidebar {
+        min-height: auto;
+        padding: 1.1rem;
+      }
+      .premium-modal {
+        padding: 1.2rem;
+        max-width: 90%;
+      }
+      .premium-modal .modal-title {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .navbar-brand {
+        font-size: 1.2rem;
+      }
+      .navbar-brand .beauty {
+        font-size: 1.3rem;
+      }
+      .nav-icons {
+        gap: 0.5rem;
+      }
+      .sidebar h5 {
+        text-align: center;
+      }
+      .sidebar a {
+        text-align: center;
+        padding: 0.4rem;
+      }
+      .glow-circle {
+        width: 55px;
+        height: 55px;
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .navbar {
+        padding: 0.4rem 0.8rem;
+      }
+      .premium-modal {
+        border-radius: 0.7rem;
+        padding: 0.8rem;
+      }
+      .modal-title {
+        font-size: 1rem;
+      }
+      body {
+        font-size: 0.8rem;
+      }
+    }
 
 
-.model-card:hover .model-photo,
-.card-photo:hover .model-photo {
-  transform: scale(1.04);
-}
+    /* 🌟 FOND FLOUTÉ UNIFORME (STYLE PREMIUM COHÉRENT) */
+    .media-container,
+    .card-photo {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d0d0d;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
+      transition: var(--transition);
+    }
 
-/* Vidéo au hover */
-.model-video {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  z-index: 2;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-}
-.model-video video,
-.model-video iframe {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.media-container:hover .model-video { opacity: 1; }
+    .media-container::before,
+    .card-photo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: var(--photo-bg);
+      background-size: cover;
+      background-position: center;
+      filter: blur(15px) brightness(0.55);
+      transform: scale(1.2);
+      z-index: 0;
+      transition: filter 0.3s ease;
+    }
 
-/* Nom + statut */
-.status-name {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  padding: 5px 10px;
-  border-radius: 20px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
+    .card-photo:hover::before,
+    .media-container:hover::before {
+      filter: blur(18px) brightness(0.65);
+    }
 
-/* Galerie modale */
-.carousel-item img,
-.carousel-item video {
-  object-fit: contain !important;
-  background: rgba(0,0,0,0.7);
-  max-height: 100vh;
-  width: 100%;
-}
+    /* 📸 IMAGE DU MODÈLE */
+    .model-photo {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      background: transparent !important;
+      transition: transform 0.35s ease-in-out;
+      pointer-events: none; /* ✅ clics possibles sur les boutons au-dessus */
+    }
 
-/* Galerie : boutons */
-.open-gallery-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-weight: bold;
-  font-size: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-.open-gallery-btn:hover {
-  transform: scale(1.1);
-  color: var(--accent);
-}
+    .card-photo .open-gallery,
+    .card-photo .btn {
+      position: relative;
+      z-index: 5; /* ✅ au-dessus de la photo */
+    }
 
-/* 💖 STYLE PREMIUM DU COEUR FAVORIS */
-.btn-favori {
-  position: relative;
-  background: transparent;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  transition: transform 0.25s ease;
-  z-index: 10;
-}
+    .model-card:hover .model-photo,
+    .card-photo:hover .model-photo {
+      transform: scale(1.05);
+    }
 
-.btn-favori i {
-  font-size: 1.6rem;
-  color: #bbb;
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
-  transition: all 0.35s ease;
-}
+    /* 🎥 VIDÉO AU SURVOL */
+    .model-video {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      z-index: 2;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
 
-.btn-favori:hover i {
-  color: #ff2a2a;
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
-}
+    .model-video video,
+    .model-video iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-/* ❤️ Cœur activé (en favori) */
-.btn-favori.active i {
-  color: #ff003c;
-  text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-  animation: pulseHeart 1.2s infinite ease-in-out;
-}
+    .media-container:hover .model-video {
+      opacity: 1;
+    }
 
-@keyframes pulseHeart {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
-  }
-  50% {
-    transform: scale(1.2);
-    filter: drop-shadow(0 0 16px rgba(255, 100, 100, 1));
-  }
-}
+    /* 💬 NOM + STATUT */
+    .status-name {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
 
-/* 💫 Effet de halo autour du cœur (premium) */
-.btn-favori::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 38px;
-  height: 38px;
-  background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, rgba(255,0,0,0) 70%);
-  transform: translate(-50%, -50%) scale(0);
-  opacity: 0;
-  border-radius: 50%;
-  transition: all 0.3s ease-out;
-  pointer-events: none;
-}
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
 
-.btn-favori.active::after {
-  transform: translate(-50%, -50%) scale(1.2);
-  opacity: 1;
-}
+    /* 🖼️ GALERIE MODALE */
+    .carousel-item img,
+    .carousel-item video {
+      object-fit: contain !important;
+      background: rgba(0, 0, 0, 0.8);
+      max-height: 100vh;
+      width: 100%;
+    }
 
-/* Flous payants */
-.blur-wrapper { position: relative; overflow: hidden; display: block; }
-.blur-wrapper img,
-.blur-wrapper video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: filter 0.35s ease, transform 0.35s ease;
-}
-.blur-wrapper.soft img, .blur-wrapper.soft video { filter: blur(12px); }
-.blur-wrapper.strong img, .blur-wrapper.strong video { filter: blur(35px); }
-.blur-wrapper.hidden img, .blur-wrapper.hidden video {
-  filter: blur(60px);
-  opacity: 0.8;
-}
-.blur-wrapper.pixel img {
-  filter: blur(5px);
-  image-rendering: pixelated;
-  transform: scale(1.1);
-  opacity: 0.9;
-}
+    /* 🎞️ GALERIE : BOUTONS */
+    .open-gallery-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
 
-/* Overlay payant */
-.blur-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 20;
-  background: rgba(0,0,0,0.45);
-  color: #fff;
-  gap: 8px;
-  pointer-events: none;
-}
-.blur-overlay button {
-  pointer-events: auto;
-}
+    .open-gallery-btn:hover {
+      transform: scale(1.1);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+    }
 
-.model-card, .card-photo {
-  width: 100%;
-  max-width: 320px;
-  margin: 0 auto;
-}
-.media-container, .card-photo {
-  aspect-ratio: 4 / 5;
-  height: auto;
-  max-height: 260px;
-}
-.model-photo {
-  object-fit: contain;
-}
+    /* 💖 STYLE PREMIUM DU CŒUR FAVORI */
+    .btn-favori {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      transition: transform 0.25s ease;
+      z-index: 10;
+    }
 
-</style>
+    .btn-favori i {
+      font-size: 1.4rem;
+      color: #bbb;
+      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+      transition: all 0.35s ease;
+    }
 
-</head>
+    .btn-favori:hover i {
+      color: #ff2a2a;
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.8));
+    }
 
+    /* ❤️ ACTIVÉ (EN FAVORI) */
+    .btn-favori.active i {
+      color: #ff003c;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+      animation: pulseHeart 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseHeart {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+      }
+      50% {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 16px rgba(255, 80, 80, 1));
+      }
+    }
+
+    /* 💫 HALO AUTOUR DU CŒUR (EFFET PREMIUM) */
+    .btn-favori::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, rgba(255,0,0,0) 70%);
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      border-radius: 50%;
+      transition: all 0.3s ease-out;
+      pointer-events: none;
+    }
+
+    .btn-favori.active::after {
+      transform: translate(-50%, -50%) scale(1.15);
+      opacity: 1;
+    }
+
+    /* 🔒 CONTENU FLOUTÉ (PAYANT) */
+    .blur-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: block;
+      border-radius: var(--border-radius);
+    }
+
+    .blur-wrapper img,
+    .blur-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: filter 0.35s ease, transform 0.35s ease;
+    }
+
+    .blur-wrapper.soft img,
+    .blur-wrapper.soft video {
+      filter: blur(10px);
+    }
+
+    .blur-wrapper.strong img,
+    .blur-wrapper.strong video {
+      filter: blur(30px);
+    }
+
+    .blur-wrapper.hidden img,
+    .blur-wrapper.hidden video {
+      filter: blur(60px);
+      opacity: 0.8;
+    }
+
+    .blur-wrapper.pixel img {
+      filter: blur(5px);
+      image-rendering: pixelated;
+      transform: scale(1.1);
+      opacity: 0.9;
+    }
+
+    /* OVERLAY PAYANT */
+    .blur-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      gap: 8px;
+      backdrop-filter: blur(6px);
+      border-radius: inherit;
+      pointer-events: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .blur-overlay button {
+      pointer-events: auto;
+    }
+
+    /* 🧱 STRUCTURE DES CARTES ET MÉDIAS */
+    .model-card,
+    .card-photo {
+      width: 100%;
+      max-width: 310px;
+      margin: 0 auto;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .model-card:hover,
+    .card-photo:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.25);
+    }
+
+    .media-container,
+    .card-photo {
+      aspect-ratio: 4 / 5;
+      height: auto;
+      max-height: 260px;
+    }
+
+    .model-photo {
+      object-fit: contain;
+    }
+
+    /* 📱 RESPONSIVE ADAPTATION */
+    @media (max-width: 768px) {
+      .model-card,
+      .card-photo {
+        max-width: 250px;
+      }
+
+      .model-photo {
+        object-fit: cover;
+      }
+
+      .status-name {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+      }
+
+      .btn-favori i {
+        font-size: 1.2rem;
+      }
+    }
+    /* Icônes du menu principal */
+    .nav-link i {
+      font-size: 1.3rem;
+      color: #fff;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
+    }
+
+    .nav-link:hover i {
+      color: var(--accent);
+      transform: scale(1.15);
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    }
+
+    /* Espacement et alignement */
+    .nav-item {
+      margin: 0 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.6rem;
+    }
+
+    .jetons-display i {
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.3));
+    }
+
+    .jetons-display:hover i {
+      transform: rotate(-15deg) scale(1.15);
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7));
+    }
+
+    .achat-jetons-icon-vip {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: gold;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+      animation: pulseGlow 2s infinite ease-in-out;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.7); }
+    }
+
+    .achat-jetons-icon-vip:hover {
+      transform: scale(1.1);
+      color: #ffcc00;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+    }
+
+    .section-title-vip {
+      color: gold;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title-vip-gold {
+      color: #ffeb99;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    }
+
+    .section-title-vip-gold i {
+      font-size: 1rem;
+      filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+    }
+
+    /* 💖 Titre "Mes Favoris" */
+    .section-title-favoris {
+      color: var(--primary-light);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 1px;
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+
+    .section-title-favoris i {
+      font-size: 1rem;
+      color: #ff1f3d;
+      filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.5));
+    }
+
+    /* 💎 Liens des favoris */
+    .favori-link {
+      color: #ccc;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      background: rgba(255, 255, 255, 0.02);
+      margin-bottom: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .favori-link i {
+      color: #ff4d4d;
+      transition: all 0.3s ease;
+    }
+
+    .favori-link:hover {
+      background: rgba(255, 0, 0, 0.08);
+      color: var(--primary-light);
+      transform: translateX(5px);
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    }
+
+    .favori-link:hover i {
+      color: #ff1a1a;
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.6));
+    }
+
+  </style>
+  </head>
 <body>
-
     <!-- Navbar principale -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><span class="live">LIVE</span> <span class="beauty">BEAUTY</span></a>
-
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                 aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <!-- Menus -->
                     <div class="collapse navbar-collapse" id="mainNavbar">
                       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                       <li class="nav-item">
-                          <a class="nav-link" href="#" data-type="default">Modèles</a>
-                      </li>
-                      <li class="nav-item">
-                          <a class="nav-link" href="#" data-type="photo">Galerie photo</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" href="{{ route('achats.mes') }}">
-                          <i class="fas fa-image me-1"></i>Mes photos achetées
+                        <a class="nav-link" href="#" data-type="default" title="Modèles">
+                          <i class="fas fa-female"></i>
                         </a>
                       </li>
                       <li class="nav-item">
+                        <a class="nav-link" href="#" data-type="photo" title="Galerie photo">
+                          <i class="fas fa-camera-retro"></i>
+                        </a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ route('achats.mes') }}" title="Mes photos achetées">
+                          <i class="fas fa-shopping-bag"></i>
+                        </a>
+                      </li>
+                      <!-- <li class="nav-item">
                           <a class="nav-link" href="#">Nouveaux Modèles</a>
-                      </li>
-                      <li class="nav-item">
+                      </li> -->
+                      <!-- <li class="nav-item">
                           <a class="nav-link" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a>
-                      </li>
-                      <li class="nav-item">
+                      </li> -->
+                      <!-- <li class="nav-item">
                           <a class="nav-link" href="#">Top Modèles</a>
-                      </li>
+                      </li> -->
                   </ul>
                 </ul>
-
                 <div class="d-flex align-items-center">
-                    
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
+                    <!-- <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a> -->
                     <a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
-                    
                 @if(Auth::check())
-                    <div class="me-3 text-white fw-bold">
-                        <i class="fas fa-coins text-warning me-1"></i>
-                        {{ Auth::user()->jetons }} jetons
+                    <div class="me-3 text-white fw-bold d-flex align-items-center jetons-display">
+                      <i class="fas fa-coins text-warning me-2"></i>
+                      <span>{{ Auth::user()->jetons }}</span>
                     </div>
                 @endif
-                    <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span>
-                    
-                    <button class="btn btn-danger fw-bold rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#achatJetonsModal">
-                      <i class="fas fa-coins me-1"></i> Achat Jetons
+                    <!-- <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span> -->
+                    <span class="text-white me-3 fw-bold">{{ Auth::user()->pseudo }}</span>
+                    <button class="btn btn-dark rounded-circle me-2 achat-jetons-icon-vip"
+                            data-bs-toggle="modal" data-bs-target="#achatJetonsModal"
+                            title="Acheter des jetons">
+                      <i class="fas fa-coins"></i>
+                      <i class="fas fa-shopping-bag ms-1"></i>
                     </button>
                     <!-- Icône modifier profil -->
-<a href="#" class="text-white fs-5 me-3" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Modifier mon profil">
-    <i class="fas fa-user-cog"></i>
-</a>
+                    <a href="#" class="text-white fs-5 me-3" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Modifier mon profil">
+                        <i class="fas fa-user-cog"></i>
+                    </a>
 
-<!-- Icône déconnexion -->
-<a href="{{ route('logout') }}" class="text-white fs-5 me-2" title="Déconnexion">
-    <i class="fas fa-power-off"></i>
-</a>
- </div>
+                    <!-- Icône déconnexion -->
+                    <a href="{{ route('logout') }}" class="text-white fs-5 me-2" title="Déconnexion">
+                        <i class="fas fa-power-off"></i>
+                    </a>
+              </div>
             </div>
         </div>
     </nav>
-
     <!-- Contenu principal -->
     <div class="container-fluid">
         <div class="row">
-
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
-                <h5>Cams en Direct</h5>
+                <h5 class="section-title-vip">
+                  <i class="fas fa-star me-2 text-warning"></i> Cams en Direct
+                </h5>
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
-                <h5>Mes Lives Privés</h5>
+                <h5 class="section-title-vip-gold">
+                  <i class="fas fa-lock text-warning me-2"></i>
+                  Lives Privés VIP
+                </h5>
                 <div id="privateLives"></div>
 
                 <br>
                 @if(Auth::check() && Auth::user()->favoris->count() > 0)
-    <h5>Mes Favoris</h5>
-    @foreach(Auth::user()->favoris as $fav)
-        <a href="{{ route('modele.profile', $fav->id) }}">
-            ❤️ {{ $fav->prenom }}
-        </a>
-    @endforeach
-@endif
+                  <div class="favoris-section mt-4">
+                    <h5 class="section-title-favoris">
+                      <i class="fas fa-heart text-danger me-2"></i> Mes Favoris
+                    </h5>
+
+                    @foreach(Auth::user()->favoris as $fav)
+                      <a href="{{ route('modele.profile', $fav->id) }}" class="favori-link d-flex align-items-center">
+                        <i class="fas fa-heart me-2"></i>
+                        <span>{{ $fav->prenom }}</span>
+                      </a>
+                    @endforeach
+                  </div>
+                @endif
 
             </div>
 

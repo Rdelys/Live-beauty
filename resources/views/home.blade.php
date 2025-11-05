@@ -443,7 +443,6 @@ body {
   border-radius: 20px;
   font-size: 0.9rem;
   letter-spacing: 0.3px;
-  backdrop-filter: blur(4px);
 }
 
 .status-dot {
@@ -561,6 +560,42 @@ body {
   border-radius: inherit;
 }
 
+/* Icônes du menu principal */
+    .nav-link i {
+      font-size: 1.3rem;
+      color: #fff;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
+    }
+
+    .nav-link:hover i {
+      color: var(--accent);
+      transform: scale(1.15);
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    }
+
+    /* Espacement et alignement */
+    .nav-item {
+      margin: 0 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.6rem;
+    }
+
+    .section-title-vip {
+      color: gold;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+      display: flex;
+      align-items: center;
+    }
 
     </style>
 </head>
@@ -593,26 +628,26 @@ body {
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-    <a class="nav-link" href="#" data-type="default">Modèles</a>
-</li>
-
-
-                <li class="nav-item">
+                  <a class="nav-link" href="#" data-type="default" title="Modèles">
+                    <i class="fas fa-female"></i>
+                  </a>
+                </li>
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="#">Nouveaux Modèles</a>
-                </li>
-                <li class="nav-item">
+                </li> -->
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a>
-                </li>
-                <li class="nav-item">
+                </li> -->
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="#">Top Modèles</a>
-                </li>
+                </li> -->
             </ul>
                 <div class="d-flex align-items-center">
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a>
-<a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
-    <i class="fa-solid fa-envelope"></i>
-</a>
+                    <!-- <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a> -->
+                <a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
+                    <i class="fa-solid fa-envelope"></i>
+                </a>
                   <button class="btn btn-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Connexion</button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">Inscription GRATUITE</button>
                 </div>
@@ -626,7 +661,9 @@ body {
 
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
-                <h5>Cams en Direct</h5>
+                <h5 class="section-title-vip">
+                  <i class="fas fa-star me-2 text-warning"></i> Cams en Direct
+                </h5>                
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
