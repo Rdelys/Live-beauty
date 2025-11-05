@@ -11,6 +11,8 @@ use App\Models\ShowPrive;
 use App\Models\Achat;
 use Carbon\Carbon;
 use App\Models\JetonPropose;
+use App\Models\HistoriqueJeton;
+
 
 class ModeleController extends Controller
 {
@@ -110,22 +112,35 @@ class ModeleController extends Controller
 }
 
 
-    public function index()
+    public function index(Request $request)
 {
+    // Données principales du dashboard
     $modeles = Modele::all();
     $jetons = Jeton::all();
-    $shows = ShowPrive::with('user','modele')->get();
-    $achats = Achat::with(['user','modele'])->latest()->get(); // ✅ ajout
+    $shows = ShowPrive::with('user', 'modele')->get();
+    $achats = Achat::with(['user', 'modele'])->latest()->get();
     $jetonsProposes = JetonPropose::where('prise', 0)->get();
 
     $nombreDeModeles = $modeles->count();
     $nombreDeJetons = $jetons->count();
     $nombreDeClients = User::count();
     $nombreAchatsPhotos = Achat::count();
-    $nombrejetonsProposes = JetonPropose::count(); // <-- nouveau
+    $nombrejetonsProposes = JetonPropose::count();
 
     $clients = User::select('id', 'nom', 'prenoms', 'jetons', 'email', 'pseudo', 'banni', 'created_at')->get();
 
+    // === 🔥 Partie Historique Jetons ===
+    $query = HistoriqueJeton::with(['user', 'modele'])->latest();
+
+    // Filtre modèle (optionnel)
+    if ($request->filled('modele_id')) {
+        $query->where('modele_id', $request->modele_id);
+    }
+
+    $historiques = $query->paginate(20);
+    $totalJetons = (clone $query)->sum('nombre_jetons');
+
+    // Envoi de toutes les données à la vue
     return view('admin', compact(
         'modeles',
         'jetonsProposes',
@@ -135,11 +150,14 @@ class ModeleController extends Controller
         'nombreDeJetons',
         'nombreDeClients',
         'clients',
-        'achats', // ✅ ajout
+        'achats',
         'nombreAchatsPhotos',
-        'nombrejetonsProposes' // ✅ ajout
+        'nombrejetonsProposes',
+        'historiques',
+        'totalJetons'
     ));
 }
+
 
 
     public function edit($id)

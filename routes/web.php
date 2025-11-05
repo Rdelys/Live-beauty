@@ -291,3 +291,6 @@ Route::middleware('auth')->group(function () {
     // pour achats "detail" (photo ou vidéo individuelle)
     Route::post('/acheter-detail/{modele}', [AchatController::class, 'acheterDetail'])->name('acheter.detail');
 });
+
+Route::get('/admin/historique-jetons', [App\Http\Controllers\JetonController::class, 'historiqueJetons'])
+    ->name('admin.historique-jetons');

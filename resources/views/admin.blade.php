@@ -335,6 +335,8 @@ footer {
   <a class="menu-link has-submenu"><i class="fas fa-images"></i> Modèles</a>
   <div class="submenu">
     <a class="menu-link"><i class="fas fa-list"></i> Liste des modeles</a>
+    <a href="#" class="menu-link"><i class="fas fa-history"></i>Jetons obtenu</a>
+
     <a class="menu-link"><i class="fas fa-plus"></i> Ajout modeles</a>
   </div>
 
@@ -356,6 +358,80 @@ footer {
 </div>
 
 <div class="content">
+
+<div id="historique-jetons-content" class="content-section d-none">
+  <h2><i class="fas fa-history text-danger"></i> Historique des Jetons</h2>
+  <p>Suivi complet des jetons utilisés et des surprises envoyées.</p>
+
+  <!-- FILTRE -->
+  <!-- FILTRE -->
+<form method="GET" class="row g-3 mb-4" action="{{ route('admin') }}">
+  <div class="col-md-4">
+    <select name="modele_id" class="form-control">
+      <option value="">-- Tous les modèles --</option>
+      @if(!empty($modeles))
+        @foreach($modeles as $modele)
+          <option value="{{ $modele->id }}" {{ request('modele_id') == $modele->id ? 'selected' : '' }}>
+            {{ $modele->prenom }} {{ $modele->nom }}
+          </option>
+        @endforeach
+      @endif
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary w-100">
+      <i class="fas fa-filter"></i> Filtrer
+    </button>
+  </div>
+</form>
+
+<!-- TOTAL -->
+<div class="alert alert-info text-dark">
+  <strong>Total des jetons utilisés :</strong> 💎 {{ number_format($totalJetons ?? 0, 0, ',', ' ') }}
+</div>
+
+<!-- TABLE -->
+<div class="table-responsive">
+  <table class="table table-bordered table-striped align-middle text-center">
+    <thead class="bg-danger text-white">
+      <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Modèle</th>
+        <th>Type</th>
+        <th>Jetons utilisés</th>
+        <th>Description</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if(!empty($historiques) && $historiques->count())
+        @foreach($historiques as $h)
+          <tr>
+            <td>{{ $h->id }}</td>
+            <td>{{ $h->user->pseudo ?? '—' }}</td>
+            <td>{{ $h->modele->prenom ?? '—' }} {{ $h->modele->nom ?? '' }}</td>
+            <td>
+              @if($h->type === 'surprise')
+                <span class="badge bg-warning text-dark">Surprise 🎁</span>
+              @else
+                <span class="badge bg-success">Jeton action</span>
+              @endif
+            </td>
+            <td><strong>{{ $h->nombre_jetons }}</strong></td>
+            <td>{{ $h->description ?? '—' }}</td>
+            <td>{{ $h->created_at->format('d/m/Y H:i') }}</td>
+          </tr>
+        @endforeach
+      @else
+        <tr><td colspan="7" class="text-muted">Aucun historique trouvé.</td></tr>
+      @endif
+    </tbody>
+  </table>
+</div>
+
+</div>
+
   <div id="dashboard-content" class="content-section">
   <h2 class="mb-4 text-white">Tableau de bord</h2>
   <p class="mb-5 text-white">Bienvenue dans l'espace d'administration de Live Beauty.</p>
@@ -1111,6 +1187,8 @@ footer {
         "Shows privés": document.getElementById("shows-prives-content"),
  "Liste des jetons proposés": document.getElementById("liste-jetons-proposes-content"),
   "Ajout jetons proposés": document.getElementById("ajout-jetons-proposes-content"),
+    "Jetons obtenu": document.getElementById("historique-jetons-content"),
+
       };
 
       menuLinks.forEach(link => {
