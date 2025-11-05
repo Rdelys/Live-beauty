@@ -366,12 +366,14 @@ footer {
   <!-- FILTRE -->
   <!-- FILTRE -->
 <form method="GET" class="row g-3 mb-4" action="{{ route('admin') }}">
+  <!-- Filtre (client-side : pas de reload) -->
+<div class="row g-3 mb-4" id="historique-filter">
   <div class="col-md-4">
-    <select name="modele_id" class="form-control">
+    <select id="filterModele" name="modele_id" class="form-control">
       <option value="">-- Tous les modèles --</option>
       @if(!empty($modeles))
         @foreach($modeles as $modele)
-          <option value="{{ $modele->id }}" {{ request('modele_id') == $modele->id ? 'selected' : '' }}>
+          <option value="{{ $modele->id }}">
             {{ $modele->prenom }} {{ $modele->nom }}
           </option>
         @endforeach
@@ -379,10 +381,12 @@ footer {
     </select>
   </div>
   <div class="col-md-2">
-    <button type="submit" class="btn btn-primary w-100">
-      <i class="fas fa-filter"></i> Filtrer
+    <button type="button" id="resetHistoriqueFilter" class="btn btn-secondary w-100">
+      <i class="fas fa-eraser"></i> Réinitialiser
     </button>
   </div>
+</div>
+
 </form>
 
 <!-- TOTAL -->
@@ -407,7 +411,7 @@ footer {
     <tbody>
       @if(!empty($historiques) && $historiques->count())
         @foreach($historiques as $h)
-          <tr>
+  <tr data-modele-id="{{ $h->modele_id ?? '' }}">
             <td>{{ $h->id }}</td>
             <td>{{ $h->user->pseudo ?? '—' }}</td>
             <td>{{ $h->modele->prenom ?? '—' }} {{ $h->modele->nom ?? '' }}</td>
@@ -1635,6 +1639,49 @@ document.addEventListener('DOMContentLoaded', function () {
     shouldSort: false,
   });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('filterModele');
+  const resetBtn = document.getElementById('resetHistoriqueFilter');
+  const rows = Array.from(document.querySelectorAll('#historique-jetons-content table tbody tr'));
+  const totalElement = document.querySelector('#historique-jetons-content .alert-info strong');
+
+  // Sélectionner par défaut le premier modèle si présent
+  if (select && select.options.length > 1) {
+    select.selectedIndex = 1;
+    applyHistoriqueFilter();
+  }
+
+  select?.addEventListener('change', applyHistoriqueFilter);
+  resetBtn?.addEventListener('click', () => {
+    select.selectedIndex = 0;
+    applyHistoriqueFilter();
+  });
+
+  function applyHistoriqueFilter() {
+    const selected = select.value;
+    let total = 0;
+
+    rows.forEach(row => {
+      const rowModeleId = row.getAttribute('data-modele-id') || '';
+      const jetonsCell = row.querySelector('td:nth-child(5)'); // colonne "Jetons utilisés"
+      const nbJetons = parseInt(jetonsCell?.innerText || 0);
+
+      if (!selected || rowModeleId === selected) {
+        row.style.display = '';
+        total += nbJetons;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Met à jour le total dans le bloc bleu
+    if (totalElement) {
+      totalElement.innerHTML = `💎 ${total.toLocaleString('fr-FR')} `;
+    }
+  }
+});
+
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
