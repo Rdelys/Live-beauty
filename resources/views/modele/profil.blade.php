@@ -336,6 +336,46 @@ video {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
+/* === FIX STYLE DES SELECTS === */
+select.form-control,
+.form-select {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2rem;
+  background-image: linear-gradient(45deg, transparent 50%, #e50914 50%), 
+                    linear-gradient(135deg, #e50914 50%, transparent 50%);
+  background-position: right 1rem top 1.2rem, right 0.9rem top 1.2rem;
+  background-size: 8px 8px, 8px 8px;
+  background-repeat: no-repeat;
+  transition: all 0.3s ease;
+}
+
+select.form-control:focus,
+.form-select:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: #e50914 !important;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+  color: #fff !important;
+}
+
+/* Options dans le menu déroulant */
+select.form-control option,
+.form-select option {
+  background-color: #111 !important;
+  color: #fff !important;
+}
+
+/* Désactiver fond blanc par défaut dans Firefox */
+select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #fff;
+}
+
   </style>
 </head>
 <body>
@@ -484,8 +524,7 @@ video {
   <h4 class="text-white mb-3">📷 Galerie Photo</h4>
 
   <!-- Formulaire d’ajout -->
-  <form action="{{ route('albums.store', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
-    @csrf
+
     <!-- 📚 Création d’un nouvel album -->
 <div class="card bg-dark text-white border-light mb-4 p-3 shadow">
   <h5 class="text-danger mb-3">Créer un nouvel album 📸</h5>
@@ -524,38 +563,62 @@ video {
 @else
   <p class="text-muted text-center mb-4">Aucun album créé pour le moment.</p>
 @endif
+  <!-- ---------- Formulaire d’ajout (photos) ---------- -->
+<form action="{{ route('gallery-photo.store', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
+  @csrf
 
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label class="form-label">Choisir les photos</label>
-        <input type="file" name="photos[]" class="form-control" multiple required accept="image/*">
-      </div>
+  <div class="row g-3">
 
-      <div class="col-md-3 mb-3">
-        <label class="form-label">Payant ?</label>
-        <select name="payant" class="form-control">
-          <option value="0">Gratuit</option>
-          <option value="1">Payant</option>
-        </select>
-      </div>
-
-      <div class="col-md-3 mb-3">
-        <label class="form-label">Prix (Jetons)</label>
-        <input type="number" step="0.01" name="prix" class="form-control" placeholder="Ex: 20">
-      </div>
-
-      <div class="col-md-3 mb-3">
-        <label class="form-label">Type de flou</label>
-        <select name="type_flou" class="form-control">
-          <option value="">Aucun</option>
-          <option value="soft">Flou doux</option>
-          <option value="strong">Flou fort</option>
-          <option value="pixel">Pixelisé</option>
-        </select>
-      </div>
+    <div class="col-md-6">
+      <label class="form-label">Choisir les photos</label>
+      <input type="file" name="photos[]" class="form-control" multiple required accept="image/*" >
     </div>
-    <button class="btn btn-success w-100">Ajouter à la galerie</button>
-  </form>
+
+    <!-- === Select Album === -->
+    <div class="col-md-3">
+      <label class="form-label">Album (optionnel)</label>
+      <select name="album_id" id="selectAlbumForUpload" class="form-control">
+        <option value="">-- Aucun --</option>
+        @foreach($modele->albums as $album)
+          <option value="{{ $album->id }}">{{ $album->nom }} ({{ $album->photos->count() }})</option>
+        @endforeach
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Payant ?</label>
+      <select name="payant" class="form-control">
+        <option value="0">Gratuit</option>
+        <option value="1">Payant</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Prix (Jetons)</label>
+      <input type="number" step="0.01" name="prix" class="form-control" placeholder="Ex: 20">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Type de flou</label>
+      <select name="type_flou" class="form-control">
+        <option value="">Aucun</option>
+        <option value="soft">Flou doux</option>
+        <option value="strong">Flou fort</option>
+        <option value="pixel">Pixelisé</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <button class="btn btn-success w-100">Ajouter à la galerie</button>
+    </div>
+  </div>
+
+</form>
+<!-- ---------- Fin formulaire d’ajout ---------- -->
+
 
   <!-- Galerie existante -->
   <div class="row gallery-sortable" id="gallerySortable">

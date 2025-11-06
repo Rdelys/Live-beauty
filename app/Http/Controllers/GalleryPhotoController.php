@@ -14,35 +14,41 @@ class GalleryPhotoController extends Controller
 {
     // Stocke des photos (déjà existant — inchangé fonctionnellement)
     public function store(Request $request, $modeleId)
-    {
-        $request->validate([
-            'photos' => 'required|array',
-            'photos.*' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:8192', // 8MB max
-            'payant' => ['nullable', Rule::in([0,1])],
-            'prix' => 'nullable|numeric|min:0',
-            'type_flou' => 'nullable|string|max:50'
+{
+    $request->validate([
+        'photos' => 'required|array',
+        'photos.*' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:8192', // 8MB max
+        'payant' => ['nullable', Rule::in([0,1])],
+        'prix' => 'nullable|numeric|min:0',
+        'type_flou' => 'nullable|string|max:50',
+        'album_id' => ['nullable','integer','exists:albums,id'],
+    ]);
+
+    // Récupère l'album_id (ou null)
+    $albumId = $request->input('album_id') ?: null;
+
+    foreach ($request->file('photos') as $photo) {
+        $path = $photo->store('gallery_photos', 'public');
+
+        // calcule position suivante pour ce modèle
+        $max = GalleryPhoto::where('modele_id', $modeleId)->max('position_photo') ?? 0;
+        $position = $max + 1;
+
+        GalleryPhoto::create([
+            'modele_id' => $modeleId,
+            'photo_url' => $path,
+            'video_url' => null,
+            'payant' => $request->input('payant', 0),
+            'prix' => $request->input('prix', 0),
+            'type_flou' => $request->input('type_flou'),
+            'position_photo' => $position,
+            'album_id' => $albumId,
         ]);
-
-        foreach ($request->file('photos') as $photo) {
-            $path = $photo->store('gallery_photos', 'public');
-
-            // calcule position suivante pour ce modèle
-            $max = GalleryPhoto::where('modele_id', $modeleId)->max('position_photo') ?? 0;
-            $position = $max + 1;
-
-            GalleryPhoto::create([
-                'modele_id' => $modeleId,
-                'photo_url' => $path,
-                'video_url' => null,
-                'payant' => $request->input('payant', 0),
-                'prix' => $request->input('prix', 0),
-                'type_flou' => $request->input('type_flou'),
-                'position_photo' => $position,
-            ]);
-        }
-
-        return back()->with('success', 'Photos ajoutées avec succès !');
     }
+
+    return back()->with('success', 'Photos ajoutées avec succès !');
+}
+
 
     // Stocke des vidéos (nouvelle méthode)
     public function storeVideo(Request $request, $modeleId)
