@@ -397,10 +397,79 @@ ul.list-unstyled li {
     -webkit-user-select: none;
     user-select: none;
 }
-</style>
 
+.album-card {
+  background: linear-gradient(145deg, #111, #1b1b1b);
+  border: 1px solid rgba(229,9,20,0.3);
+  border-radius: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  color: #fff;
+}
+.album-card:hover {
+  transform: scale(1.05);
+  border-color: var(--red);
+  box-shadow: 0 0 20px rgba(229,9,20,0.5);
+}
+.album-card.active {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 25px rgba(229,9,20,0.6) !important;
+}
+.album-card h5 {
+  color: #fff;
+  font-weight: 600;
+}
+.album-card p {
+  color: #fff;
+  opacity: 0.9;
+}
+
+</style>
+    <!-- === ALBUMS === -->
+@php
+    $albums = \App\Models\Album::where('modele_id', $modele->id)
+                ->withCount('photos')
+                ->get();
+@endphp
+
+@if($albums->count() > 0)
+<div class="gallery-container mb-5">
+    <h3 class="gallery-title">📁 Albums</h3>
+    <div class="row g-4 justify-content-center">
+        @foreach($albums as $album)
+        <div class="col-6 col-md-3">
+            <div class="card bg-dark text-center border-success shadow-lg album-card"
+                style="cursor:pointer; transition:all 0.3s ease;"
+                onclick="filterPhotosByAlbum({{ $album->id }})"
+                data-album-id="{{ $album->id }}">
+                <div class="card-body">
+                    <h5 class="text-success mb-2">{{ $album->nom }}</h5>
+                    <p class="text-white mb-1">{{ $album->photos_count }} photo(s)</p>
+                    <span class="badge bg-success">Voir l'album</span>
+                </div>
+            </div>
+        </div>
+        @endforeach
+
+        <!-- Bouton pour tout afficher -->
+        <div class="col-6 col-md-3">
+            <div class="card bg-secondary text-center border-light shadow-lg album-card"
+                 style="cursor:pointer;"
+                 onclick="filterPhotosByAlbum(null)">
+                <div class="card-body">
+                    <h5 class="text-white mb-2">Tous les albums</h5>
+                    <p class="text-light mb-1">Afficher tout</p>
+                    <span class="badge bg-light text-dark">Afficher tout</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 <div class="gallery-container mt-5">
     <h3 class="gallery-title">📸 Galerie Photos</h3>
+
+
     <div class="gallery-grid">
         @forelse($photos as $item)
             @php
@@ -414,7 +483,9 @@ ul.list-unstyled li {
             @endphp
 
             <!-- Photo payante -->
-<div class="gallery-item text-center position-relative no-right-click" oncontextmenu="return false;">
+<div class="gallery-item text-center position-relative no-right-click"
+     data-album-id="{{ $item->album_id ?? '' }}"
+     oncontextmenu="return false;">
     <img src="{{ asset('storage/' . $item->photo_url) }}" alt="Photo"
          style="{{ $blurStyle }}" data-path="{{ $item->photo_url }}" />
 
@@ -748,6 +819,34 @@ document.addEventListener("DOMContentLoaded", () => {
   <span class="lightbox-close">&times;</span>
   <img id="lightboxImage" src="" alt="Agrandissement photo">
 </div>
+<script>
+function filterPhotosByAlbum(albumId) {
+  const allPhotos = document.querySelectorAll('.gallery-item');
+  allPhotos.forEach(item => {
+    const photoAlbum = item.getAttribute('data-album-id');
+    // Si albumId est null, on montre tout
+    if (!albumId || photoAlbum == albumId) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  // Effet visuel sur la carte active
+  document.querySelectorAll('.album-card').forEach(card => {
+    const id = card.getAttribute('data-album-id');
+    if (!albumId && !id) {
+      card.classList.add('border-success');
+    } else if (albumId && id == albumId) {
+      card.classList.add('border-success');
+      card.style.boxShadow = '0 0 20px rgba(40,167,69,0.5)';
+    } else {
+      card.classList.remove('border-success');
+      card.style.boxShadow = '';
+    }
+  });
+}
+</script>
 
 
 @endsection

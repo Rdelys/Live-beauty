@@ -375,6 +375,20 @@ select:-moz-focusring {
   color: transparent;
   text-shadow: 0 0 0 #fff;
 }
+.card.text-center.bg-dark {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.card.text-center.bg-dark:hover {
+  border-color: #e50914;
+  box-shadow: 0 0 15px rgba(229,9,20,0.4);
+  transform: translateY(-5px);
+}
+.btn-outline-light.btn-sm.mt-2:hover {
+  background: #e50914;
+  border-color: #e50914;
+  color: #fff;
+}
 
   </style>
 </head>
@@ -559,10 +573,24 @@ select:-moz-focusring {
         </div>
       </div>
     @endforeach
+
+    <!-- 🌟 Carte Afficher tout -->
+    <div class="col-6 col-md-3">
+      <div class="card text-white text-center bg-dark border-light shadow position-relative">
+        <div class="card-body">
+          <h5 class="card-title text-white">Tous les albums</h5>
+          <p class="mb-1">Afficher toutes les photos</p>
+          <button class="btn btn-danger btn-sm mt-2" onclick="filterPhotosByAlbum(null)">
+            🔁 Afficher tout
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 @else
   <p class="text-muted text-center mb-4">Aucun album créé pour le moment.</p>
 @endif
+
   <!-- ---------- Formulaire d’ajout (photos) ---------- -->
 <form action="{{ route('gallery-photo.store', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
   @csrf
@@ -580,7 +608,7 @@ select:-moz-focusring {
       <select name="album_id" id="selectAlbumForUpload" class="form-control">
         <option value="">-- Aucun --</option>
         @foreach($modele->albums as $album)
-          <option value="{{ $album->id }}">{{ $album->nom }} ({{ $album->photos->count() }})</option>
+          <option value="{{ $album->id }}">{{ $album->nom }}</option>
         @endforeach
       </select>
     </div>
@@ -2282,12 +2310,21 @@ if (badge) badge.textContent = index + 1;
 <script>
 function filterPhotosByAlbum(albumId) {
   const allPhotos = document.querySelectorAll('.sortable-item');
+  const albumCards = document.querySelectorAll('.card[data-album-id]');
+  
   allPhotos.forEach(item => {
     const photoAlbum = item.getAttribute('data-album-id');
     item.style.display = (!albumId || photoAlbum == albumId) ? '' : 'none';
   });
+
+  // Animation légère pour le filtrage
+  allPhotos.forEach(item => {
+    item.style.transition = "opacity 0.3s ease";
+    item.style.opacity = item.style.display === 'none' ? 0 : 1;
+  });
 }
 </script>
+
 
 </body>
 </html>

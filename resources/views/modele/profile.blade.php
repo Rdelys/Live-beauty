@@ -205,6 +205,38 @@
   color: #ff0000;
 }
 
+.album-card {
+  background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.album-card:hover {
+  transform: scale(1.05);
+  border-color: #e50914;
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
+}
+
+.album-card.active {
+  border-color: #e50914;
+  box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
+}
+
+.album-title {
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.album-count {
+  color: #fff;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
 </style>
 
 <div class="container modele-container">
@@ -469,6 +501,46 @@ ul.list-unstyled li {
     cursor: pointer;
 }
 </style>
+@php
+    use App\Models\Album;
+
+    $albums = Album::where('modele_id', $modele->id)
+                ->withCount('photos')
+                ->get();
+@endphp
+
+@if($albums->count() > 0)
+<div class="gallery-container mb-5">
+    <h3 class="gallery-title">📁 Albums</h3>
+    <div class="row g-4 justify-content-center">
+        @foreach($albums as $album)
+        <div class="col-6 col-md-3">
+            <div class="card album-card text-center shadow-lg"
+                 data-album-id="{{ $album->id }}"
+                 onclick="filterPhotosByAlbum({{ $album->id }})">
+                <div class="card-body">
+                    <h5 class="album-title">{{ $album->nom }}</h5>
+                    <p class="album-count">{{ $album->photos_count }} photo(s)</p>
+                    <span class="badge bg-danger">Voir l'album</span>
+                </div>
+            </div>
+        </div>
+        @endforeach
+
+        <!-- Bouton pour tout afficher -->
+        <div class="col-6 col-md-3">
+            <div class="card album-card text-center shadow-lg"
+                 onclick="filterPhotosByAlbum(null)">
+                <div class="card-body">
+                    <h5 class="album-title text-white">Tous les albums</h5>
+                    <p class="album-count text-white">Afficher tout</p>
+                    <span class="badge bg-light text-dark">Tout</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 <div class="gallery-container mt-5">
     <h3 class="gallery-title">📸 Galerie Photos</h3>
@@ -485,7 +557,9 @@ ul.list-unstyled li {
             @endphp
 
             <!-- Photo payante -->
-<div class="gallery-item text-center position-relative no-right-click" oncontextmenu="return false;">
+<div class="gallery-item text-center position-relative no-right-click"
+     data-album-id="{{ $item->album_id ?? '' }}"
+     oncontextmenu="return false;">
     <img src="{{ asset('storage/' . $item->photo_url) }}" alt="Photo"
          style="{{ $blurStyle }}" data-path="{{ $item->photo_url }}" />
 
@@ -601,5 +675,28 @@ document.addEventListener("keydown", e => {
   <span class="lightbox-close">&times;</span>
   <img id="lightboxImage" src="" alt="Agrandissement photo">
 </div>
+<script>
+function filterPhotosByAlbum(albumId) {
+  const allPhotos = document.querySelectorAll('.gallery-item');
+  allPhotos.forEach(item => {
+    const photoAlbum = item.getAttribute('data-album-id');
+    if (!albumId || photoAlbum == albumId) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  // Gestion visuelle de la sélection d’album
+  document.querySelectorAll('.album-card').forEach(card => {
+    const id = card.getAttribute('data-album-id');
+    if (albumId && id == albumId) {
+      card.classList.add('active');
+    } else {
+      card.classList.remove('active');
+    }
+  });
+}
+</script>
 
 @endsection
