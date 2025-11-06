@@ -297,4 +297,5 @@ Route::get('/admin/historique-jetons', [App\Http\Controllers\JetonController::cl
 Route::post('/gallery-photo/reorder', [GalleryPhotoController::class, 'reorder'])
     ->name('gallery-photo.reorder');
 
-    Route::post('/modele/{id}/albums', [GalleryPhotoController::class, 'storeAlbum'])->name('albums.store');
+Route::post('/modele/profil/{id}/album', [GalleryPhotoController::class, 'storeAlbum'])
+    ->name('albums.store');
