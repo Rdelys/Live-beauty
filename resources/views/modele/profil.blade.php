@@ -484,8 +484,47 @@ video {
   <h4 class="text-white mb-3">📷 Galerie Photo</h4>
 
   <!-- Formulaire d’ajout -->
-  <form action="{{ route('gallery-photo.store', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
+  <form action="{{ route('albums.store', $modele->id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
     @csrf
+    <!-- 📚 Création d’un nouvel album -->
+<div class="card bg-dark text-white border-light mb-4 p-3 shadow">
+  <h5 class="text-danger mb-3">Créer un nouvel album 📸</h5>
+  <form action="{{ route('albums.store', $modele->id) }}" method="POST">
+    @csrf
+    <div class="row align-items-end">
+      <div class="col-md-8 mb-3">
+        <label class="form-label">Nom de l’album</label>
+        <input type="text" name="nom" class="form-control" required placeholder="Ex : Séance été 2025">
+      </div>
+      <div class="col-md-4 mb-3">
+        <button class="btn btn-danger w-100">➕ Créer l’album</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- 🎞️ Liste des albums -->
+@if($modele->albums && $modele->albums->count())
+  <div class="row g-4 mb-4">
+    @foreach($modele->albums as $album)
+      <div class="col-6 col-md-3">
+        <div class="card text-white text-center bg-dark border-light shadow position-relative">
+          <div class="card-body">
+            <h5 class="card-title text-danger">{{ $album->nom }}</h5>
+            <p class="mb-1">{{ $album->photos->count() }} photo(s)</p>
+            <button class="btn btn-outline-light btn-sm mt-2"
+                    onclick="filterPhotosByAlbum({{ $album->id }})">
+              Voir les photos
+            </button>
+          </div>
+        </div>
+      </div>
+    @endforeach
+  </div>
+@else
+  <p class="text-muted text-center mb-4">Aucun album créé pour le moment.</p>
+@endif
+
     <div class="row">
       <div class="col-md-6 mb-3">
         <label class="form-label">Choisir les photos</label>
@@ -521,7 +560,9 @@ video {
   <!-- Galerie existante -->
   <div class="row gallery-sortable" id="gallerySortable">
   @foreach($modele->galleryPhotos->whereNotNull('photo_url')->sortBy('position_photo') as $photo)
-    <div class="col-6 col-md-3 mb-4 sortable-item" data-id="{{ $photo->id }}">
+<div class="col-6 col-md-3 mb-4 sortable-item"
+     data-id="{{ $photo->id }}"
+     data-album-id="{{ $photo->album_id ?? '' }}">
       <div class="card bg-dark text-white border-light position-relative">
   <!-- 🏷️ Badge d'ordre -->
   <div class="photo-order-badge">{{ $photo->position_photo }}</div>
@@ -2174,6 +2215,15 @@ if (badge) badge.textContent = index + 1;
     }
   });
 });
+</script>
+<script>
+function filterPhotosByAlbum(albumId) {
+  const allPhotos = document.querySelectorAll('.sortable-item');
+  allPhotos.forEach(item => {
+    const photoAlbum = item.getAttribute('data-album-id');
+    item.style.display = (!albumId || photoAlbum == albumId) ? '' : 'none';
+  });
+}
 </script>
 
 </body>

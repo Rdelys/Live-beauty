@@ -113,4 +113,10 @@ class Modele extends Authenticatable implements CanResetPasswordContract
             }
         });
     }
+
+    public function albums()
+{
+    return $this->hasMany(Album::class);
+}
+
 }

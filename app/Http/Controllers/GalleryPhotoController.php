@@ -7,6 +7,8 @@ use App\Models\GalleryPhoto;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use App\Models\Album;
+use App\Models\Modele;
 
 class GalleryPhotoController extends Controller
 {
@@ -148,4 +150,28 @@ public function reorder(Request $request)
     return response()->json(['success' => true]);
 }
 
+public function storeAlbum(Request $request, $modeleId)
+{
+    // 🔒 Validation
+    $request->validate([
+        'nom' => 'required|string|max:255',
+    ]);
+
+    // 🧩 Création de l'album
+    Album::create([
+        'modele_id' => $modeleId,
+        'nom' => $request->nom,
+    ]);
+
+    // 🔁 Récupération du modèle avec ses albums et photos
+    $modele = Modele::with(['albums.photos' => function ($query) {
+        $query->orderBy('created_at', 'desc');
+    }])->findOrFail($modeleId);
+
+    // ✨ Message de succès
+    $successMessage = '✅ Album créé avec succès !';
+
+    // 🔙 Retour sur la vue profil.blade.php avec mise à jour
+return view('modele.profil', compact('modele'))->with('success', $successMessage);
+}
 }

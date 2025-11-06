@@ -16,7 +16,9 @@ class GalleryPhoto extends Model
     'payant',
     'prix',
     'type_flou',
-    'position_photo'   // <- ajouté
+    'position_photo',   // <- ajouté
+        'album_id', // ✅ important
+
 ];
 
 
@@ -24,4 +26,10 @@ class GalleryPhoto extends Model
     {
         return $this->belongsTo(Modele::class);
     }
+
+    public function album()
+{
+    return $this->belongsTo(Album::class);
+}
+
 }
