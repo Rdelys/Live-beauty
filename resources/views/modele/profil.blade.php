@@ -1206,7 +1206,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com", {
+socket = io("http://localhost:3000/", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1596,34 +1596,64 @@ startBtn.addEventListener('click', async () => {
 });
 
 /* === ARRÊTER LE LIVE === */
+/* === ARRÊTER LE LIVE === */
 stopBtn.addEventListener('click', async () => {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-
-    for (let id in peerConnections) {
-        peerConnections[id].close();
-        delete peerConnections[id];
-    }
-
-    if (socket) socket.disconnect();
-
-    liveVideo.srcObject = null;
-    liveSection.style.display = 'none';
-    startBtn.style.display = 'inline-block';
-    stopBtn.style.display = 'none';
-
-    await fetch('/api/live/stop', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    try {
+        // 1) Prévenir les watchers / serveur que le modèle stoppe proprement
+        // en fournissant l'id du modèle si tu l'as dans une variable JS (sinon null)
+        const modeleId = "{{ $modele->id ?? '' }}"; // blade -> remplace si besoin
+        if (socket && socket.connected) {
+            socket.emit('modele-stop-live', { modele_id: modeleId });
         }
-    });
 
-    console.log("Live arrêté.");
+        // 2) Stopper le flux local
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        // 3) Fermer toutes les peer connections
+        for (let id in peerConnections) {
+            peerConnections[id].close();
+            delete peerConnections[id];
+        }
+
+        // 4) Notifier ton backend Laravel (API) que le live est fini
+        await fetch('/api/live/stop', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        // 5) Déconnecter socket (optionnel) et recharger la page pour permettre relancer
+        if (socket && socket.connected) socket.disconnect();
+
+        // Forcer reload pour le modèle (ouvre un nouvel état propre pour relancer)
+        window.location.reload(); // ou window.location.href = '/modele/dashboard';
+    } catch (err) {
+        console.error('Erreur stop live:', err);
+        alert("Erreur lors de l'arrêt du live : " + (err.message || err));
+    }
 });
+
+// Quand le modèle a stoppé proprement (arrêt via bouton)
+socket.on('modele-stop-live', (data) => {
+  console.log('modele-stop-live reçu', data);
+  // si tu veux juste redirect les watchers vers le profil/dashboard
+  // window.location.href = `/profil/${data.modele_id}`; // ex
+  // sinon reload la page actuelle
+  window.location.reload();
+});
+
+// Quand le modèle se déconnecte de façon inattendue (server 'disconnect' handler envoie modele-deconnecte)
+socket.on('modele-deconnecte', (payload) => {
+  console.log('modele-deconnecte reçu', payload);
+  // reload / redirect pour actualiser l'interface viewers ou modèle
+  window.location.reload();
+});
+
 
 /* === ENVOI MESSAGE CHAT === */
 function sendMessage(e) {
