@@ -367,24 +367,57 @@ footer {
   <!-- FILTRE -->
 <form method="GET" class="row g-3 mb-4" action="{{ route('admin') }}">
   <!-- Filtre (client-side : pas de reload) -->
-<div class="row g-3 mb-4" id="historique-filter">
-  <div class="col-md-4">
-    <select id="filterModele" name="modele_id" class="form-control">
-      <option value="">-- Tous les modèles --</option>
-      @if(!empty($modeles))
-        @foreach($modeles as $modele)
-          <option value="{{ $modele->id }}">
-            {{ $modele->prenom }} {{ $modele->nom }}
-          </option>
-        @endforeach
-      @endif
-    </select>
-  </div>
-  <div class="col-md-2">
-    <button type="button" id="resetHistoriqueFilter" class="btn btn-secondary w-100">
-      <i class="fas fa-eraser"></i> Réinitialiser
-    </button>
-  </div>
+<!-- ==== FILTRES JETONS OBTENU ==== -->
+<div class="card p-3 mb-4 bg-dark text-white">
+    <div class="row g-3">
+
+        <!-- Filtre Modèle -->
+        <div class="col-md-3">
+            <label class="form-label">Modèle :</label>
+            <select id="filterModele" class="form-control">
+                <option value="">-- Tous les modèles --</option>
+                @foreach($modeles as $modele)
+                    <option value="{{ $modele->id }}">
+                        {{ $modele->prenom }} {{ $modele->nom }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Entre deux dates -->
+        <div class="col-md-3">
+            <label class="form-label">Du :</label>
+            <input type="date" id="filterStartDate" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Au :</label>
+            <input type="date" id="filterEndDate" class="form-control">
+        </div>
+
+        <!-- Mois précis -->
+        <div class="col-md-3">
+            <label class="form-label">Mois :</label>
+            <input type="month" id="filterSingleMonth" class="form-control">
+        </div>
+
+        <!-- Entre deux mois -->
+        <div class="col-md-3">
+            <label class="form-label">Du mois :</label>
+            <input type="month" id="filterMonthStart" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Au mois :</label>
+            <input type="month" id="filterMonthEnd" class="form-control">
+        </div>
+
+        <!-- Bouton réinitialiser -->
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="button" id="resetHistoriqueFilter" class="btn btn-secondary w-100">
+                <i class="fas fa-eraser"></i> Réinitialiser
+            </button>
+        </div>
+
+    </div>
 </div>
 
 </form>
@@ -1640,46 +1673,100 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('filterModele');
-  const resetBtn = document.getElementById('resetHistoriqueFilter');
-  const rows = Array.from(document.querySelectorAll('#historique-jetons-content table tbody tr'));
-  const totalElement = document.querySelector('#historique-jetons-content .alert-info strong');
+document.addEventListener("DOMContentLoaded", () => {
 
-  // Sélectionner par défaut le premier modèle si présent
-  if (select && select.options.length > 1) {
-    select.selectedIndex = 1;
-    applyHistoriqueFilter();
-  }
+    const rows = Array.from(document.querySelectorAll('#historique-jetons-content tbody tr'));
 
-  select?.addEventListener('change', applyHistoriqueFilter);
-  resetBtn?.addEventListener('click', () => {
-    select.selectedIndex = 0;
-    applyHistoriqueFilter();
-  });
+    const filterModele      = document.getElementById("filterModele");
+    const startDateInput    = document.getElementById("filterStartDate");
+    const endDateInput      = document.getElementById("filterEndDate");
+    const singleMonthInput  = document.getElementById("filterSingleMonth");
+    const monthStartInput   = document.getElementById("filterMonthStart");
+    const monthEndInput     = document.getElementById("filterMonthEnd");
+    const resetBtn          = document.getElementById("resetHistoriqueFilter");
 
-  function applyHistoriqueFilter() {
-    const selected = select.value;
-    let total = 0;
+    const totalElement = document.querySelector('#historique-jetons-content .alert-info strong');
 
-    rows.forEach(row => {
-      const rowModeleId = row.getAttribute('data-modele-id') || '';
-      const jetonsCell = row.querySelector('td:nth-child(5)'); // colonne "Jetons utilisés"
-      const nbJetons = parseInt(jetonsCell?.innerText || 0);
+    function parseRowDate(row) {
+        const dateText = row.cells[6].innerText;
+        const [d, m, yHour] = dateText.split("/");
+        const [y, h] = yHour.split(" ");
+        return new Date(`${y}-${m}-${d} ${h}`);
+    }
 
-      if (!selected || rowModeleId === selected) {
-        row.style.display = '';
-        total += nbJetons;
-      } else {
-        row.style.display = 'none';
-      }
+    function applyAllFilters() {
+        const modeleVal = filterModele.value || null;
+
+        const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+        const endDate   = endDateInput.value ? new Date(endDateInput.value + " 23:59:59") : null;
+
+        const singleMonth = singleMonthInput.value ? singleMonthInput.value.split("-") : null;
+        const monthStart  = monthStartInput.value ? monthStartInput.value.split("-") : null;
+        const monthEnd    = monthEndInput.value ? monthEndInput.value.split("-") : null;
+
+        let total = 0;
+
+        rows.forEach(row => {
+
+            const rowDate = parseRowDate(row);
+            const modeleId = row.getAttribute('data-modele-id');
+            const jetons = parseInt(row.cells[4].innerText);
+
+            let show = true;
+
+            // Filtre modèle
+            if (modeleVal && modeleId !== modeleVal) show = false;
+
+            // Entre deux dates
+            if (startDate && rowDate < startDate) show = false;
+            if (endDate && rowDate > endDate) show = false;
+
+            // Mois précis
+            if (singleMonth) {
+                const [smY, smM] = singleMonth;
+                if (rowDate.getFullYear() != smY || (rowDate.getMonth() + 1) != smM) {
+                    show = false;
+                }
+            }
+
+            // Entre deux mois
+            if (monthStart && monthEnd) {
+                const [msY, msM] = monthStart;
+                const [meY, meM] = monthEnd;
+
+                const startMonthDate = new Date(msY, msM - 1, 1);
+                const endMonthDate   = new Date(meY, meM, 0, 23, 59, 59);
+
+                if (rowDate < startMonthDate || rowDate > endMonthDate) {
+                    show = false;
+                }
+            }
+
+            row.style.display = show ? "" : "none";
+            if (show) total += jetons;
+        });
+
+        totalElement.innerHTML = `💎 ${total.toLocaleString("fr-FR")}`;
+    }
+
+    // Écouteurs
+    [filterModele, startDateInput, endDateInput, singleMonthInput, monthStartInput, monthEndInput]
+        .forEach(el => el.addEventListener("change", applyAllFilters));
+
+    // RESET COMPLET
+    resetBtn.addEventListener("click", () => {
+        filterModele.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        singleMonthInput.value = "";
+        monthStartInput.value = "";
+        monthEndInput.value = "";
+
+        applyAllFilters();
     });
 
-    // Met à jour le total dans le bloc bleu
-    if (totalElement) {
-      totalElement.innerHTML = `💎 ${total.toLocaleString('fr-FR')} `;
-    }
-  }
+    // Appliquer par défaut
+    applyAllFilters();
 });
 
 </script>
