@@ -915,15 +915,15 @@ select:-moz-focusring {
 
             <div class="mb-3">
               <label class="form-label">Nom du jeton</label>
-              <input type="text" name="nom" class="form-control" required placeholder="Ex : Jeton VIP">
+              <input type="text" id="jeton_nom" name="nom" class="form-control" required placeholder="Ex : Jeton VIP">
             </div>
             <div class="mb-3">
               <label class="form-label">Description</label>
-              <textarea name="description" class="form-control" placeholder="Ex : Jeton pour accès spécial"></textarea>
+              <textarea name="description" id="jeton_description" class="form-control" placeholder="Ex : Jeton pour accès spécial"></textarea>
             </div>
             <div class="mb-3">
               <label class="form-label">Quantité</label>
-              <input type="number" name="nombre_de_jetons" class="form-control" required placeholder="Ex : 100">
+              <input type="number" id="jeton_nombre" name="nombre_de_jetons" class="form-control" required placeholder="Ex : 100">
             </div>
           <button type="submit" class="btn btn-success w-100">✅ Créer le jeton</button>
           </form>
@@ -2243,34 +2243,32 @@ document.addEventListener('DOMContentLoaded', function() {
       label.textContent = checked ? 'Payant' : 'Gratuit';
     });
   }
-
-  // === Gestion sélection des jetons proposés ===
-  const select = document.getElementById('select-jeton-propose');
-  const hiddenInput = document.getElementById('jeton_propose_id'); // Champ caché ajouté dans le formulaire
-
-  if (select) {
-    select.addEventListener('change', function() {
-      const opt = this.selectedOptions[0];
-
-      // Si aucun jeton proposé sélectionné
-      if (!opt || !opt.value) {
-        document.querySelector('input[name="nom"]').value = '';
-        document.querySelector('textarea[name="description"]').value = '';
-        document.querySelector('input[name="nombre_de_jetons"]').value = '';
-        if (hiddenInput) hiddenInput.value = '';
-        return;
-      }
-
-      // Remplissage automatique des champs à partir des data-attributes
-      document.querySelector('input[name="nom"]').value = opt.dataset.nom || '';
-      document.querySelector('textarea[name="description"]').value = opt.dataset.description || '';
-      document.querySelector('input[name="nombre_de_jetons"]').value = opt.dataset.nombre || '';
-
-      // On sauvegarde aussi l'ID du jeton proposé sélectionné
-      if (hiddenInput) hiddenInput.value = opt.value;
-    });
-  }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('select-jeton-propose');
+    const hiddenInput = document.getElementById('jeton_propose_id');
+
+    if (select) {
+        select.addEventListener('change', function() {
+            const opt = this.selectedOptions[0];
+
+            if (!opt.value) {
+                document.getElementById('jeton_nom').value = '';
+                document.getElementById('jeton_description').value = '';
+                document.getElementById('jeton_nombre').value = '';
+                hiddenInput.value = '';
+                return;
+            }
+
+            document.getElementById('jeton_nom').value = opt.dataset.nom;
+            document.getElementById('jeton_description').value = opt.dataset.description;
+            document.getElementById('jeton_nombre').value = opt.dataset.nombre;
+            hiddenInput.value = opt.value;
+        });
+    }
+});
+
 </script>
 <!-- Modal Modification Photo/Vidéo -->
 <div class="modal fade" id="editGalleryModal" tabindex="-1" aria-labelledby="editGalleryModalLabel" aria-hidden="true">
