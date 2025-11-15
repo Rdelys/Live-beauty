@@ -34,7 +34,7 @@ body {
 
 /* === CONTAINERS === */
 .container {
-  max-width: 1100px;
+  max-width: 1300px;
   margin: auto;
   padding: 2rem 1rem;
   animation: fadeIn 0.6s ease-in-out;
@@ -389,6 +389,31 @@ select:-moz-focusring {
   border-color: #e50914;
   color: #fff;
 }
+
+#videoContainer video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /*  💥 remplissage total */
+}
+
+#videoContainer {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh; /*  💥 en plein écran */
+    position: relative;
+    background: #000;
+}
+
+#videoContainer:fullscreen video,
+#videoContainer:-webkit-full-screen video,
+#videoContainer:-moz-full-screen video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+
 /* === BOUTON DÉCONNEXION PREMIUM === */
 .btn-logout {
   background: linear-gradient(135deg, #e50914, #b4060f);
@@ -790,7 +815,7 @@ select:-moz-focusring {
         style="position:absolute;top:10px;right:10px;z-index:10;background:rgba(0,0,0,0.5);border:none;color:white;padding:6px 10px;border-radius:6px;cursor:pointer;">
     ⛶
 </button>
-    <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light" style="max-height: 700px;"></video>
+    <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light"></video>
 
     <!-- Overlay spectateurs -->
     <div id="viewersOverlay" style="position:absolute;top:10px;left:10px;z-index:10;color:white;">
