@@ -389,6 +389,30 @@ select:-moz-focusring {
   border-color: #e50914;
   color: #fff;
 }
+/* === BOUTON DÉCONNEXION PREMIUM === */
+.btn-logout {
+  background: linear-gradient(135deg, #e50914, #b4060f);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.8rem 1.6rem;
+  border: none;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.5);
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: linear-gradient(135deg, #ff0f1d, #d10010);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(255, 0, 20, 0.6);
+}
+
+.btn-logout:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+}
 
   </style>
 </head>
@@ -1127,9 +1151,18 @@ select:-moz-focusring {
 <script>
   document.getElementById("fullscreenBtn")?.addEventListener("click", () => {
     const container = document.getElementById("videoContainer");
-    if (container.requestFullscreen) container.requestFullscreen();
-    else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+
+    // Si on est déjà en plein écran → quitter
+    if (document.fullscreenElement) {
+        document.exitFullscreen();
+    } 
+    else {
+        // Sinon → entrer en plein écran
+        if (container.requestFullscreen) container.requestFullscreen();
+        else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+    }
 });
+
 
 /* === RÉFÉRENCES DOM === */
 const startBtn     = document.getElementById('startLiveBtn');

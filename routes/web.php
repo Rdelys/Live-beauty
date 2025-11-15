@@ -43,6 +43,13 @@ Route::get('/admin/modeles/{id}/edit', [ModeleController::class, 'edit'])->name(
 Route::put('/admin/modeles/{id}', [ModeleController::class, 'update'])->name('modeles.update');
 Route::delete('/admin/modeles/{id}', [ModeleController::class, 'destroy'])->name('modeles.destroy');
 
+
+// stripe
+    Route::post('/stripe/create-session', [StripeController::class, 'createCheckoutSession'])->name('stripe.create');
+Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+
+
 // Jetons
 Route::post('/jetons/store', [JetonController::class, 'store'])->name('jetons.store');
 
@@ -265,9 +272,6 @@ Route::post('/live/start-private', [App\Http\Controllers\LiveController::class, 
     Route::post('/live/stop-private', [App\Http\Controllers\LiveController::class, 'stopPrivate'])
     ->name('live.stopPrivate');
 
-    Route::post('/stripe/create-session', [StripeController::class, 'createCheckoutSession'])->name('stripe.create');
-Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
-Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
 
 
 Route::post('/modele/{modele}/gallery-photo', [GalleryPhotoController::class, 'store'])

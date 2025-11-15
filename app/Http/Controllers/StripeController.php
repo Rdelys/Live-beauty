@@ -14,7 +14,7 @@ class StripeController extends Controller
         $user = Auth::user();
         $pack = $request->input('pack'); // { jetons: int, prix: float }
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         $session = Session::create([
             'payment_method_types' => ['card'],
