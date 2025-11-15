@@ -53,5 +53,6 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // autres middlewares
         'block.countries' => \App\Http\Middleware\BlockCountries::class,
+        'admin.auth' => \App\Http\Middleware\AdminAuth::class,
     ];
 }

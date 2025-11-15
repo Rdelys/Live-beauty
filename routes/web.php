@@ -14,6 +14,8 @@ use App\Models\JetonPropose;
 use Illuminate\Http\Request;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\GalleryPhotoController;
+use App\Http\Controllers\AdminLoginController;
+use App\Http\Controllers\AdminController;
 
 
 
@@ -55,7 +57,7 @@ Route::post('/jetons/store', [JetonController::class, 'store'])->name('jetons.st
 
 // Auth pour modèle modeles.livebeautyofficial.com
 Route::get('/modele/login', function (Request $request) {
-    if ($request->getHost() !== '127.0.0.1') {
+    if ($request->getHost() !== 'modeles.livebeautyofficial.com') {
         abort(403, 'Accès interdit');
     }
     return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
@@ -303,3 +305,19 @@ Route::post('/gallery-photo/reorder', [GalleryPhotoController::class, 'reorder']
 
 Route::post('/modele/profil/{id}/album', [GalleryPhotoController::class, 'storeAlbum'])
     ->name('albums.store');
+
+// Page login admin
+Route::get('/admin-login', [AdminLoginController::class, 'showForm'])->name('admin.login');
+
+// Soumission du login
+Route::post('/admin-login', [AdminLoginController::class, 'login'])->name('admin.login.submit');
+
+// Zone admin sécurisée
+Route::middleware('admin.auth')->group(function () {
+
+    // Page admin principale (basée sur MODELECONTROLLER)
+    Route::get('/admin', [ModeleController::class, 'index'])->name('admin');
+
+    // Déconnexion admin
+    Route::post('/admin-logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+});

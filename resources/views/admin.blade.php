@@ -355,6 +355,12 @@ footer {
     <a href="#" class="menu-link">Liste des jetons proposés</a>
     <a href="#" class="menu-link">Ajout jetons proposés</a>
   </div>
+  <form method="POST" action="{{ route('admin.logout') }}">
+    @csrf
+    <button class="btn btn-danger w-100 mt-3">
+        <i class="fas fa-sign-out-alt"></i> Déconnexion
+    </button>
+</form>
 </div>
 
 <div class="content">
