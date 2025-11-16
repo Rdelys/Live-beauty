@@ -786,16 +786,17 @@ select:-moz-focusring {
 
 
   <!-- Galerie existante -->
+<div id="galleryScrollable" style="max-height: 620px; overflow-y: auto; padding-right: 10px;">
   <div class="row gallery-sortable" id="gallerySortable">
-  @foreach($modele->galleryPhotos->whereNotNull('photo_url')->sortBy('position_photo') as $photo)
-<div class="col-6 col-md-3 mb-4 sortable-item"
-     data-id="{{ $photo->id }}"
-     data-album-id="{{ $photo->album_id ?? '' }}">
-      <div class="card bg-dark text-white border-light position-relative">
+      @foreach($modele->galleryPhotos->whereNotNull('photo_url')->sortBy('position_photo') as $photo)
+      <div class="col-6 col-md-3 mb-4 sortable-item"
+        data-id="{{ $photo->id }}"
+        data-album-id="{{ $photo->album_id ?? '' }}">
+        <div class="card bg-dark text-white border-light position-relative">
   <!-- 🏷️ Badge d'ordre -->
-  <div class="photo-order-badge">{{ $photo->position_photo }}</div>
-  <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
- <div class="card-body text-center">
+          <div class="photo-order-badge">{{ $photo->position_photo }}</div>
+            <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
+              <div class="card-body text-center">
             @if($photo->payant)
               <span class="badge bg-danger">Payant</span>
               <p class="mb-1">💰 {{ $photo->prix }} Jetons</p>
@@ -820,10 +821,12 @@ select:-moz-focusring {
               @method('DELETE')
               <button class="btn btn-sm btn-danger mt-2">🗑️ Supprimer</button>
             </form>
-           </div>
+          </div>
+        </div>
       </div>
+    @endforeach
     </div>
-  @endforeach
+
 </div>
 
   @if($modele->galleryPhotos->whereNotNull('photo_url')->isEmpty())
