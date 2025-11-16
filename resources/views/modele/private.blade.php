@@ -756,8 +756,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // feedback utilisateur — personnalisé selon le type
       // feedback utilisateur — personnalisé selon le type
-const message = type === 'video' ? '✅ Vidéo achetée avec succès !' : '✅ Photo achetée avec succès !';
-alert(message);
+const message = type === 'video'
+    ? 'Vidéo achetée avec succès !'
+    : 'Photo achetée avec succès !';
+
+// Ouvre la modal de succès
+const successModal = new bootstrap.Modal(document.getElementById('achatSuccessModal'));
+successModal.show();
+
 
 btn.innerText = message.replace('✅ ', ''); // juste "Photo achetée"
 btn.classList.add('disabled');
@@ -852,6 +858,25 @@ function filterPhotosByAlbum(albumId) {
   });
 }
 </script>
+<!-- Modal de succès après achat -->
+<div class="modal fade" id="achatSuccessModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white text-center p-4" style="border-radius: 12px;">
+        
+        <div class="mb-3">
+            <i class="fas fa-shopping-bag fa-3x text-success"></i>
+        </div>
+
+        <h4 class="fw-bold text-success">Photo ajoutée à votre galerie privée</h4>
+        <p class="mt-2">Vous pouvez dès maintenant la retrouver dans votre espace privé.</p>
+
+        <a href="{{ route('achats.mes') }}" class="btn btn-success mt-3 px-4">
+            Voir ma galerie privée
+        </a>
+
+    </div>
+  </div>
+</div>
 
 
 @endsection
