@@ -21,22 +21,34 @@ class HostFilter
             // - /logout
             // - /login
             $allowedPatterns = [
-                '#^$#',                           // racine /
-                '#^modele(/.*)?$#',               // /modele ou /modele/...
-                '#^password(/.*)?$#',             // /password ou /password/...
-                '#^login$#',                      // /login
-                '#^logout$#',                     // /logout
+    '#^$#',
+    '#^modele(/.*)?$#',
+    '#^password(/.*)?$#',
+    '#^login$#',
+    '#^logout$#',
 
-                // ✅ autoriser les actions live
-                '#^live/start$#',
-                '#^live/stop$#',
-                '#^live/start-private$#',
-                '#^live/stop-private$#',
+    // Live
+    '#^live/start$#',
+    '#^live/stop$#',
+    '#^live/start-private$#',
+    '#^live/stop-private$#',
 
-                // ✅ autoriser API Live
-                '#^api/live/start$#',
-                '#^api/live/stop$#',
-            ];
+    // API Live
+    '#^api/live/start$#',
+    '#^api/live/stop$#',
+
+    // Album (update, delete, edit)
+    '#^albums/update/\d+$#',
+    '#^albums/\d+/edit$#',
+    '#^albums/\d+$#',  // destroy
+
+    // Gallery Photo (update, delete, destroyMultiple)
+    '#^gallery-photo/update/\d+$#',
+    '#^gallery-photo/\d+$#',
+    '#^gallery-photo/destroy/\d+$#',
+    '#^gallery-photo/destroyMultiple$#',
+];
+
 
 
             $path = ltrim($request->path(), '/');
