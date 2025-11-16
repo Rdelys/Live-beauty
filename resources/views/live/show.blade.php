@@ -1100,7 +1100,7 @@ video {
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
 
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")

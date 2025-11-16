@@ -439,6 +439,22 @@ select:-moz-focusring {
   box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
 }
 
+/* === Agrandir la vidéo client === */
+#incomingClientVideo.expanded {
+    width: 60vw !important;
+    height: 45vw !important;
+    max-width: 800px;
+    max-height: 600px;
+    position: absolute;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+    z-index: 99999 !important;
+    box-shadow: 0 0 25px rgba(255,255,255,0.3);
+    border: 2px solid #ff416c;
+}
+
+
   </style>
 </head>
 <body>
@@ -1206,10 +1222,16 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com", {
+socket = io("http://localhost:3000/", {
     path: '/socket.io',
     transports: ['websocket']
 });
+
+socket.emit("join-public", {
+    pseudo: "{{ $modele->prenom }}"
+});
+
+
 
 // Indicateur "en train d'écrire"
 let typingTimeout;
@@ -1260,6 +1282,40 @@ socket.on('client-offer', async (data) => {
   toggleClientViewBtn.style.display = 'block'; // ✅ au lieu de stopViewingClientBtn
 };
 
+let isClientExpanded = false;
+
+incomingClientVideo.addEventListener("click", () => {
+    if (!incomingClientVideo.srcObject) return;
+
+    if (isClientExpanded) {
+        incomingClientVideo.classList.remove("expanded");
+        isClientExpanded = false;
+    } else {
+        incomingClientVideo.classList.add("expanded");
+        isClientExpanded = true;
+    }
+});
+// === rendre la vidéo client draggable ===
+function makeDraggable(el) {
+    let offsetX = 0, offsetY = 0, isDown = false;
+
+    el.addEventListener("mousedown", (e) => {
+        if (isClientExpanded) return; // pas de drag en mode full
+        isDown = true;
+        offsetX = el.offsetLeft - e.clientX;
+        offsetY = el.offsetTop - e.clientY;
+    });
+
+    document.addEventListener("mouseup", () => isDown = false);
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDown) return;
+        el.style.left = (e.clientX + offsetX) + "px";
+        el.style.top = (e.clientY + offsetY) + "px";
+    });
+}
+
+makeDraggable(incomingClientVideo);
 
   pc.onicecandidate = (ev) => {
     if (ev.candidate) socket.emit('client-candidate', { to: clientId, candidate: ev.candidate });
