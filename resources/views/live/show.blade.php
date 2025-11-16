@@ -1176,13 +1176,16 @@ if (messageInputtest) {
   messageInputtest.addEventListener('keydown', function() {
     if (socket) {
       const payload = {
-        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
-        isModel: false
-      };
-      @if(isset($showPriveId))
-        payload.showPriveId = "{{ $showPriveId }}";
-      @endif
-      socket.emit("typing", payload);
+  pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+  isModel: false,
+  modeleId: {{ $modele->id }}
+};
+@if(isset($showPriveId))
+  payload.showPriveId = "{{ $showPriveId }}";
+@endif
+
+socket.emit("typing", payload);
+
     }
 
     clearTimeout(typingTimeout);
@@ -1548,6 +1551,8 @@ async function startClientCam() {
     clientPc.onicecandidate = event => {
       if (event.candidate) {
         socket.emit('client-candidate', {
+              modeleId: {{ $modele->id }},
+
           toRoom: isPrivateEnabled && showPriveId ? `prive-${showPriveId}` : 'public',
           candidate: event.candidate,
           from: clientSocketId
@@ -1564,6 +1569,8 @@ async function startClientCam() {
 
     // envoi de l'offer au serveur (qui forwarde au modèle)
     socket.emit('client-offer', {
+          modeleId: {{ $modele->id }},
+
       showPriveId: showPriveId ?? null,
       offer: clientPc.localDescription,
       from: clientSocketId
@@ -1592,7 +1599,11 @@ function stopClientCam() {
     clientCameraBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
     clientAudioBtn.innerHTML  = '<i class="fa-solid fa-microphone"></i>';
     // informer le serveur / modèle
-    socket.emit('client-stop', { showPriveId: showPriveId ?? null, from: clientSocketId });
+socket.emit('client-stop', {
+    modeleId: {{ $modele->id }},
+    showPriveId: showPriveId ?? null,
+    from: clientSocketId
+});
   } catch (e) {
     console.warn(e);
   }
@@ -1744,6 +1755,8 @@ socket.on("broadcaster", () => {
     socket.emit("chat-message", {
         pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
         message: msg,
+            modeleId: {{ $modele->id }},
+
         showPriveId: "{{ $showPriveId ?? '' }}"
     });
 
@@ -2034,6 +2047,8 @@ document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item =>
                 emoji: emoji,
                 cost: cost,
                 pseudo: pseudo,
+                    modeleId: {{ $modele->id }},
+
                 showPriveId: "{{ $showPriveId ?? '' }}"
 
             });
@@ -2090,6 +2105,8 @@ socket.emit("jeton-sent", {
     description: description,
     pseudo: pseudo,
     isGolden: isGolden,
+        modeleId: {{ $modele->id }},
+
     showPriveId: "{{ $showPriveId ?? '' }}"
 });
         }

@@ -1228,7 +1228,8 @@ socket = io("http://localhost:3000/", {
 });
 
 socket.emit("join-public", {
-    pseudo: "{{ $modele->prenom }}"
+    pseudo: "{{ $modele->prenom }}",
+    modeleId: {{ $modele->id }}
 });
 
 
@@ -1240,15 +1241,19 @@ const messageInput = document.getElementById("messageInput");
 messageInput.addEventListener('keydown', function() {
     if (socket) {
         socket.emit("typing", {
-            pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
-            isModel: true
-        });
+    pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+    modeleId: {{ $modele->id }},
+    isModel: true
+});
+
     }
     
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
         if (socket) {
-            socket.emit("stopTyping");
+socket.emit("stopTyping", {
+    modeleId: {{ $modele->id }}
+});
         }
     }, 1000);
 });
@@ -1324,7 +1329,11 @@ makeDraggable(incomingClientVideo);
   await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
-  socket.emit('client-answer', { toClientSocketId: clientId, description: pc.localDescription });
+socket.emit('client-answer', {
+    toClientSocketId: clientId,
+    description: pc.localDescription,
+    modeleId: {{ $modele->id }}
+});
 });
 
 // model stops viewing -> inform client(s)
@@ -1332,7 +1341,10 @@ stopViewingClientBtn?.addEventListener('click', () => {
   Object.keys(clientPeerConnections).forEach(clientId => {
     clientPeerConnections[clientId]?.close();
     delete clientPeerConnections[clientId];
-    socket.emit('client-disconnect', { to: clientId });
+socket.emit('client-disconnect', {
+    to: clientId,
+    modeleId: {{ $modele->id }}
+});
   });
   incomingClientVideo.srcObject = null;
   incomingClientVideo.style.display = 'none';
@@ -1548,6 +1560,8 @@ toggleMicBtn?.addEventListener("click", () => {
         // 🔴 Envoi automatique d'un message au chat
         socket.emit("chat-message", {
             pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+                modeleId: {{ $modele->id }},
+
             message: isMicMuted 
                 ? "🎤 Le modèle a coupé son micro." 
                 : "🎤 Le modèle a réactivé son micro."
@@ -1572,6 +1586,8 @@ pauseLiveBtn?.addEventListener("click", () => {
     // Envoi automatique au chat
     socket.emit("chat-message", {
         pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
+            modeleId: {{ $modele->id }},
+
         message: isPaused 
             ? "⏸ Le modèle a mis le live en pause." 
             : "▶️ Le modèle a repris le live."
@@ -1724,7 +1740,8 @@ function sendMessage(e) {
     socket.emit("chat-message", {
         pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
         message: msg,
-        color: color
+        color: color,
+        modeleId: {{ $modele->id }}
     });
 
     document.getElementById("messageInput").value = '';
@@ -2007,6 +2024,7 @@ privateSocket.emit("broadcaster", {
       if (!msg) return;
       privateSocket.emit("chat-message", {
         showPriveId: currentShowPriveId,
+            modeleId: {{ $modele->id }},
         pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
         message: msg
       });
