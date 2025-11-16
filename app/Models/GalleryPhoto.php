@@ -32,4 +32,6 @@ class GalleryPhoto extends Model
     return $this->belongsTo(Album::class);
 }
 
+
+
 }

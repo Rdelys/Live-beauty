@@ -563,11 +563,16 @@ ul.list-unstyled li {
     <img src="{{ asset('storage/' . $item->photo_url) }}" alt="Photo"
          style="{{ $blurStyle }}" data-path="{{ $item->photo_url }}" />
 
-    @if($item->payant)
-        <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
-            <span class="badge bg-success mb-2">{{ $item->prix }} jetons</span><br>
-        </div>
-    @endif
+    @php
+    $prixAlbum = $item->album ? $item->album->prix : null;
+@endphp
+
+@if($item->payant && $prixAlbum)
+    <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
+        <span class="badge bg-success mb-2">{{ $prixAlbum }} jetons</span><br>
+    </div>
+@endif
+
 </div>
 
         @empty
