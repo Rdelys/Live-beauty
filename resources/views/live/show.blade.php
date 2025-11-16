@@ -13,1035 +13,842 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <style>
-    #clientCamControls {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+    :root{
+  /* couleurs / thèmes */
+  --bg-1: #0b0014;
+  --bg-2: #3a004a;
+  --accent: #ff1744;
+  --accent-2: #ff4081;
+  --muted: rgba(255,255,255,0.12);
+  --glass: rgba(0,0,0,0.35);
+  --card: rgba(255,255,255,0.03);
+  --soft-border: rgba(255,255,255,0.08);
+  --gold-1: #ffd54f;
+  --gold-2: #ffb300;
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --shadow-1: 0 10px 30px rgba(0,0,0,0.35);
+  --shadow-soft: 0 6px 18px rgba(0,0,0,0.35);
+  --glass-blur: 12px;
+
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-#clientCamControls button {
-  width: 46px;
-  height: 46px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  color: rgba(255,255,255,0.85);
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-#clientCamControls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#clientCamControls button:not(:disabled):hover {
-  background: linear-gradient(135deg, #ff4b2b, #ff416c);
-  color: white;
-  transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(255,65,108,0.5);
-}
-
-#clientCamControls i {
-  pointer-events: none;
-}
-
-    .fullscreen-icon {
-  background: linear-gradient(135deg, #212121, #333);
-  color: #e0e0e0;
-  box-shadow: 0 0 15px rgba(255,255,255,0.05);
-}
-
-.fullscreen-icon:hover {
-  background: linear-gradient(135deg, #444, #111);
-  box-shadow: 0 0 18px rgba(255,255,255,0.15);
-}
-@keyframes pulseFinished {
-  0%   { transform: scale(1); opacity: 1; }
-  50%  { transform: scale(1.2); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-    body {
+/* ===== Reset / Base ===== */
+* { box-sizing: border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+html,body { height:100%; }
+body {
   margin: 0;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-sans);
   color: #fff;
-  background: linear-gradient(135deg, #0b0014 0%, #22011f 35%, #3a004a 70%, #0b0014 100%);
-  background-attachment: fixed;
-  background-size: 400% 400%;
-  animation: bgSexy 20s ease infinite;
+  background: radial-gradient(circle at 20% 20%, #ff2a6d20, transparent 60%),
+              radial-gradient(circle at 80% 70%, #8a2be220, transparent 60%),
+              radial-gradient(circle at 50% 40%, #ff008020, transparent 70%),
+              #0a0012;
+  background-size: 200% 200%;
+  animation: bgNeonSmoke 18s ease-in-out infinite alternate;
   overflow-x: hidden;
 }
 
-@keyframes bgSexy {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.container-live {
-  max-width: 1300px;
-  margin: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-}
-
-.left-live {
-  flex: 2;
-  background-color: transparent;
-  border-radius: 12px;
-  padding: 2rem;
-  min-width: 320px;
+@keyframes bgNeonSmoke {
+  0%   { background-position: 20% 20%; }
+  50%  { background-position: 80% 60%; }
+  100% { background-position: 40% 10%; }
 }
 
 
-.right-jetons {
-  flex: 1;
-  background-color: #212121;
-  border-radius: 12px;
-  padding: 2rem;
-  min-width: 280px;
+/* subtle animated background */
+@keyframes bg-pan { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
+
+/* ===== Layout container ===== */
+.container-live{
+  max-width:1600px;
+  margin: 24px auto;
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+  padding: 0 16px;
 }
 
-video {
-  width: 100%;
-  height: auto;
-  max-height: none; /* Supprimer la limite */
-  border: 4px solid #e53935;
-  border-radius: 12px;
-  object-fit: cover; /* Adapté pour plein écran */
+/* left = video, right = chat column */
+.left-live{ flex:3; position:relative; min-width:0; }
+#videoContainer{
+  height:95vh;
+  border-radius:var(--radius-lg);
+  background:var(--glass);
+  padding:14px;
+  box-shadow: var(--shadow-1), inset 0 0 25px rgba(255,255,255,0.03);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+#videoContainer video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius: 14px;
+  border: 3px solid rgba(255,255,255,0.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
 }
 
-
-.badge-live {
-  background-color: #e53935;
-  padding: 8px 18px;
-  color: white;
-  font-weight: bold;
-  border-radius: 20px;
-  display: inline-block;
-  margin: 1rem 0;
-  font-size: 1rem;
-  animation: pulse 1.2s infinite;
+/* ===== Chat Column (fixed input at bottom) ===== */
+/* BEM-like: #chatColumn is the block */
+#chatColumn{
+  width:350px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 22px;
+  border: 1px solid var(--soft-border);
+  padding: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  backdrop-filter: blur(var(--glass-blur));
+  display:flex;
+  flex-direction:column;
+  height:75vh;            /* same height as videoContainer */
+  min-height:420px;
+  position:relative;
+  overflow:hidden;
 }
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+/* align top with video (if page layout requires margin) */
+#chatColumn--topFix { margin-top: 270px; } /* optional helper (kept for backward compat) */
+
+/* Elements inside chat column */
+#chatColumn .chat__header{
+  margin-bottom:8px;
+  font-weight:700;
+  letter-spacing:0.2px;
 }
 
-/* Jetons stylisés */
-.jeton-card {
-  background: linear-gradient(145deg, #2f2f2f, #1f1f1f);
-  border: 1px solid #444;
-  border-radius: 16px;
-  padding: 1rem 1.2rem;
-  margin-bottom: 1.2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: transform 0.2s ease;
+/* messages area - grows, scrollable */
+#messages.chat-wrapper{
+  flex:1 1 auto;
+  overflow-y:auto;
+  padding:12px;
+  border-radius:12px;
+  background: var(--card);
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.25);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  scroll-behavior: smooth;
 }
 
-.jeton-card:hover {
-  transform: scale(1.02);
+/* hide default scrollbar but keep scrolling accessible */
+#messages.chat-wrapper::-webkit-scrollbar{ width:8px; }
+#messages.chat-wrapper::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.06); border-radius:8px; }
+
+/* single chat bubble */
+.chat-bubble{
+  display:inline-block;
+  max-width:90%;
+  padding:8px 12px;
+  border-radius:12px;
+  background: rgba(255,255,255,0.06);
+  color:#fff;
+  font-weight:600;
+  word-wrap:break-word;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
 }
 
-.jeton-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* typing indicator variant */
+#typingIndicator{ opacity:.85; font-style:italic; font-weight:600; }
+
+/* ===== Chat form pinned to bottom ===== */
+/* The form is visually fixed inside the chat column (not page-fixed) */
+#chatForm{
+  flex:0 0 auto;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding-top:12px;
+  border-top: 1px solid rgba(255,255,255,0.03);
+  margin-top:12px;
+  background: transparent;
 }
 
-.jeton-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #f8f8f8;
-}
-
-.jeton-desc {
-  font-size: 0.85rem;
-  color: #ccc;
-}
-
-.jeton-btn {
-  background-color: #ff1744;
-  color: #fff;
+/* make sure inputs have accessible sizes */
+#chatForm input[type="text"],
+#chatForm input[type="search"]{
+  flex:1 1 auto;
+  height:42px;
+  padding: 10px 12px;
+  border-radius: 10px;
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  font-size: 0.95rem;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size:14px;
+  outline: none;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.35);
 }
 
-.jeton-btn:hover {
-  background-color: #d50000;
+/* send button */
+#chatForm button[type="submit"]{
+  flex:0 0 auto;
+  height:42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border:none;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color:#fff;
+  font-weight:800;
+  box-shadow: 0 6px 18px rgba(255,0,80,0.18);
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+#chatForm button[type="submit"]:hover{ transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,0,80,0.24); }
+
+/* if mobile: stack small */
+@media (max-width:576px){
+  #chatColumn{ width:100%; height:60vh; padding:14px; }
+  #chatForm{ gap:8px; }
+  #chatForm input{ height:40px; font-size:14px; padding:8px 10px; }
+  #chatForm button{ height:40px; padding:0 14px; font-size:14px; }
 }
 
-.jeton-btn:disabled {
-  background-color: #666;
-  cursor: not-allowed;
+/* ===== Token icons & menus (refactored, no duplication) ===== */
+.video-top-icons{
+  position:absolute;
+  top:14px;
+  right:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:1200;
+  align-items:center;
+}
+.token-icon{
+  width:50px; height:50px;
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(25,25,25,0.75);
+  color:#fff; font-size:22px; border:none;
+  cursor:pointer; transition: all .22s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 0 8px rgba(255,255,255,0.06);
+}
+.token-icon:hover{ transform: translateY(-4px) scale(1.04); filter:brightness(1.05); }
+.fullscreen-icon{ background: linear-gradient(135deg,#212121,#333); color:#e0e0e0; }
+
+/* golden / surprise variants */
+.golden-icon{
+  background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+  color:#3a2300; font-weight:700;
+  box-shadow: 0 0 18px rgba(255,193,7,0.28), inset 0 0 8px rgba(255,255,255,0.12);
+  animation: glow-gold 3s infinite ease-in-out;
+}
+@keyframes glow-gold{ 0%,100%{box-shadow:0 0 15px rgba(255,193,7,0.35)}50%{box-shadow:0 0 28px rgba(255,215,64,0.8)} }
+.surprise-icon{ background: linear-gradient(135deg,#6a1b9a,#ba68c8); box-shadow: 0 0 18px rgba(186,104,200,0.28); }
+
+/* token menu panel */
+.token-menu{
+  position:absolute;
+  top:56px; right:0;
+  min-width:240px;
+  background: rgba(15,15,15,0.88);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:10px;
+  display:none;
+  flex-direction:column; gap:8px;
+  z-index:1150;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  transform-origin: top right;
+}
+.token-menu.open{ display:flex; animation: menu-in .2s ease both; }
+@keyframes menu-in{ from{opacity:0; transform: translateY(-8px) scale(.96)} to{opacity:1; transform:none} }
+
+.token-menu .menu-title{ font-size:0.9rem; color: #ffbdf3; text-align:center; font-weight:600; letter-spacing:.2px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.04) }
+.token-choice{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px; border-radius:8px; cursor:pointer;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
+  border:1px solid rgba(255,255,255,0.03);
+  transition: all .18s ease;
+  font-weight:600;
+}
+.token-choice:hover{ transform:scale(1.02); background: linear-gradient(135deg,#ff4081,#7c4dff); box-shadow: 0 8px 24px rgba(255,64,129,0.18) }
+
+/* grid for surprises */
+.token-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; }
+.token-item{ border-radius:10px; padding:10px 8px; text-align:center; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); transition: transform .18s ease, box-shadow .18s ease;}
+.token-item:hover{ transform:translateY(-4px) scale(1.03); box-shadow:0 10px 30px rgba(0,0,0,0.45); background: linear-gradient(135deg,#ff4081,#7c4dff); }
+.token-emoji{ font-size:1.8rem; margin-bottom:6px; }
+
+/* token bubbles that animate above the video */
+.token-bubble{
+  position:absolute;
+  bottom:120px;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:700;
+  background: rgba(40,40,40,0.78);
+  color:#fff;
+  z-index:1200;
+  pointer-events:none;
+  animation: bubble-float 2200ms forwards;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+.token-bubble.golden{ background: linear-gradient(90deg,var(--gold-1),var(--gold-2)); color:#2b1600; }
+@keyframes bubble-float{ 0%{opacity:1; transform:translateY(0) scale(1)} 60%{transform:translateY(-40px) scale(1.02)} 100%{opacity:0; transform:translateY(-110px) scale(.95)} }
+
+/* ===== Misc UI: buttons, overlays, modals ===== */
+.btn-premium-quit{
+  background: linear-gradient(90deg,#ff4081,#f50057);
+  color:#fff; border:none; border-radius:50px; padding:12px 28px; font-weight:700;
+  box-shadow: 0 8px 30px rgba(255,64,129,0.2); cursor:pointer;
+}
+.badge-live{ background:var(--accent); padding:8px 16px; border-radius:20px; font-weight:700; display:inline-block; animation:badge-pulse 1.2s infinite; }
+@keyframes badge-pulse{0%{opacity:1}50%{opacity:.6}100%{opacity:1}}
+
+/* pause overlay shown over video when paused */
+#pauseOverlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; background:rgba(0,0,0,0.7); color:var(--accent-2); font-size:1.4rem; z-index:2000; backdrop-filter: blur(6px); }
+
+/* start overlay click to enable audio */
+#startOverlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.8); z-index:1000; cursor:pointer; font-weight:700; }
+
+/* small watermark */
+#watermark{ position:fixed; right:10px; bottom:10px; opacity:.28; font-size:12px; pointer-events:none; z-index:9999 }
+
+/* fullscreen adjustments */
+#videoContainer:fullscreen, #videoContainer:-webkit-full-screen{ width:100vw; height:100vh; border-radius:0; padding:0; display:flex; align-items:center; justify-content:center; background:#000; }
+#videoContainer:fullscreen .video-top-icons, #videoContainer:-webkit-full-screen .video-top-icons{ top:12px; right:12px; z-index:99999; }
+
+/* mobile responsive layout */
+@media (max-width:992px){
+  .container-live{ flex-direction:column; gap:14px; }
+  .left-live{ order:1; }
+  #chatColumn{ order:2; width:100%; height:auto; min-height:220px; margin-top:0; }
+  #videoContainer{ height:55vh; }
 }
 
-/* Chat bulles/messages */
-.chat-wrapper {
-  position: absolute;
-  bottom: 100px; /* au-dessus du champ de texte */
-  left: 10px;
-  right: 10px;
-  max-height: 150px;
-  overflow-y: auto;
-  padding-right: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.95rem;
-  z-index: 9999;
-  pointer-events: auto;
-  scrollbar-width: none; /* Firefox */
+/* small cleanup / utility */
+.hidden{ display:none !important; }
+.center{ display:flex; align-items:center; justify-content:center; }
+
+/* ===== Accessibility helpers ===== */
+button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-offset:2px; }
+
+/* ===== Deprecated / internal compatibility notes =====
+- Pour garder compatibilité avec ton HTML Blade existant, on conserve les IDs : #chatColumn, #messages.chat-wrapper, #chatForm, #startOverlay, #pauseOverlay, .video-top-icons, .token-menu, .token-bubble, etc.
+- Le formulaire de chat (#chatForm) est positionné naturellement en bas via flex column (il n'est pas "position:fixed" sur la page) — il reste collé au bas du #chatColumn et les messages défilent au-dessus.
+*/
+#chatColumn {
+    margin-top: 240px !important;
 }
 
-.chat-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome */
+/* ===== Bouton Retour ===== */
+#backBtn {
+    background: linear-gradient(135deg, #2c003b, #4a0061);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35),
+                inset 0 0 12px rgba(255,255,255,0.05);
+    transition: all 0.25s ease;
+}
+#backBtn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4a0061, #7c1fa1);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.5);
 }
 
-.chat-bubble {
-  background: none; /* Pas de fond */
-  padding: 0;
-  border-radius: 0;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 700; /* Texte plus épais */
-  text-shadow: 
-    1px 1px 3px rgba(0, 0, 0, 0.8),
-    -1px -1px 2px rgba(0, 0, 0, 0.6); /* Ombre pour lisibilité */
-  pointer-events: none;
-  max-width: 90%;
-  word-wrap: break-word;
-  animation: fadeInUp 0.3s ease-out;
+/* ===== Badge EN DIRECT ===== */
+.badge-live {
+    background: linear-gradient(135deg, #ff1744, #ff4081);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 6px 16px rgba(255, 64, 129, 0.3),
+                inset 0 0 8px rgba(255,255,255,0.15);
+    animation: badgePulse 1.4s infinite ease-in-out;
 }
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-
-
-
-/*@keyframes fadeOut {
-  0% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-20px); }
+@keyframes badgePulse {
+    0%,100% { transform:scale(1); opacity:1; }
+    50%     { transform:scale(1.05); opacity:0.75; }
 }
 
-/* Chat Form */
-#videoContainer {
+/* ===== Affichage des jetons ===== */
+.jetons-display {
+    background: rgba(255,255,255,0.08);
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1rem;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.25),
+                0 4px 14px rgba(0,0,0,0.3);
+}
+.jetons-display #userJetons {
+    color: #ffd740;
+    font-weight: 900;
+}
 
+/* ===== Timer Privé ===== */
+#privateTimer {
+    background: linear-gradient(135deg, rgba(0,0,0,0.75), rgba(30,0,60,0.8));
+    padding: 8px 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ffd740;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45),
+                inset 0 0 12px rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+    animation: timerGlow 2s infinite ease-in-out;
+}
+@keyframes timerGlow {
+    0%,100% { box-shadow: 0 0 12px rgba(255,215,64,0.25); }
+    50%     { box-shadow: 0 0 24px rgba(255,215,64,0.55); }
+}
+
+/* ============================================
+   🌹 MODALS PREMIUM, SEXY & GLASS NEON
+   ============================================ */
+
+.modal-premium {
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(0, 0, 0, 0.55)
+    );
+    backdrop-filter: blur(18px);
+    border-radius: 26px !important;
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 0;
+    overflow: hidden;
+    box-shadow:
+        0 12px 45px rgba(0,0,0,0.6),
+        inset 0 0 30px rgba(255,255,255,0.05);
     position: relative;
 }
 
-#chatForm {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
-    border-radius: 10px;
-    width: calc(100% - 40px);
-    max-width: 700px;
-    box-sizing: border-box;
-    z-index: 1000; /* Toujours au-dessus de la vidéo */
+/* Effet néon rose autour du modal */
+.modal-premium::before {
+    content:"";
+    position:absolute;
+    inset:-3px;
+    border-radius:30px;
+    background: radial-gradient(circle at 50% 0%,
+        rgba(255,64,129,0.45),
+        rgba(255,255,255,0) 70%
+    );
+    filter: blur(14px);
+    z-index:-1;
 }
 
-#chatForm input {
-  flex: 1;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: none;
-  background: rgba(255,255,255,0.15);
-  color: #fff;
+/* Glow animé interne très sexy */
+.modal-glow {
+    position:absolute;
+    inset:0;
+    background: radial-gradient(circle at 50% 120%,
+        rgba(255,0,90,0.28),
+        transparent 70%);
+    filter: blur(40px);
+    opacity: 0.9;
+    animation: modalGlow 5s ease-in-out infinite alternate;
+}
+@keyframes modalGlow {
+    0% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.03); }
 }
 
-#chatForm button {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  background: #e53935;
-  color: #fff;
-  font-weight: bold;
+/* Icône sexy rose */
+.premium-icon {
+    font-size: 3.6rem;
+    background: linear-gradient(135deg, #ff4081, #ff77a9);
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: iconPulse 2s infinite ease-in-out;
+}
+@keyframes iconPulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.85; }
 }
 
-#chatForm button:hover {
-  background: #d32f2f;
+/* Titre glam */
+.modal-premium h4,
+.modal-premium h5 {
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(255, 64, 129, 0.4);
 }
 
-/* En plein écran */
-#videoContainer:fullscreen #chatForm,
-#videoContainer:-webkit-full-screen #chatForm {
-    bottom: 20px;
-    width: calc(100% - 30px);
-}
-
-/* Responsive */
-@media (max-width: 992px) {
-  .container-live {
-    flex-direction: column;
-  }
-
-  .left-live, .right-jetons {
-    width: 100%;
-    padding: 1.5rem;
-  }
-
-  .jeton-btn {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-  }
-
-  #chatForm {
-    flex-direction: column;
-    padding: 8px;
-  }
-
-  .chat-bubble {
-    font-size: 0.9rem;
-    max-width: 95%;
-  }
-}
-
-@media (max-width: 576px) {
-  body {
-    padding: 1rem 0.5rem;
-  }
-
-  h2, h4, h5 {
-    font-size: 1.2rem;
-  }
-
-  .jeton-name {
+/* Texte */
+.modal-premium p {
     font-size: 1rem;
-  }
-
-  .jeton-desc {
-    font-size: 0.8rem;
-  }
-
-  .jeton-btn {
-    font-size: 0.85rem;
-    padding: 0.3rem 0.6rem;
-  }
-
- #chatForm {
-  width: 95%;
-  bottom: 15px;
+    opacity: 0.85;
+    line-height: 1.5;
 }
 
-#chatForm {
-  width: 95%;
-  bottom: 15px;
+/* Boutons premium */
+.modal-premium .btn {
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 700;
+    transition: 0.3s;
 }
 
-#chatForm input,
-#chatForm button {
-  font-size: 0.9rem;
-  padding: 0.4rem;
+.modal-premium .btn-danger {
+    background: linear-gradient(135deg, #ff4081, #ff1744) !important;
+    border: none !important;
+    box-shadow: 0 8px 20px rgba(255,64,129,0.4);
+}
+.modal-premium .btn-danger:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
 }
 
-#videoContainer:fullscreen #chatForm,
-#videoContainer:-webkit-full-screen #chatForm {
-  position: absolute;
-  bottom: 20px;
-  width: 95%;
-  max-width: 700px;
+.modal-premium .btn-secondary {
+    background: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
 }
-
-}
-#videoContainer:fullscreen {
-  width: 100vw;
-  height: 100vh;
-  background-color: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#videoContainer:-webkit-full-screen { /* pour Safari/Chrome */
-  width: 100vw;
-  height: 100vh;
-  background-color: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-/* ICONS & MENUS POUR JETONS */
-.video-top-icons {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  z-index: 1200;
-}
-
-/* Adapter pour mobile */
-@media (max-width: 576px) {
-  .video-top-icons {
-    top: 8px;
-    right: 8px;
-    gap: 6px;
-  }
-}
-
-/* Quand on est en plein écran */
-#videoContainer:fullscreen .video-top-icons,
-#videoContainer:-webkit-full-screen .video-top-icons {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 99999; /* Très haut pour passer au-dessus */
-}
-
-
-
-/* Icones */
-/* Base commune aux icônes */
-.token-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  border: none;
-  background: rgba(25,25,25,0.75);
-  color: #fff;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  backdrop-filter: blur(8px);
-  box-shadow:
-    0 4px 14px rgba(0,0,0,0.5),
-    inset 0 0 8px rgba(255,255,255,0.1);
-}
-
-/* Effet général au survol */
-.token-icon:hover {
-  transform: translateY(-4px) scale(1.05);
-  filter: brightness(1.2);
-}
-.token-icon:active { transform: scale(.96); }
-
-/* Gold style for model tokens */
-.golden-icon {
-  background: linear-gradient(135deg, #ffb300, #ff9800);
-  color: #3a2300;
-  font-weight: bold;
-  box-shadow:
-    0 0 15px rgba(255,193,7,0.35),
-    inset 0 0 8px rgba(255,255,255,0.25);
-  animation: glowGold 3s infinite ease-in-out;
-}
-
-@keyframes glowGold {
-  0%, 100% { box-shadow: 0 0 15px rgba(255,193,7,0.4); }
-  50% { box-shadow: 0 0 25px rgba(255,215,64,0.8); }
-}
-
-.golden-icon:hover {
-  background: linear-gradient(135deg, #ffd740, #ffb300);
-  transform: translateY(-4px) scale(1.1);
-}
-
-.surprise-icon {
-  background: linear-gradient(135deg, #6a1b9a, #ba68c8);
-  color: #fff;
-  box-shadow:
-    0 0 18px rgba(186,104,200,0.35),
-    inset 0 0 8px rgba(255,255,255,0.25);
-  animation: pulseViolet 3s infinite ease-in-out;
-}
-
-@keyframes pulseViolet {
-  0%, 100% { box-shadow: 0 0 15px rgba(186,104,200,0.35); }
-  50% { box-shadow: 0 0 30px rgba(186,104,200,0.7); }
-}
-
-.surprise-icon:hover {
-  background: linear-gradient(135deg, #8e24aa, #ce93d8);
-  transform: translateY(-4px) scale(1.1);
-  box-shadow: 0 0 25px rgba(206,147,216,0.6);
-}
-
-/* === Petites animations au clic === */
-.token-icon:active {
-  transform: scale(0.95);
-  filter: brightness(0.9);
-}
-
-/* ==== MENUS TOKENS / SURPRISES PREMIUM ==== */
-.token-menu {
-  position: absolute;
-  top: 56px;
-  right: 0;
-  min-width: 240px;
-  background: rgba(15, 15, 15, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 12px 10px;
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 1150;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 0 25px rgba(255, 0, 100, 0.25),
-              0 0 45px rgba(255, 255, 255, 0.05);
-  transform-origin: top right;
-  animation: fadeInMenu 0.25s ease-out;
-}
-
-@keyframes fadeInMenu {
-  from { opacity: 0; transform: scale(0.9) translateY(-8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-
-.token-menu .menu-title {
-  font-size: 0.9rem;
-  color: #ffbdf3;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.token-choice {
-  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.05);
-  color: #fff;
-  text-align: left;
-  padding: 10px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.token-choice:hover {
-  background: linear-gradient(135deg, #ff4081, #7c4dff);
-  color: #fff;
-  transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(255,64,129,0.4);
-}
-
-/* BULLES QUI APPARAISSENT SUR LA VIDEO */
-.token-bubble {
-  position: absolute;
-  bottom: 120px; /* au-dessus du chat */
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 700;
-  color: #fff;
-  background: rgba(40,40,40,0.75);
-  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
-  z-index: 1200;
-  pointer-events: none;
-  animation: floatUp 2200ms forwards;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
-.token-bubble.golden {
-  background: linear-gradient(90deg,#ffd54f,#ffb300);
-  color: #2b1600;
-  transform-origin: center;
-}
-
-/* position aléatoire horizontal (we will set left via js) */
-@keyframes floatUp {
-  0% { opacity: 1; transform: translateY(0) scale(1); }
-  60% { opacity: 1; transform: translateY(-40px) scale(1.02); }
-  100% { opacity: 0; transform: translateY(-110px) scale(.95); }
-}
-
-/* responsive adjustments */
-@media (max-width: 576px) {
-  .video-top-icons {
-    top: 10px;
-    right: 10px;
-    gap: 8px;
-  }
-
-  .token-icon {
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
-    border-radius: 10px;
-  }
-  .token-menu { right: -6px; min-width: 180px; top: 48px; }
-  .token-bubble { bottom: 150px; font-size: 0.9rem; padding: 8px 12px; }
-}
-
-#typingIndicator {
-    opacity: 0.7;
-    font-size: 0.9em;
-    animation: pulseTyping 1.5s infinite;
-}
-
-@keyframes pulseTyping {
-    0% { opacity: 0.5; }
-    50% { opacity: 0.9; }
-    100% { opacity: 0.5; }
-}
-
-.token-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 colonnes */
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.token-item {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.token-item:hover {
-  background: linear-gradient(135deg, #ff4081, #7c4dff);
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 0 25px rgba(255,64,129,0.35);
-}
-
-.token-emoji {
-  font-size: 1.9rem;
-  margin-bottom: 4px;
-  text-shadow: 0 2px 8px rgba(255,255,255,0.25);
-}
-
-.token-cost {
-  font-size: 0.85rem;
-  color: #ccc;
-}
-
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 15px rgba(255,64,129,0.4); }
-  50% { box-shadow: 0 0 25px rgba(255,64,129,0.7); }
-}
-
-.token-menu.open {
-  display: flex !important;
-  animation: fadeInMenu 0.25s ease-out forwards;
-}
-
-@media screen and (max-width: 768px) {
-    #videoContainer {
-        height: 80vh; /* prend 80% de la hauteur de l'écran */
-    }
-
-    #videoContainer video {
-        height: 100%;
-        width: 100%;
-        object-fit: cover; /* évite les bandes noires */
-    }
-}
-
-#backBtn {
-  background: linear-gradient(135deg, #ff1744, #d50000); /* Rouge dégradé */
-  color: #fff;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  padding: 0.6rem 1.2rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-#backBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-}
-
-#backBtn:active {
-  transform: scale(0.97);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-#localPreview {
-    position: absolute;
-    top: 50px; right: 1050px;
-    width: 140px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid rgba(255,255,255,0.3);
-    box-shadow: 0 0 12px rgba(0,0,0,0.4);
-    display: none;
-    z-index: 10; /* sous les menus et boutons */
-  }
-
-  /* Boutons stylisés, verticaux sous Surprise */
-  .clientCamBtn {
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(6px);
-  }
-
-  .clientCamBtn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.25);
+.modal-premium .btn-secondary:hover {
+    background: rgba(255,255,255,0.2) !important;
     transform: translateY(-2px);
-  }
+}
 
-  .clientCamBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+/* X close blanc premium */
+.btn-close-white {
+    filter: invert(1) brightness(1.5);
+}
 
-  .tooltip-text {
-    display: none;
+/* Animation apparition */
+.modal.fade .modal-dialog {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    transition: 0.35s ease-out;
+}
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+
+/* === FULLSCREEN MODE: floating chat bubble === */
+#videoContainer:fullscreen #chatFloating,
+#videoContainer:-webkit-full-screen #chatFloating {
     position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.9);
-    color: #fff;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    max-height: 50vh;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 12px;
+    z-index: 999999999;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: floatIn .25s ease-out;
+    cursor: grab;
+}
+
+@keyframes floatIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+/* draggable indicator */
+#chatFloating.dragging {
+    opacity: 0.75;
+    cursor: grabbing;
+}
+
+/* messages */
+#chatFloatingMsgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.35);
+}
+
+/* mini input */
+#chatFloatingInput {
+    display: flex;
+    gap: 6px;
+}
+
+#chatFloatingInput input {
+    flex: 1;
+    border-radius: 10px;
     padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-
-  .clientCamBtn:hover:disabled .tooltip-text {
-    display: block;
-  }
-
-  /* ==== MODALE PREMIUM ==== */
-.modal-premium {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #000000 100%);
-  border-radius: 20px;
-  box-shadow: 0 0 30px rgba(255, 64, 129, 0.3);
-  overflow: hidden;
-  position: relative;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
 }
 
-.modal-premium h4 {
-  font-size: 1.5rem;
-  background: linear-gradient(90deg, #ff4081, #ff80ab);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+#chatFloatingInput button {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg,#ff4081,#ff1744);
+    color: white;
+    font-weight: 700;
 }
 
-.modal-premium .premium-icon {
-  font-size: 3rem;
-  animation: pulseHeart 2s infinite ease-in-out;
+/* hide main chat column fullscreen */
+#videoContainer:fullscreen ~ #chatColumn,
+#videoContainer:-webkit-full-screen ~ #chatColumn {
+    display: none !important;
 }
 
-@keyframes pulseHeart {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.2); opacity: 1; }
-}
-
-/* Effet de glow rose doux */
-.modal-premium .modal-glow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(255,64,129,0.15), transparent 70%);
-  z-index: 0;
-  animation: rotateGlow 8s linear infinite;
-}
-
-@keyframes rotateGlow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Bouton Quitter */
-.btn-premium-quit {
-  background: linear-gradient(90deg, #ff4081, #f50057);
-  color: #fff;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  transition: all 0.25s ease;
-  box-shadow: 0 0 15px rgba(255, 64, 129, 0.4);
-  position: relative;
-  z-index: 2;
-}
-
-.btn-premium-quit:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 0 25px rgba(255, 64, 129, 0.6);
-  background: linear-gradient(90deg, #f50057, #ff80ab);
-}
-
-@keyframes pulsePause {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.7; }
-}
 
   </style>
 </head>
 <body>
   <div class="container-live">
-  
-
     <!-- LIVE Section -->
     <div class="left-live">
       <button id="backBtn" class="btn btn-secondary mb-3">
           ← Retour
       </button>
       <h2>{{ $modele->prenom }} est en Live 🎥</h2>
-      <div class="badge-live">🔴 EN DIRECT</div>
-@auth
-<div class="text-white mb-2">
-    💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
-</div>
-@endauth
-<!-- Chrono privé -->
-<div id="privateTimer"
-     style="position:absolute;top:10px;left:50%;transform:translateX(-50%);
-            background:rgba(0,0,0,0.6);color:#fff;
-            padding:6px 12px;border-radius:6px;
-            font-weight:bold;z-index:10;">
-    00:00
-</div>
-@auth
-    @if(Auth::user()->role != 'modele' && !isset($showPriveId))
-        <div class="text-center my-3">
-            <button id="switchPrivateBtn" class="btn btn-danger">
-              🚪 Passer en show privée
-            </button>
-        </div>
-    @endif
-@endauth
+
+          <div class="badge-live">
+            🔴 EN DIRECT
+          </div>
+
+          @auth
+            <div class="jetons-display mb-2">
+                💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
+            </div>
+
+          @endauth
+
+          <!-- Chrono privé -->
+          <div id="privateTimer"
+              style="position:absolute;top:10px;left:50%;transform:translateX(-50%);
+                      background:rgba(0,0,0,0.6);color:#fff;
+                      padding:6px 12px;border-radius:6px;
+                      font-weight:bold;z-index:10;">
+              00:00
+          </div>
+
+          @auth
+              @if(Auth::user()->role != 'modele' && !isset($showPriveId))
+                  <div class="text-center my-3">
+                      <button id="switchPrivateBtn" class="btn btn-danger">
+                        🚪 Passer en show privée
+                      </button>
+                  </div>
+              @endif
+          @endauth
+
+        <div id="videoContainer" style="position: relative;">
+
+          @auth
+            <div id="startOverlay" style="
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); color: white;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            font-size: 1.5rem;
+            cursor: pointer;
+            ">
+            ▶️ Cliquez pour démarrer le live avec son
+            </div>
+          @endauth
 
 
+          <video id="liveVideo" autoplay playsinline controls></video>
 
+            <!-- ✅ Overlay Premium quand la vidéo est en pause -->
 
-<div id="videoContainer" style="position: relative;">
-  @auth
-  <div id="startOverlay" style="
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.8); color: white;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
-  font-size: 1.5rem;
-  cursor: pointer;
-  ">
-  ▶️ Cliquez pour démarrer le live avec son
-  </div>
+          <div id="pauseOverlay" style="
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: #ff4081;
+            font-size: 1.8rem;
+            font-weight: 600;
+            z-index: 2000;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+          ">
+
+            <div style="animation: pulsePause 1.5s infinite;">
+              🔒 Live en pause
+            </div>
+
+            <div style="font-size:1rem; color:#fff; margin-top:8px; opacity:0.8;">
+              Touchez l’écran pour reprendre
+            </div>
+
+          </div>
+
+          @auth
+            <!-- Default tokens icon -->
+              <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
+                💠
+              </button>-->
+
+            <div class="video-top-icons" aria-hidden="false">
+              <button id="fullscreenBtn" class="token-icon fullscreen-icon" title="Plein écran" type="button">
+                ⛶
+              </button>
+
+              <!-- Model personal tokens icon (gold) -->
+              <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
+                ✨
+              </button>
+
+              <button id="modelSurpriseTokensBtn" class="token-icon surprise-icon" title="Surprises" type="button">
+                🎁
+              </button>
+            
+                  <!-- === Client: Camera / Voix Buttons (sous Surprise) === -->
+              <!-- Inclure Font Awesome (si pas déjà présent dans ta page) -->
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+              <div id="clientCamControls" style="margin-top:8px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+
+                <button id="clientCameraBtn" disabled title="Vous devez être en show privée"
+                  style="
+                    width:46px;
+                    height:46px;
+                    border:none;
+                    border-radius:14px;
+                    background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                    color:rgba(255,255,255,0.85);
+                    font-size:18px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+                    backdrop-filter:blur(8px);
+                    cursor:pointer;
+                    transition:all 0.25s ease;
+                    position:relative;
+                    overflow:hidden;
+                  "
+                  onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
+                  onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
+                >
+                  <i class="fa-solid fa-video" style="pointer-events:none;"></i>
+                </button>
+
+                <button id="clientAudioBtn" disabled title="Vous devez être en show privée"
+                  style="
+                    width:46px;
+                    height:46px;
+                    border:none;
+                    border-radius:14px;
+                    background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                    color:rgba(255,255,255,0.85);
+                    font-size:18px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+                    backdrop-filter:blur(8px);
+                    cursor:pointer;
+                    transition:all 0.25s ease;
+                    position:relative;
+                    overflow:hidden;
+                  "
+                  onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
+                  onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
+                >
+                  <i class="fa-solid fa-microphone" style="pointer-events:none;"></i>
+                </button>
+              </div>
+
+              <!-- Mini preview locale (en bas à gauche du player) -->
+              <video id="localPreview" autoplay muted playsinline style="width:160px;height:120px;object-fit:cover;border-radius:8px;display:none;"></video>
+
+              <!-- Menus (remplis via Blade) -->
+              <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
+                <div class="menu-title">Jetons standards</div>
+                @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
+                @foreach($jetonsGlobaux as $jeton)
+                <button class="token-choice"
+                data-name="{{ $jeton->nom }}"
+                data-cost="{{ $jeton->nombre_de_jetons }}"
+                data-description="{{ $jeton->description }}">
+                {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} {{ $jeton->modele_id ? '✨' : '💠' }}
+                </button>
+                @endforeach
+              </div>
+
+              <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
+                <div class="menu-title">Actions de {{ $modele->prenom }}</div>
+                @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
+                @foreach($jetonsPerso as $jeton)
+                <button class="token-choice"
+                    data-name="{{ $jeton->nom }}"
+                    data-cost="{{ $jeton->nombre_de_jetons }}"
+                    data-description="{{ $jeton->description }}">
+                    {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
+                </button>
+                @endforeach
+              </div>
+              <!-- Menu Surprise -->
+              <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
+                <div class="menu-title">Envoyer une Surprise ✨</div>
+                <div class="token-grid">
+                    <div class="token-item" data-cost="1"><div class="token-emoji">💌</div><div class="token-cost">1</div></div>
+                    <div class="token-item" data-cost="5"><div class="token-emoji">🌹</div><div class="token-cost">5</div></div>
+                    <div class="token-item" data-cost="10"><div class="token-emoji">🎀</div><div class="token-cost">10</div></div>
+                    <div class="token-item" data-cost="50"><div class="token-emoji">💎</div><div class="token-cost">50</div></div>
+                    <div class="token-item" data-cost="100"><div class="token-emoji">💋</div><div class="token-cost">100</div></div>
+                    <div class="token-item" data-cost="250"><div class="token-emoji">🍸</div><div class="token-cost">250</div></div>
+                    <div class="token-item" data-cost="500"><div class="token-emoji">🎁</div><div class="token-cost">500</div></div>
+                    <div class="token-item" data-cost="750"><div class="token-emoji">💄</div><div class="token-cost">750</div></div>
+                    <div class="token-item" data-cost="1000"><div class="token-emoji">👑</div><div class="token-cost">1000</div></div>
+                </div>
+              </div>
+            </div>
+          @endauth
+          <div id="chatFloating" style="display:none;">
+              <div id="chatFloatingMsgs"></div>
+
+              <div id="chatFloatingInput">
+                  <input type="text" id="floatingMsgInput" placeholder="Écrire...">
+                  <button id="floatingSendBtn">➤</button>
+              </div>
+          </div>
+        </div> 
+    </div> 
+    <div id="chatColumn">
+      <div id="messages" class="chat-wrapper"></div>
+      @auth
+        @if(Auth::user()->role != 'modele')
+        <form id="chatForm" onsubmit="sendMessage(event)">
+            <input type="text" id="messageInput" placeholder="Tape ton message..." required>
+            <button type="submit" class="btn btn-danger">Envoyer</button>
+        </form>
+        @endif
       @endauth
-
-
-  <video id="liveVideo" autoplay playsinline controls></video>
-  <!-- ✅ Overlay Premium quand la vidéo est en pause -->
-<div id="pauseOverlay" style="
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
-  color: #ff4081;
-  font-size: 1.8rem;
-  font-weight: 600;
-  z-index: 2000;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-">
-  <div style="animation: pulsePause 1.5s infinite;">
-    🔒 Live en pause
-  </div>
-  <div style="font-size:1rem; color:#fff; margin-top:8px; opacity:0.8;">
-    Touchez l’écran pour reprendre
-  </div>
-</div>
-
-    @auth
-     <!-- Default tokens icon -->
-      <!--<button id="defaultTokensBtn" class="token-icon" title="Jetons standards" type="button">
-        💠
-      </button>-->
-
-  <div class="video-top-icons" aria-hidden="false">
-    <button id="fullscreenBtn" class="token-icon fullscreen-icon" title="Plein écran" type="button">
-    ⛶
-</button>
-
-     
-      <!-- Model personal tokens icon (gold) -->
-      <button id="modelTokensBtn" class="token-icon golden-icon" title="Actions du modèle" type="button">
-        ✨
-      </button>
-
-      <button id="modelSurpriseTokensBtn" class="token-icon surprise-icon" title="Surprises" type="button">
-        🎁
-      </button>
-
-      <!-- === Client: Camera / Voix Buttons (sous Surprise) === -->
-<!-- Inclure Font Awesome (si pas déjà présent dans ta page) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<div id="clientCamControls" style="margin-top:8px; display:flex; flex-direction:column; align-items:center; gap:8px;">
-
-  <button id="clientCameraBtn" disabled title="Vous devez être en show privée"
-    style="
-      width:46px;
-      height:46px;
-      border:none;
-      border-radius:14px;
-      background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-      color:rgba(255,255,255,0.85);
-      font-size:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 4px 10px rgba(0,0,0,0.3);
-      backdrop-filter:blur(8px);
-      cursor:pointer;
-      transition:all 0.25s ease;
-      position:relative;
-      overflow:hidden;
-    "
-    onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
-    onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
-  >
-    <i class="fa-solid fa-video" style="pointer-events:none;"></i>
-  </button>
-
-  <button id="clientAudioBtn" disabled title="Vous devez être en show privée"
-    style="
-      width:46px;
-      height:46px;
-      border:none;
-      border-radius:14px;
-      background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-      color:rgba(255,255,255,0.85);
-      font-size:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 4px 10px rgba(0,0,0,0.3);
-      backdrop-filter:blur(8px);
-      cursor:pointer;
-      transition:all 0.25s ease;
-      position:relative;
-      overflow:hidden;
-    "
-    onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
-    onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
-  >
-    <i class="fa-solid fa-microphone" style="pointer-events:none;"></i>
-  </button>
-
-</div>
-
-
-<!-- Mini preview locale (en bas à gauche du player) -->
-<video id="localPreview" autoplay muted playsinline style="width:160px;height:120px;object-fit:cover;border-radius:8px;display:none;"></video>
-
-
-      <!-- Menus (remplis via Blade) -->
-      <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
-        <div class="menu-title">Jetons standards</div>
-        @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
-        @foreach($jetonsGlobaux as $jeton)
-        <button class="token-choice"
-        data-name="{{ $jeton->nom }}"
-        data-cost="{{ $jeton->nombre_de_jetons }}"
-        data-description="{{ $jeton->description }}">
-        {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} {{ $jeton->modele_id ? '✨' : '💠' }}
-        </button>
-        @endforeach
-      </div>
-
-      <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
-        <div class="menu-title">Actions de {{ $modele->prenom }}</div>
-        @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
-        @foreach($jetonsPerso as $jeton)
-        <button class="token-choice"
-            data-name="{{ $jeton->nom }}"
-            data-cost="{{ $jeton->nombre_de_jetons }}"
-            data-description="{{ $jeton->description }}">
-            {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
-        </button>
-        @endforeach
-      </div>
-      <!-- Menu Surprise -->
-      <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
-        <div class="menu-title">Envoyer une Surprise ✨</div>
-        <div class="token-grid">
-            <div class="token-item" data-cost="1"><div class="token-emoji">💌</div><div class="token-cost">1</div></div>
-            <div class="token-item" data-cost="5"><div class="token-emoji">🌹</div><div class="token-cost">5</div></div>
-            <div class="token-item" data-cost="10"><div class="token-emoji">🎀</div><div class="token-cost">10</div></div>
-            <div class="token-item" data-cost="50"><div class="token-emoji">💎</div><div class="token-cost">50</div></div>
-            <div class="token-item" data-cost="100"><div class="token-emoji">💋</div><div class="token-cost">100</div></div>
-            <div class="token-item" data-cost="250"><div class="token-emoji">🍸</div><div class="token-cost">250</div></div>
-            <div class="token-item" data-cost="500"><div class="token-emoji">🎁</div><div class="token-cost">500</div></div>
-            <div class="token-item" data-cost="750"><div class="token-emoji">💄</div><div class="token-cost">750</div></div>
-            <div class="token-item" data-cost="1000"><div class="token-emoji">👑</div><div class="token-cost">1000</div></div>
-        </div>
-      </div>
     </div>
-    @endauth
-    <div class="chat-wrapper" id="messages"></div>
-    <!-- ICONES JETONS (INSÉRER DANS #videoContainer, après <video>) -->
-    @auth
-      @if(Auth::user()->role != 'modele') {{-- modèle ne peut pas envoyer --}}
-      <form id="chatForm" class="d-flex" onsubmit="sendMessage(event)">
-        <input type="text" id="messageInput" class="form-control me-2" placeholder="Tape ton message..." required>
-        <button type="submit" class="btn btn-danger">Envoyer</button>
-      </form>
-      @endif
-    @endauth
-      </div>
-</div>
+  </div> 
 
-
-      @if(!Auth::check())
+  @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
     <p class="text-warning fs-5">
       ⏳ Il vous reste <span id="countdown">10</span> secondes de live gratuit.
@@ -1050,27 +857,24 @@ video {
       🔒 Connecte-toi ou crée un compte pour continuer à regarder le live.
     </p>
   </div>
-@endif
-@if(!Auth::check())
-<script>
-  let seconds = 10;
-  const countdownElement = document.getElementById('countdown');
+    @endif
+    @if(!Auth::check())
+    <script>
+      let seconds = 10;
+      const countdownElement = document.getElementById('countdown');
 
-  const countdownInterval = setInterval(() => {
-    seconds--;
-    countdownElement.textContent = seconds;
+      const countdownInterval = setInterval(() => {
+        seconds--;
+        countdownElement.textContent = seconds;
 
-    if (seconds <= 0) {
-      clearInterval(countdownInterval);
-      window.location.href = "{{ route('home') }}";
-    }
-  }, 1000);
-</script>
-@endif
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          window.location.href = "{{ route('home') }}";
+        }
+      }, 1000);
+    </script>
+    @endif
 
-    </div>
-
-  </div>
 
   <!-- Modal confirmation show privé -->
 <div class="modal fade" id="confirmPrivateModal" tabindex="-1" aria-labelledby="confirmPrivateLabel" aria-hidden="true">
@@ -1100,7 +904,7 @@ video {
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
 
 <script>
-  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1813,6 +1617,72 @@ document.getElementById("fullscreenBtn").addEventListener("click", () => {
         if (container.requestFullscreen) container.requestFullscreen();
         else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
     }
+});
+const chatColumn = document.getElementById("chatColumn");
+const chatFloating = document.getElementById("chatFloating");
+const chatFloatingMsgs = document.getElementById("chatFloatingMsgs");
+const floatingInput = document.getElementById("floatingMsgInput");
+const floatingSendBtn = document.getElementById("floatingSendBtn");
+
+/* === FULLSCREEN: show floating chat === */
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+    const v = document.getElementById("videoContainer");
+
+    if (!document.fullscreenElement) {
+        v.requestFullscreen();
+        setTimeout(() => {
+            chatFloating.style.display = "flex";
+        }, 400);
+    } else {
+        document.exitFullscreen();
+        chatFloating.style.display = "none";
+    }
+});
+
+/* === Sync new messages to floating chat === */
+function pushToFloating(msgHtml) {
+    const div = document.createElement("div");
+    div.className = "chat-bubble";
+    div.innerHTML = msgHtml;
+    chatFloatingMsgs.appendChild(div);
+    chatFloatingMsgs.scrollTop = chatFloatingMsgs.scrollHeight;
+}
+
+/* Intercepter tes messages existants */
+const originalAppend = messagesDiv.appendChild.bind(messagesDiv);
+messagesDiv.appendChild = function (node) {
+    originalAppend(node.cloneNode(true));
+    pushToFloating(node.innerHTML);
+};
+
+/* === Send from floating input === */
+floatingSendBtn.addEventListener("click", () => {
+    const msg = floatingInput.value.trim();
+    if (!msg) return;
+    messageInput.value = msg; 
+    sendMessage(new Event("submit"));
+    floatingInput.value = "";
+});
+
+/* === DRAGGABLE FLOATING CHAT === */
+let drag = false, offsetX = 0, offsetY = 0;
+
+chatFloating.addEventListener("mousedown", (e) => {
+    drag = true;
+    chatFloating.classList.add("dragging");
+    offsetX = e.clientX - chatFloating.offsetLeft;
+    offsetY = e.clientY - chatFloating.offsetTop;
+});
+
+document.addEventListener("mouseup", () => {
+    drag = false;
+    chatFloating.classList.remove("dragging");
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (!drag) return;
+    chatFloating.style.left = (e.clientX - offsetX) + "px";
+    chatFloating.style.top = (e.clientY - offsetY) + "px";
 });
 
 
