@@ -31,6 +31,13 @@ class BlockCountries
             return $next($request);
         }
 
+        // Autoriser le sous-domaine modeles.livebeautyofficial.com
+        if ($request->getHost() === 'modeles.livebeautyofficial.com') {
+            \Log::info("Sous-domaine autorisé, blocage IP ignoré : " . $request->getHost());
+            return $next($request);
+        }
+
+
         $ip = $request->getClientIp();
 
         // Ignore GeoIP pour local
