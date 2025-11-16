@@ -21,6 +21,52 @@
    Responsive & Professionnel
 ============================ */
 
+/* Modal - Thème sombre */
+.modal-content {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #333;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333;
+}
+
+.modal-footer {
+    border-top: 1px solid #333;
+}
+
+/* Inputs sombres */
+.modal-content .form-control {
+    background-color: #222;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.modal-content .form-control:focus {
+    background-color: #222;
+    border-color: #ff4444; /* légèrement rouge pour cohérence */
+    box-shadow: none;
+    color: #fff;
+}
+
+/* Boutons */
+.btn-secondary {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: #0055ff;
+    border: 1px solid #0077ff;
+}
+
+.btn-close {
+    filter: invert(1); /* transforme la croix en blanc */
+}
+
+
 body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #000000, #1a1a1a);
@@ -607,37 +653,63 @@ select:-moz-focusring {
     <!-- 📚 Création d’un nouvel album -->
 <div class="card bg-dark text-white border-light mb-4 p-3 shadow">
   <h5 class="text-danger mb-3">Créer un nouvel album 📸</h5>
-  <form action="{{ route('albums.store', $modele->id) }}" method="POST">
-    @csrf
-    <div class="row align-items-end">
-      <div class="col-md-8 mb-3">
-        <label class="form-label">Nom de l’album</label>
-        <input type="text" name="nom" class="form-control" required placeholder="Ex : Séance été 2025">
-      </div>
-      <div class="col-md-4 mb-3">
-        <button class="btn btn-danger w-100">➕ Créer l’album</button>
-      </div>
+  <!-- dans profil.blade.php — bloc Création d’un nouvel album -->
+<form action="{{ route('albums.store', $modele->id) }}" method="POST">
+  @csrf
+  <div class="row align-items-end">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Nom de l’album</label>
+      <input type="text" name="nom" class="form-control" required placeholder="Ex : Séance été 2025">
     </div>
-  </form>
+
+    <div class="col-md-3 mb-3">
+      <label class="form-label">Prix (Jetons)</label>
+      <input type="number" step="0.01" name="prix" class="form-control" placeholder="Ex : 20">
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <button class="btn btn-danger w-100">➕ Créer l’album</button>
+    </div>
+  </div>
+</form>
+
 </div>
 
 <!-- 🎞️ Liste des albums -->
 @if($modele->albums && $modele->albums->count())
   <div class="row g-4 mb-4">
     @foreach($modele->albums as $album)
-      <div class="col-6 col-md-3">
-        <div class="card text-white text-center bg-dark border-light shadow position-relative">
-          <div class="card-body">
-            <h5 class="card-title text-danger">{{ $album->nom }}</h5>
-            <p class="mb-1">{{ $album->photos->count() }} photo(s)</p>
-            <button class="btn btn-outline-light btn-sm mt-2"
-                    onclick="filterPhotosByAlbum({{ $album->id }})">
-              Voir les photos
-            </button>
-          </div>
-        </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-white text-center bg-dark border-light shadow position-relative">
+      <div class="card-body">
+        <h5 class="card-title text-danger">{{ $album->nom }}</h5>
+        <p class="mb-1">{{ $album->photos->count() }} photo(s)</p>
+        @if(!is_null($album->prix))
+          <p class="mb-2">💰 {{ $album->prix }} Jetons</p>
+        @endif
+
+        <button class="btn btn-outline-light btn-sm mt-2" onclick="filterPhotosByAlbum({{ $album->id }})">Voir les photos</button>
+
+        <!-- Modifier (modal) -->
+        <button class="btn btn-sm btn-warning mt-2"
+                data-bs-toggle="modal"
+                data-bs-target="#editAlbumModal"
+                data-id="{{ $album->id }}"
+                data-nom="{{ e($album->nom) }}"
+                data-prix="{{ $album->prix ?? '' }}">
+          ✏️ Modifier
+        </button>
+
+        <!-- Supprimer -->
+        <form action="{{ route('albums.destroy', $album->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer l\\'album et toutes ses photos ?')">
+          @csrf
+          @method('DELETE')
+          <button class="btn btn-sm btn-danger mt-2">🗑️ Supprimer</button>
+        </form>
       </div>
-    @endforeach
+    </div>
+  </div>
+@endforeach
 
     <!-- 🌟 Carte Afficher tout -->
     <div class="col-6 col-md-3">
@@ -758,6 +830,7 @@ select:-moz-focusring {
     <p class="text-muted text-center">Aucune photo dans la galerie.</p>
   @endif
 </div>
+
 
   <div class="tab-pane fade show active text-start" id="profil" role="tabpanel">
     <p><strong>Nom :</strong> {{ $modele->nom }}</p>
@@ -2487,6 +2560,53 @@ function filterPhotosByAlbum(albumId) {
 }
 </script>
 
+<!-- Modal Edit Album -->
+<div class="modal fade" id="editAlbumModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editAlbumForm" method="POST">
+      @csrf
+      @method('PUT')
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier l'album</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nom</label>
+            <input type="text" name="nom" id="editAlbumNom" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Prix (Jetons)</label>
+            <input type="number" step="0.01" name="prix" id="editAlbumPrix" class="form-control" placeholder="Ex: 20">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const editAlbumModal = document.getElementById('editAlbumModal');
+  const editForm = document.getElementById('editAlbumForm');
 
+  editAlbumModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const id = button.getAttribute('data-id');
+    const nom = button.getAttribute('data-nom');
+    const prix = button.getAttribute('data-prix');
+
+    document.getElementById('editAlbumNom').value = nom || '';
+    document.getElementById('editAlbumPrix').value = prix || '';
+
+    // cible du formulaire -> albums.update
+    editForm.action = `/albums/${id}`; // correspond à route albums.update (PUT)
+  });
+});
+</script>
 </body>
 </html>

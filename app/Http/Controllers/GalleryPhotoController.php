@@ -161,12 +161,14 @@ public function storeAlbum(Request $request, $modeleId)
     // 🔒 Validation
     $request->validate([
         'nom' => 'required|string|max:255',
+            'prix' => 'nullable|numeric|min:0',
     ]);
 
     // 🧩 Création de l'album
     Album::create([
         'modele_id' => $modeleId,
         'nom' => $request->nom,
+            'prix' => $request->prix ?: null,
     ]);
 
     // 🔁 Récupération du modèle avec ses albums et photos
@@ -178,6 +180,8 @@ public function storeAlbum(Request $request, $modeleId)
     $successMessage = '✅ Album créé avec succès !';
 
     // 🔙 Retour sur la vue profil.blade.php avec mise à jour
-return view('modele.profil', compact('modele'))->with('success', $successMessage);
+return redirect()
+    ->route('modele.profil')
+    ->with('success', 'Album créé avec succès !');
 }
 }

@@ -303,8 +303,11 @@ Route::get('/admin/historique-jetons', [App\Http\Controllers\JetonController::cl
 Route::post('/gallery-photo/reorder', [GalleryPhotoController::class, 'reorder'])
     ->name('gallery-photo.reorder');
 
-Route::post('/modele/profil/{id}/album', [GalleryPhotoController::class, 'storeAlbum'])
-    ->name('albums.store');
+Route::prefix('albums')->group(function () {
+    Route::post('{modele}', [GalleryPhotoController::class, 'storeAlbum'])->name('albums.store'); // si tu veux garder l'existant
+    Route::put('{album}', [App\Http\Controllers\AlbumController::class, 'update'])->name('albums.update');
+    Route::delete('{album}', [App\Http\Controllers\AlbumController::class, 'destroy'])->name('albums.destroy');
+});
 
 // Page login admin
 Route::get('/admin-login', [AdminLoginController::class, 'showForm'])->name('admin.login');
