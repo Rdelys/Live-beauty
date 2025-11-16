@@ -1206,7 +1206,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com", {
+socket = io("http://localhost:3000/", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1533,7 +1533,9 @@ startBtn.addEventListener('click', async () => {
         stopBtn.style.display = 'inline-block';
 
         // Informer serveur qu'on est le broadcaster
-        socket.emit("broadcaster");
+socket.emit("broadcaster", {
+    modeleId: {{ $modele->id }}
+});
         socket.emit("request-viewers");
 
         // Gestion des watchers

@@ -1100,7 +1100,7 @@ video {
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
 
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1137,11 +1137,13 @@ const peerConnection = new RTCPeerConnection({
   // Dans la partie où vous émettez "watcher"
 socket.on("connect", () => {
     socket.emit("watcher", {
-        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}"
-        @if(isset($showPriveId))
-        , showPriveId: "{{ $showPriveId }}"
-        @endif
-    });
+    pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+    modeleId: {{ $modele->id }},
+    @if(isset($showPriveId))
+        showPriveId: {{ $showPriveId }},
+    @endif
+});
+
 });
 
 
@@ -1705,14 +1707,18 @@ socket.on("show-time", (data) => {
   // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
   // Quand un nouveau broadcaster arrive, on se re-connecte comme watcher
 socket.on("broadcaster", () => {
-  const payload = {
-    pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}"
-  };
-  @if(isset($showPriveId))
-    payload.showPriveId = "{{ $showPriveId }}";
-  @endif
-  socket.emit("watcher", payload);
+    const payload = {
+        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+        room: "public-{{ $modele->id }}"
+    };
+
+    @if(isset($showPriveId))
+        payload.showPriveId = "{{ $showPriveId }}";
+    @endif
+
+    socket.emit("watcher", payload);
 });
+
 
 
   // Nettoyage à la fermeture ou rechargement de la page
