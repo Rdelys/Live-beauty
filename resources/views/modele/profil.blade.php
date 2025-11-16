@@ -784,6 +784,11 @@ select:-moz-focusring {
 </form>
 <!-- ---------- Fin formulaire d’ajout ---------- -->
 
+<div class="text-end mb-3">
+    <button class="btn btn-danger" onclick="deleteSelectedPhotos()">
+        🗑️ Supprimer la sélection
+    </button>
+</div>
 
   <!-- Galerie existante -->
 <div id="galleryScrollable" style="max-height: 620px; overflow-y: auto; padding-right: 10px;">
@@ -792,7 +797,13 @@ select:-moz-focusring {
       <div class="col-6 col-md-3 mb-4 sortable-item"
         data-id="{{ $photo->id }}"
         data-album-id="{{ $photo->album_id ?? '' }}">
+        
         <div class="card bg-dark text-white border-light position-relative">
+          <input type="checkbox"
+               class="select-photo-checkbox"
+               value="{{ $photo->id }}"
+               style="position:absolute; top:10px; right:10px; z-index:20; width:20px; height:20px;">
+
   <!-- 🏷️ Badge d'ordre -->
           <div class="photo-order-badge">{{ $photo->position_photo }}</div>
             <img src="{{ asset('storage/' . $photo->photo_url) }}" class="card-img-top rounded" style="height:200px;object-fit:cover;">
@@ -2611,5 +2622,40 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+<script>
+function deleteSelectedPhotos() {
+    const selected = Array.from(document.querySelectorAll('.select-photo-checkbox:checked'))
+                          .map(cb => cb.value);
+
+    if (selected.length === 0) {
+        alert("Veuillez sélectionner au moins une photo.");
+        return;
+    }
+
+    if (!confirm("Supprimer " + selected.length + " photo(s) ?")) return;
+
+    fetch("{{ route('gallery-photo.multiple-delete') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content
+        },
+        body: JSON.stringify({ ids: selected })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert("Erreur lors de la suppression.");
+        }
+    })
+    .catch(err => {
+        alert("Erreur réseau.");
+        console.error(err);
+    });
+}
+</script>
+
 </body>
 </html>

@@ -324,3 +324,5 @@ Route::middleware('admin.auth')->group(function () {
     // Déconnexion admin
     Route::post('/admin-logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
 });
+Route::post('/gallery-photo/multiple-delete', [GalleryPhotoController::class, 'destroyMultiple'])
+     ->name('gallery-photo.multiple-delete');

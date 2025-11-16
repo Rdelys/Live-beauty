@@ -184,4 +184,24 @@ return redirect()
     ->route('modele.profil')
     ->with('success', 'Album créé avec succès !');
 }
+
+public function destroyMultiple(Request $request)
+{
+    $request->validate([
+        'ids' => 'required|array',
+        'ids.*' => 'exists:gallery_photos,id'
+    ]);
+
+    $photos = GalleryPhoto::whereIn('id', $request->ids)->get();
+
+    foreach ($photos as $photo) {
+        if ($photo->photo_url) {
+            Storage::disk('public')->delete($photo->photo_url);
+        }
+        $photo->delete();
+    }
+
+    return response()->json(['success' => true]);
+}
+
 }
