@@ -184,7 +184,6 @@ return redirect()
     ->route('modele.profil')
     ->with('success', 'Album créé avec succès !');
 }
-
 public function destroyMultiple(Request $request)
 {
     $request->validate([
