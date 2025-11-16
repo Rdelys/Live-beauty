@@ -315,6 +315,43 @@ footer {
   footer .text-muted a:hover {
     text-decoration: underline;
   }
+
+  /* Fond du conteneur */
+.choices__inner {
+    background-color: #2e2f44 !important;  /* ton style dark */
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+
+/* Style du placeholder */
+.choices__inner .choices__input {
+    color: #ccc !important;
+}
+
+/* Fond de la liste déroulante */
+.choices__list--dropdown, 
+.choices__list {
+    background-color: #2e2f44 !important;
+    color: #fff !important;
+}
+
+/* Items sélectionnés */
+.choices__item.choices__item--selectable {
+    background-color: #0d6efd;   /* bleu bootstrap ou ta couleur */
+    color: #fff !important;
+}
+
+/* Items dans la liste */
+.choices__list--dropdown .choices__item {
+    background-color: #2e2f44 !important;
+    color: #fff !important;
+}
+
+/* Item hover */
+.choices__list--dropdown .choices__item--selectable:hover {
+    background-color: #3a3b52 !important;
+}
+
   </style>
 </head>
 <body>

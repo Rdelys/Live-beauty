@@ -20,6 +20,36 @@
    Blanc - Rouge - Noir
    Responsive & Professionnel
 ============================ */
+/* Fond du sélecteur */
+.choices__inner {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+
+/* Couleur du placeholder */
+.choices__input {
+    color: #ccc !important;
+}
+
+/* Dropdown */
+.choices__list--dropdown, 
+.choices__list {
+    background-color: #222 !important;
+    color: #fff !important;
+}
+
+/* Item sélectionné (tag) */
+.choices__item.choices__item--selectable {
+    background-color: #e50914 !important;
+    color: #fff !important;
+}
+
+/* Option hover */
+.choices__list--dropdown .choices__item--selectable:hover {
+    background-color: #333 !important;
+    color: #fff !important;
+}
 
 /* Modal - Thème sombre */
 .modal-content {
@@ -2348,18 +2378,22 @@ togglePrivateMicBtn?.addEventListener("click", () => {
 
           <div class="mb-3">
             <label class="form-label">Langues parlées</label>
-            <select name="langue" class="form-control">
-              <option value="" disabled selected>
-                {{ $modele->langue ? $modele->langue : 'Sélectionnez une langue' }}
-              </option>
-              <option value="FR" {{ (old('langue', $modele->langue) == 'FR') ? 'selected' : '' }}>Français</option>
-              <option value="EN" {{ (old('langue', $modele->langue) == 'EN') ? 'selected' : '' }}>Anglais</option>
-              <option value="DE" {{ (old('langue', $modele->langue) == 'DE') ? 'selected' : '' }}>Allemand</option>
-              <option value="ES" {{ (old('langue', $modele->langue) == 'ES') ? 'selected' : '' }}>Espagnol</option>
-              <option value="IT" {{ (old('langue', $modele->langue) == 'IT') ? 'selected' : '' }}>Italien</option>
-              <option value="PT" {{ (old('langue', $modele->langue) == 'PT') ? 'selected' : '' }}>Portugais</option>
-              <option value="NL" {{ (old('langue', $modele->langue) == 'NL') ? 'selected' : '' }}>Néerlandais</option>
-            </select>
+            <select id="edit-langue" name="langue[]" class="form-control" multiple>
+    @php
+        $langues = is_array($modele->langue) 
+            ? $modele->langue 
+            : explode(',', $modele->langue ?? '');
+    @endphp
+
+    <option value="FR" {{ in_array('FR', $langues) ? 'selected' : '' }}>Français</option>
+    <option value="EN" {{ in_array('EN', $langues) ? 'selected' : '' }}>Anglais</option>
+    <option value="DE" {{ in_array('DE', $langues) ? 'selected' : '' }}>Allemand</option>
+    <option value="ES" {{ in_array('ES', $langues) ? 'selected' : '' }}>Espagnol</option>
+    <option value="IT" {{ in_array('IT', $langues) ? 'selected' : '' }}>Italien</option>
+    <option value="PT" {{ in_array('PT', $langues) ? 'selected' : '' }}>Portugais</option>
+    <option value="NL" {{ in_array('NL', $langues) ? 'selected' : '' }}>Néerlandais</option>
+</select>
+
           </div>
 
           <div class="mb-3">
@@ -2391,6 +2425,26 @@ togglePrivateMicBtn?.addEventListener("click", () => {
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // === Initialiser Choices dans le modal ===
+    const editLangueSelect = document.getElementById('edit-langue');
+
+    if (editLangueSelect) {
+        new Choices(editLangueSelect, {
+            removeItemButton: true,
+            placeholderValue: 'Sélectionnez les langues',
+            searchPlaceholderValue: 'Rechercher...',
+            shouldSort: false,
+        });
+    }
+
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

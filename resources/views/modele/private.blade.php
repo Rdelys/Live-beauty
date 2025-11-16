@@ -310,16 +310,16 @@ ul.list-unstyled li {
             @endif
             @php
     $flags = [
-        'FR' => '🇫🇷 Francais',
-        'EN' => '🇬🇧 Anglais',
-        'ES' => '🇪🇸 Espagnol',
-        'IT' => '🇮🇹 Italien',
-        'DE' => '🇩🇪 Allemand',
-        'PT' => '🇵🇹 Portugais',
-        'AR' => '🇸🇦 Arabe',
-        'RU' => '🇷🇺 Russe',
-        'ZH' => '🇨🇳 Chinois',
-        'JP' => '🇯🇵 Japonais'
+        'FR' => 'Francais',
+        'EN' => 'Anglais',
+        'ES' => 'Espagnol',
+        'IT' => 'Italien',
+        'DE' => 'Allemand',
+        'PT' => 'Portugais',
+        'AR' => 'Arabe',
+        'RU' => 'Russe',
+        'ZH' => 'Chinois',
+        'JP' => 'Japonais'
     ];
 
     $langues = $modele->langue 

@@ -314,16 +314,16 @@
 
                 @php
                     $flags = [
-                        'FR' => '🇫🇷 Français',
-                        'EN' => '🇬🇧 Anglais',
-                        'ES' => '🇪🇸 Espagnol',
-                        'IT' => '🇮🇹 Italien',
-                        'DE' => '🇩🇪 Allemand',
-                        'PT' => '🇵🇹 Portugais',
-                        'AR' => '🇸🇦 Arabe',
-                        'RU' => '🇷🇺 Russe',
-                        'ZH' => '🇨🇳 Chinois',
-                        'JP' => '🇯🇵 Japonais'
+                        'FR' => 'Français',
+                        'EN' => 'Anglais',
+                        'ES' => 'Espagnol',
+                        'IT' => 'Italien',
+                        'DE' => 'Allemand',
+                        'PT' => 'Portugais',
+                        'AR' => 'Arabe',
+                        'RU' => 'Russe',
+                        'ZH' => 'Chinois',
+                        'JP' => 'Japonais'
                     ];
 
                     $langues = $modele->langue
