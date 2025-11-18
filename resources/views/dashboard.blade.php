@@ -1821,6 +1821,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+@include('components.chatbot')
 
 </body>
 </html>
