@@ -446,7 +446,7 @@ ul.list-unstyled li {
                 <div class="card-body">
                     <h5 class="text-success mb-2">{{ $album->nom }}</h5>
                     <p class="text-white mb-1">{{ $album->photos_count }} photo(s)</p>
-                    <span class="badge bg-success">{{ __('Voir l'album') }}</span>
+<span class="badge bg-success">{{ __("Voir l'album") }}</span>
                 </div>
             </div>
         </div>
