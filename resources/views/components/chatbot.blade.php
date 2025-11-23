@@ -240,7 +240,7 @@ document.getElementById("close-chatbot").onclick = () => {
   SOCKET.IO - SINGLETON SAFE
 ------------------------- */
 if (!window.socketChat) {
-    window.socketChat = io("wss://livebeautyofficial.com", {
+    window.socketChat = io("https://livebeautyofficial.com:4000", {
         transports: ["websocket"],
         upgrade: false,
         autoConnect: true
