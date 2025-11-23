@@ -272,26 +272,52 @@ video {
     animation: fadeIn 0.5s ease;
 }
 
-/* ================================
-   RESPONSIVE
-=================================*/
+/* ============================
+   RESPONSIVE MOBILE FIX MENU
+============================ */
 @media (max-width: 992px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Sidebar devient un menu mobile non fixe */
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        padding: 1rem;
-        border-right: none;
+        position: absolute !important;
+        top: 60px; /* sous la navbar mobile */
+        left: 0;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 80vh;
+        overflow-y: auto;
+        background: var(--sidebar-bg);
+        border-right: none !important;
         border-bottom: 1px solid var(--border);
+        padding: 1rem !important;
+        z-index: 9999;
     }
 
+    /* Quand menu collapse est fermé → totalement caché */
+    .collapse:not(.show) {
+        display: none !important;
+    }
+
+    /* Le contenu reprend toute la largeur */
     .content {
-        margin-left: 0;
-        padding: 1.4rem;
+        margin-left: 0 !important;
+        margin-top: 20px;
+        padding: 1rem !important;
     }
 
+    /* Alignement des liens */
     .sidebar a {
-        justify-content: center;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    /* Sous-menus */
+    .submenu {
+        padding-left: 1rem;
     }
 }
 
@@ -1106,17 +1132,51 @@ textarea::-ms-input-placeholder {
     }
 }
 
+/* ================================
+   FIX GLOBAL DES TABLEAUX EN MOBILE
+================================ */
+.table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    display: block !important;
+}
+
+/* Empêche les cellules de s'étirer inutilement */
+table {
+    width: 100% !important;
+    table-layout: auto !important;
+}
+
+/* Les colonnes s’ajustent en mobile */
+@media (max-width: 768px) {
+
+    table th,
+    table td {
+        white-space: nowrap !important;
+        padding: 10px 12px !important;
+    }
+
+    /* Colonne description : permet de ne pas casser l'affichage */
+    td:nth-child(3),
+    th:nth-child(3) {
+        white-space: normal !important;
+    }
+}
+
   </style>
 </head>
 <body>
   <!-- Bouton Hamburger (visible en mobile) -->
-<nav class="navbar navbar-dark bg-dark d-lg-none">
+<nav class="navbar navbar-dark bg-dark d-lg-none fixed-top">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
   </div>
 </nav>
+
 
 <!-- Menu latéral transformé en dropdown mobile -->
 <div class="collapse d-lg-block sidebar" id="mobileMenu">
