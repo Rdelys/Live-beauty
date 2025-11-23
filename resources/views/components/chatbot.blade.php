@@ -236,11 +236,12 @@ document.getElementById("close-chatbot").onclick = () => {
 if (!window.socketChat) {
     window.socketChat = io("https://livebeautyofficial.com", {
         path: "/chatbot/socket.io",
-        transports: ["websocket"],
-        upgrade: false,
+        transports: ["polling", "websocket"],
+        upgrade: true,
         autoConnect: true
     });
 }
+
 
 
 const socketChat = window.socketChat;

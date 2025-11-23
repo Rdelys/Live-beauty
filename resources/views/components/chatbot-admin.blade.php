@@ -233,7 +233,8 @@ document.getElementById("adminChatClose").onclick = () => {
 /* SOCKET */
 const socket = io("https://livebeautyofficial.com", {
     path: "/chatbot/socket.io",
-    transports: ["websocket"]
+    transports: ["polling", "websocket"], 
+    upgrade: true
 });
 
 
