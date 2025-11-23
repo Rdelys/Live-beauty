@@ -1166,6 +1166,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 
 <script>
   const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1297,7 +1298,7 @@ if (switchPrivateBtn) {
         const res = await fetch("{{ route('live.canStart') }}", {
           method: "POST",
           headers: {
-            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token"]').content,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({ modele_id: "{{ $modele->id }}" })
@@ -1348,7 +1349,7 @@ if (switchPrivateBtn) {
       fetch("{{ route('live.stopPrivate') }}", {
         method: "POST",
         headers: {
-          "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+          "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token"]').content,
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
@@ -1443,7 +1444,7 @@ function enablePrivateProtection() {
     fetch("{{ route('live.stopPrivate') }}", {
         method: "POST",
         headers: {
-            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').content,
+            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token"]').content,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({ modele_id: "{{ $modele->id }}" }),
