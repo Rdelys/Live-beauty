@@ -231,7 +231,7 @@ document.getElementById("adminChatClose").onclick = () => {
 };
 
 /* SOCKET */
-const socket = io("http://localhost:4000");
+const socket = io("wss://livebeautyofficial.com");
 
 socket.on("connect", () => {
     socket.emit("identify", { type: "admin" });

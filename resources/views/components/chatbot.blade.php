@@ -209,7 +209,8 @@ if (!window._socketIOLoaded) {
     <div id="chatbot-messages">
         <div class="msg-left welcome-msg">🔥 {{ __('Bienvenue') }}
  {{ Auth::user()->pseudo }} !</div>
-        <div class="msg-left welcome-msg">😘 Comment puis-je t’aider aujourd’hui ?</div>
+        <div class="msg-left welcome-msg">😘 {{ __('Comment puis-je t’aider aujourd’hui') }}
+ ?</div>
     </div>
 
     <div id="chatbot-input">
@@ -239,7 +240,7 @@ document.getElementById("close-chatbot").onclick = () => {
   SOCKET.IO - SINGLETON SAFE
 ------------------------- */
 if (!window.socketChat) {
-    window.socketChat = io("http://localhost:4000", {
+    window.socketChat = io("wss://livebeautyofficial.com", {
         transports: ["websocket"],
         upgrade: false,
         autoConnect: true
