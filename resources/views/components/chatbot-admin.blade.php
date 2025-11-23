@@ -202,7 +202,7 @@
     <audio id="adminChatSound" src="/sounds/notificationAction.mp3" preload="auto"></audio>
 </div>
 
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
 <script>
 const panel  = document.getElementById("adminChatPanel");
