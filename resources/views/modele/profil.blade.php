@@ -95,11 +95,18 @@
 .btn-close {
     filter: invert(1); /* transforme la croix en blanc */
 }
+/* Canvas fond animé */
+#bgcanvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
 
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #000000, #1a1a1a);
+  background: #000 !important; /* fallback */
   color: #fff;
   margin: 0;
   padding: 0;
@@ -534,6 +541,7 @@ select:-moz-focusring {
   </style>
 </head>
 <body>
+<canvas id="bgcanvas"></canvas>
 
 <div class="container text-center">
     @if(session('success'))
@@ -2709,6 +2717,85 @@ function deleteSelectedPhotos() {
         console.error(err);
     });
 }
+</script>
+<script>
+/* ---- Animation fluide d’icônes Font Awesome ---- */
+const canvas = document.getElementById("bgcanvas");
+const ctx = canvas.getContext("2d");
+
+let W, H;
+let iconsArray = [];
+
+/* Icônes glamour (FA) */
+const icons = [
+  "\uf004", // cœur
+  "\uf0d6", // argent
+  "\uf005", // star
+  "\uf3a5", // lipstick
+  "\uf553", // high heels
+  "\uf3a6", // kiss
+  "\uf0a0", // diamant
+  "\uf290", // sac à main
+  "\uf182"  // robe
+];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+class FloatingIcon {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = H + 50;
+    this.size = 26 + Math.random() * 44;
+    this.speed = 0.2 + Math.random() * 0.5;
+    this.angle = Math.random() * 360;
+    this.spin = (Math.random() - 0.5) * 0.4;
+    this.alpha = 0.2 + Math.random() * 0.6;
+    this.icon = icons[Math.floor(Math.random() * icons.length)];
+    this.color = `rgba(255, ${50 + Math.random()*50}, ${150 + Math.random()*100}, ${this.alpha})`;
+  }
+  update() {
+    this.y -= this.speed;
+    this.angle += this.spin;
+    if (this.y < -60) this.reset();
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle * Math.PI / 180);
+    ctx.font = `${this.size}px "Font Awesome 6 Free"`;
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = "rgba(255,0,150,0.6)";
+    ctx.shadowBlur = 12;
+    ctx.fillText(this.icon, 0, 0);
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 60; i++) iconsArray.push(new FloatingIcon());
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+
+  const gradient = ctx.createLinearGradient(0, 0, W, H);
+  gradient.addColorStop(0, "#120013");
+  gradient.addColorStop(1, "#00001a");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+
+  iconsArray.forEach(icon => {
+    icon.update();
+    icon.draw();
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
 </script>
 
 </body>
