@@ -18,7 +18,7 @@
     /* ============================
    🎀 LIVE BEAUTY PREMIUM STYLE
    Blanc - Rouge - Noir
-   Responsive & Professionnel
+   Responsive & Professionnelcre
 ============================ */
 /* Fond du sélecteur */
 .choices__inner {

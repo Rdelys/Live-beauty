@@ -53,7 +53,7 @@ Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.
 
 
 // Jetons
-Route::post('/jetons/store', [JetonController::class, 'store'])->name('jetons.store');
+Route::post('/modele/login/jetons/store', [JetonController::class, 'store'])->name('jetons.store');
 
 // Auth pour modèle modeles.livebeautyofficial.com
 Route::get('/modele/login', function (Request $request) {
