@@ -314,17 +314,18 @@
 
                 @php
                     $flags = [
-                         'FR' => '{{ __('Francais') }}',
-        'EN' => '{{ __('Anglais') }}',
-        'ES' => '{{ __('Espagnol') }}',
-        'IT' => '{{ __('Italien') }}',
-        'DE' => '{{ __('Allemand') }}',
-        'PT' => '{{ __('Portugais') }}',
-        'AR' => '{{ __('Arabe') }}',
-        'RU' => '{{ __('Russe') }}',
-        'ZH' => '{{ __('Chinois') }}',
-        'JP' => '{{ __('Japonais') }}'
-                    ];
+    'FR' => __('Francais'),
+    'EN' => __('Anglais'),
+    'ES' => __('Espagnol'),
+    'IT' => __('Italien'),
+    'DE' => __('Allemand'),
+    'PT' => __('Portugais'),
+    'AR' => __('Arabe'),
+    'RU' => __('Russe'),
+    'ZH' => __('Chinois'),
+    'JP' => __('Japonais')
+];
+
 
                     $langues = $modele->langue
                         ? array_map('trim', explode(',', strtoupper($modele->langue)))

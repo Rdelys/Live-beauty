@@ -143,13 +143,13 @@ Route::get('/connexion', function () {
     return redirect('/'); // ou tu peux rediriger vers un layout avec les modales
 })->name('login');
 
-Route::get('/{id}', function ($id) {
+Route::get('/modele/{id}/', function ($id) {
     $modele = Modele::findOrFail($id);
     return view('modele.profile', compact('modele'));
 })->name('modele.profile');
 
 // Profil privé
-Route::get('/{id}/private', function ($id) {
+Route::get('/modele/{id}/private', function ($id) {
     $modele = Modele::findOrFail($id);
     return view('modele.private', compact('modele'));
 })->name('modele.private');

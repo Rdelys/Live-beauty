@@ -309,18 +309,19 @@ ul.list-unstyled li {
                 <p>{{ $modele->services }}</p>
             @endif
             @php
-    $flags = [
-        'FR' => '{{ __('Francais') }}',
-        'EN' => '{{ __('Anglais') }}',
-        'ES' => '{{ __('Espagnol') }}',
-        'IT' => '{{ __('Italien') }}',
-        'DE' => '{{ __('Allemand') }}',
-        'PT' => '{{ __('Portugais') }}',
-        'AR' => '{{ __('Arabe') }}',
-        'RU' => '{{ __('Russe') }}',
-        'ZH' => '{{ __('Chinois') }}',
-        'JP' => '{{ __('Japonais') }}'
-    ];
+  $flags = [
+    'FR' => __('Francais'),
+    'EN' => __('Anglais'),
+    'ES' => __('Espagnol'),
+    'IT' => __('Italien'),
+    'DE' => __('Allemand'),
+    'PT' => __('Portugais'),
+    'AR' => __('Arabe'),
+    'RU' => __('Russe'),
+    'ZH' => __('Chinois'),
+    'JP' => __('Japonais')
+];
+
 
     $langues = $modele->langue 
         ? array_map('trim', explode(',', strtoupper($modele->langue))) 
