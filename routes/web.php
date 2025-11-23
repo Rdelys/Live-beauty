@@ -265,7 +265,7 @@ Route::post('/live/debiter', [App\Http\Controllers\LiveController::class, 'debit
     ->middleware('auth')
     ->name('live.canStart');
 
-Route::delete('/jetons/{id}', [JetonController::class, 'destroy'])->name('jetons.destroy');
+Route::delete('modele/login/jetons/{id}', [JetonController::class, 'destroy'])->name('jetons.destroy');
 Route::put('/jetons-proposes/{id}', [JetonProposeController::class, 'update'])->name('jetons-proposes.update');
 
 Route::post('/live/start-private', [App\Http\Controllers\LiveController::class, 'startPrivate'])
