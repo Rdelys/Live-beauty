@@ -14,18 +14,16 @@
     border-radius: 50%;
     cursor: pointer;
 
-    /* Noir glossy 3D */
     background: radial-gradient(circle at 35% 35%, #222 0%, #000 70%);
     border: 3px solid #d40022;
 
-    color: #ff2a4f; /* pour l’emoji 💋 */
+    color: #ff2a4f;
     font-size: 36px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    /* Effet 3D + glow néon */
     box-shadow:
         0 0 15px rgba(212,0,34,0.8),
         0 0 25px rgba(212,0,34,0.5),
@@ -66,11 +64,7 @@
     transform: scale(1.12);
 }
 
-
-/* ------------------------------------------ */
-/* CHATBOX LUXE ROUGE & NOIR                   */
-/* ------------------------------------------ */
-
+/* CHATBOX */
 #chatbot-container {
     position: fixed;
     bottom: 110px;
@@ -101,7 +95,6 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Header rouge glossy */
 #chatbot-header {
     background: linear-gradient(145deg, #ff0037, #b0001c);
     padding: 12px 16px;
@@ -111,7 +104,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     box-shadow: inset 0 -2px 5px rgba(0,0,0,0.4);
 }
 
@@ -120,7 +112,6 @@
     font-size: 20px;
 }
 
-/* Messages */
 #chatbot-messages {
     padding: 12px;
     height: 320px;
@@ -129,7 +120,6 @@
     font-size: 15px;
 }
 
-/* Zone de saisie */
 #chatbot-input {
     background: #0f0f0f;
     padding: 10px;
@@ -148,28 +138,12 @@
 #chatbot-input input::placeholder {
     color: #777;
 }
-
-/* Responsive mobile */
-@media (max-width: 480px) {
-    #chatbot-container {
-        width: 90%;
-        right: 5%;
-        bottom: 100px;
-    }
-
-    #chatbot-toggle {
-        width: 65px;
-        height: 65px;
-        font-size: 32px;
-    }
-}
 </style>
 
-
-<!-- BOUTON FLOTTANT LUXE -->
+<!-- BOUTON -->
 <button id="chatbot-toggle">💋</button>
 
-<!-- CHATBOT -->
+<!-- CHAT -->
 <div id="chatbot-container">
     <div id="chatbot-header">
         🔥 Live Beauty CHAT – Bonjour {{ Auth::user()->pseudo }} !
@@ -186,7 +160,6 @@
     </div>
 </div>
 
-
 <script>
 document.getElementById("chatbot-toggle").onclick = () => {
     document.getElementById("chatbot-container").style.display = "flex";
@@ -198,4 +171,57 @@ document.getElementById("close-chatbot").onclick = () => {
     document.getElementById("chatbot-toggle").style.display = "flex";
 };
 </script>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+<script>
+if (!window.socketChat) {
+    window.socketChat = io("http://localhost:4000");
+}
+const socketChat = window.socketChat;
+
+const USER_ID = "{{ Auth::user()->id }}".toString();
+const USER_PSEUDO = "{{ Auth::user()->pseudo }}";
+
+// 🔥 IDENTIFICATION FIABLE APRÈS CONNECT
+socketChat.on("connect", () => {
+    socketChat.emit("identify", {
+        type: "client",
+        userId: USER_ID,
+        pseudo: USER_PSEUDO
+    });
+});
+
+// AFFICHAGE MESSAGE
+function addMessage(sender, msg, color = "#ff2a4f") {
+    const box = document.getElementById("chatbot-messages");
+    box.innerHTML += `
+        <p><strong style="color:${color}">${sender} :</strong> ${msg}</p>
+    `;
+    box.scrollTop = box.scrollHeight;
+}
+
+// RECEPTION
+socketChat.on("chatbot-reply", d => addMessage(d.sender, d.message));
+socketChat.on("bot-reply", d => addMessage("Bot", d.message));
+
+// ENVOI
+document.querySelector("#chatbot-input input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        const message = this.value.trim();
+        if (!message) return;
+
+        addMessage("Moi", message, "#ff0044");
+
+        socketChat.emit("client-message", {
+            userId: USER_ID,
+            pseudo: USER_PSEUDO,
+            message
+        });
+
+        this.value = "";
+    }
+});
+</script>
+
 @endif

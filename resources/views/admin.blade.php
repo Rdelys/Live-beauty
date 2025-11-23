@@ -16,6 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
   <style>
+    
   /* ================================
    THEME DARK PREMIUM NOIR & ROUGE
 =================================*/
@@ -1145,6 +1146,8 @@ textarea::-ms-input-placeholder {
     <a href="#" class="menu-link">Liste des jetons proposés</a>
     <a href="#" class="menu-link">Ajout jetons proposés</a>
   </div>
+
+  
   <form method="POST" action="{{ route('admin.logout') }}">
     @csrf
     <button class="btn btn-danger w-100 mt-3">
@@ -2568,5 +2571,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+@include('components.chatbot-admin')
+
 </body>
 </html>
