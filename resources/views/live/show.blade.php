@@ -1224,7 +1224,79 @@ window.addEventListener("pagehide", () => {
     }
 });
 
+// === 🎬 Gestion du message premium quand la vidéo est mise en pause ===
+const pauseOverlay = document.getElementById("pauseOverlay");
 
+// Quand la vidéo est mise en pause
+video.addEventListener("pause", () => {
+  // N'afficher que si la vidéo a déjà été démarrée une première fois
+  if (video.currentTime > 0 && !video.ended) {
+    pauseOverlay.style.display = "flex";
+  }
+});
+
+// Quand la vidéo repart
+video.addEventListener("play", () => {
+  pauseOverlay.style.display = "none";
+});
+
+// Reprendre la vidéo si on clique sur le texte
+pauseOverlay.addEventListener("click", () => {
+  video.play().catch(() => {});
+  pauseOverlay.style.display = "none";
+});
+
+/**
+ * 📡 Quand le modèle (broadcaster) se déconnecte,
+ * on affiche une modale avec un bouton "Quitter".
+ */
+socket.on("modele-deconnecte", (data) => {
+  console.log("⚠️ Le modèle a quitté le show :", data);
+
+  // 1️⃣ Stop vidéo & fermeture connexion WebRTC
+  try {
+    const liveVideo = document.getElementById("liveVideo");
+    if (liveVideo) {
+      const stream = liveVideo.srcObject;
+      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+      liveVideo.pause();
+      liveVideo.srcObject = null;
+      liveVideo.style.filter = "grayscale(70%)";
+      liveVideo.style.opacity = "0.7";
+    }
+
+    if (typeof peerConnection !== "undefined" && peerConnection) {
+      peerConnection.close();
+    }
+
+    socket.close();
+  } catch (err) {
+    console.warn("Erreur cleanup:", err);
+  }
+
+  // 2️⃣ Affiche la modale Bootstrap
+  const modalEl = document.getElementById("modelLeftModal");
+  if (modalEl) {
+    const modal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+    modal.show();
+
+    // 3️⃣ Gestion du bouton Quitter
+    const quitBtn = document.getElementById("quitShowBtn");
+    if (quitBtn) {
+      quitBtn.onclick = () => {
+        window.location.href = "/dashboard"; // 🔁 redirection (tu peux changer ici)
+      };
+    }
+
+    // Si la modale se ferme autrement (Esc ou clic), on redirige aussi
+    modalEl.addEventListener("hidden.bs.modal", () => {
+      window.location.href = "/dashboard";
+    });
+  } else {
+    // Fallback : redirection si la modale est absente
+    window.location.href = "/dashboard";
+  }
+});
 // ✅ Activer la protection si c’est une page de show privée existante
 @if(isset($showPriveId))
 document.addEventListener("DOMContentLoaded", () => {
@@ -2042,61 +2114,6 @@ document.addEventListener("keydown", (e) => {
   </div>
 </div>
 
-<script>
-/**
- * 📡 Quand le modèle (broadcaster) se déconnecte,
- * on affiche une modale avec un bouton "Quitter".
- */
-socket.on("modele-deconnecte", (data) => {
-  console.log("⚠️ Le modèle a quitté le show :", data);
-
-  // 1️⃣ Stop vidéo & fermeture connexion WebRTC
-  try {
-    const liveVideo = document.getElementById("liveVideo");
-    if (liveVideo) {
-      const stream = liveVideo.srcObject;
-      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-      liveVideo.pause();
-      liveVideo.srcObject = null;
-      liveVideo.style.filter = "grayscale(70%)";
-      liveVideo.style.opacity = "0.7";
-    }
-
-    if (typeof peerConnection !== "undefined" && peerConnection) {
-      peerConnection.close();
-    }
-
-    socket.close();
-  } catch (err) {
-    console.warn("Erreur cleanup:", err);
-  }
-
-  // 2️⃣ Affiche la modale Bootstrap
-  const modalEl = document.getElementById("modelLeftModal");
-  if (modalEl) {
-    const modal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
-    modal.show();
-
-    // 3️⃣ Gestion du bouton Quitter
-    const quitBtn = document.getElementById("quitShowBtn");
-    if (quitBtn) {
-      quitBtn.onclick = () => {
-        window.location.href = "/dashboard"; // 🔁 redirection (tu peux changer ici)
-      };
-    }
-
-    // Si la modale se ferme autrement (Esc ou clic), on redirige aussi
-    modalEl.addEventListener("hidden.bs.modal", () => {
-      window.location.href = "/dashboard";
-    });
-  } else {
-    // Fallback : redirection si la modale est absente
-    window.location.href = "/dashboard";
-  }
-});
-</script>
-
-
 </body>
 </html>
 
@@ -2298,27 +2315,6 @@ if (backBtnEl) {
   });
 }
 
-// === 🎬 Gestion du message premium quand la vidéo est mise en pause ===
-const pauseOverlay = document.getElementById("pauseOverlay");
-
-// Quand la vidéo est mise en pause
-video.addEventListener("pause", () => {
-  // N'afficher que si la vidéo a déjà été démarrée une première fois
-  if (video.currentTime > 0 && !video.ended) {
-    pauseOverlay.style.display = "flex";
-  }
-});
-
-// Quand la vidéo repart
-video.addEventListener("play", () => {
-  pauseOverlay.style.display = "none";
-});
-
-// Reprendre la vidéo si on clique sur le texte
-pauseOverlay.addEventListener("click", () => {
-  video.play().catch(() => {});
-  pauseOverlay.style.display = "none";
-});
 
 </script>
 
