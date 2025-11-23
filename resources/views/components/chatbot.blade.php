@@ -228,7 +228,7 @@ document.getElementById("close-chatbot").onclick = () => {
 };
 </script>
 
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 /* -------------------------
   SOCKET.IO - SINGLETON SAFE
