@@ -231,10 +231,11 @@ document.getElementById("adminChatClose").onclick = () => {
 };
 
 /* SOCKET */
-const socket = io("https://livebeautyofficial.com/chatbot", {
+const socket = io("https://livebeautyofficial.com", {
     path: "/chatbot/socket.io",
     transports: ["websocket"]
 });
+
 
 socket.on("connect", () => {
     socket.emit("identify", { type: "admin" });

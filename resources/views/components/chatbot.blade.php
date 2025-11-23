@@ -234,13 +234,14 @@ document.getElementById("close-chatbot").onclick = () => {
   SOCKET.IO - SINGLETON SAFE
 ------------------------- */
 if (!window.socketChat) {
-    window.socketChat = io("https://livebeautyofficial.com/chatbot", {
+    window.socketChat = io("https://livebeautyofficial.com", {
         path: "/chatbot/socket.io",
         transports: ["websocket"],
         upgrade: false,
         autoConnect: true
     });
 }
+
 
 const socketChat = window.socketChat;
 
