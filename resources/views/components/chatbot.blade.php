@@ -12,10 +12,7 @@ window._chatAlreadyLoaded = true;
 </script>
 
 <!-- 🔒 SOCKET.IO CHARGÉ UNE SEULE FOIS -->
-<script>
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js" defer></script>
-
-</script>
 
 <style>
 /* ----------------------------------------------------------- */
