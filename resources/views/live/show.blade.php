@@ -613,6 +613,24 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     display: none !important;
 }
 
+/* 🔥 Correction visibilité du texte dans les token-choice */
+.token-menu .token-choice {
+    color: #ffffff !important;        /* texte bien blanc */
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);  /* lisibilité améliorée */
+    font-weight: 700;                 /* texte plus lisible */
+}
+
+/* Titre du menu mieux visible */
+.token-menu .menu-title {
+    color: #ffdbf9 !important;
+    text-shadow: 0 0 6px rgba(0,0,0,0.6);
+}
+
+/* Effet au survol : texte blanc toujours visible */
+.token-choice:hover {
+    color: #fff !important;
+}
+
 
   </style>
 </head>
@@ -904,7 +922,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
 
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")
@@ -1685,6 +1703,19 @@ document.addEventListener("mousemove", (e) => {
     chatFloating.style.top = (e.clientY - offsetY) + "px";
 });
 
+/* === Send message when pressing Enter in floating chat === */
+floatingInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        e.preventDefault(); 
+        const msg = floatingInput.value.trim();
+        if (!msg) return;
+
+        messageInput.value = msg;   // on réutilise la même fonction
+        sendMessage(new Event("submit"));
+
+        floatingInput.value = "";
+    }
+});
 
 // 🎧 Gestion de l'activation audio par clic sur l'overlay
 const overlay = document.getElementById("startOverlay");
