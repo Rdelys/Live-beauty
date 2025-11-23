@@ -12,7 +12,6 @@ window._chatAlreadyLoaded = true;
 </script>
 
 <!-- 🔒 SOCKET.IO CHARGÉ UNE SEULE FOIS -->
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js" defer></script>
 
 <style>
 /* ----------------------------------------------------------- */
@@ -229,7 +228,7 @@ document.getElementById("close-chatbot").onclick = () => {
 };
 </script>
 
-
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
 /* -------------------------
   SOCKET.IO - SINGLETON SAFE
