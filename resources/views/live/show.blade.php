@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
   <title>Live de {{ $modele->prenom }}</title>
@@ -854,14 +854,14 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 <body>
         <div class="top-bar-live top-fixed">
     <button id="backBtn" class="back-btn">
-        <i class="fa-solid fa-arrow-left"></i> Retour
+        <i class="fa-solid fa-arrow-left"></i> {{ __('Retour') }}
     </button>
 
     <div id="privateTimer" class="private-timer">00:00</div>
 
     <div class="jetons-display">
         <i class="fa-solid fa-coins"></i>
-        Jetons : <span id="userJetons">{{ Auth::user()->jetons ?? 0 }}</span>
+        {{ __('Jetons') }} : <span id="userJetons">{{ Auth::user()->jetons ?? 0 }}</span>
     </div>
     
 </div>
@@ -886,10 +886,10 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
           @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
     <p class="text-warning fs-5">
-      ⏳ Il vous reste <span id="countdown">10</span> secondes de live gratuit.
+      ⏳ {{ __('Il vous reste') }} <span id="countdown">10</span> {{ __('secondes de live gratuit') }} .
     </p>
     <p class="text-light small">
-      🔒 Connecte-toi ou crée un compte pour continuer à regarder le live.
+      🔒 {{ __('Connecte-toi ou crée un compte pour continuer à regarder le live') }}.
     </p>
   </div>
     @endif
@@ -920,12 +920,12 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
         </h2>
 
         <div class="modele-tags">
-            <span class="tag">🔥 En Live</span>
+            <span class="tag">🔥 {{ __('En Live') }} </span>
         </div>
 
         <div class="modele-details">
-            <strong>Tarif privé :</strong> {{ $modele->nombre_jetons_show_privee }} jetons<br>
-            <strong>Durée :</strong> {{ $modele->duree_show_privee }} min
+            <strong>{{ __('Tarif privé') }} :</strong> {{ $modele->nombre_jetons_show_privee }} {{ __('jetons') }}<br>
+            <strong>{{ __('Durée') }} :</strong> {{ $modele->duree_show_privee }} min
         </div>
     </div>
    
@@ -935,7 +935,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
               @if(Auth::user()->role != 'modele' && !isset($showPriveId))
                   <div class="text-center my-3">
                       <button id="switchPrivateBtn" class="btn btn-danger">
-                        🚪 Passer en show privée
+                        🚪 {{ __('Passer en show privée') }}
                       </button>
                   </div>
               @endif
@@ -951,7 +951,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
             font-size: 1.5rem;
             cursor: pointer;
             ">
-            ▶️ Cliquez pour démarrer le live avec son
+            ▶️ {{ __('Cliquez pour démarrer le live avec son') }} 
             </div>
           @endauth
 
@@ -979,11 +979,11 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
           ">
 
             <div style="animation: pulsePause 1.5s infinite;">
-              🔒 Live en pause
+              🔒 {{ __('Live en pause') }}
             </div>
 
             <div style="font-size:1rem; color:#fff; margin-top:8px; opacity:0.8;">
-              Touchez l’écran pour reprendre
+              {{ __('Touchez l’écran pour reprendre') }} 
             </div>
 
           </div>
@@ -1069,7 +1069,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 
               <!-- Menus (remplis via Blade) -->
               <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
-                <div class="menu-title">Jetons standards</div>
+                <div class="menu-title">{{ __('Jetons standards') }} </div>
                 @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
                 @foreach($jetonsGlobaux as $jeton)
                 <button class="token-choice"
@@ -1095,7 +1095,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
               </div>
               <!-- Menu Surprise -->
               <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
-                <div class="menu-title">Envoyer une Surprise ✨</div>
+                <div class="menu-title">{{ __('Envoyer une Surprise') }} ✨</div>
                 <div class="token-grid">
                     <div class="token-item" data-cost="1"><div class="token-emoji">💌</div><div class="token-cost">1</div></div>
                     <div class="token-item" data-cost="5"><div class="token-emoji">🌹</div><div class="token-cost">5</div></div>
@@ -1126,7 +1126,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
         @if(Auth::user()->role != 'modele')
         <form id="chatForm" onsubmit="sendMessage(event)">
             <input type="text" id="messageInput" placeholder="Tape ton message..." required>
-            <button type="submit" class="btn btn-danger">Envoyer</button>
+            <button type="submit" class="btn btn-danger">{{ __('Envoyer') }}</button>
         </form>
         @endif
     </div>
@@ -1142,18 +1142,18 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white border-0 rounded-3 shadow">
       <div class="modal-header border-0">
-        <h5 class="modal-title" id="confirmPrivateLabel">🎥 Show privé</h5>
+        <h5 class="modal-title" id="confirmPrivateLabel">🎥 {{ __('Show privé') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body text-center">
         <p>
-          Ce show privé coûte 
-          <strong id="privateCost" class="text-warning"></strong> jetons par minute.
+          {{ __('Ce show privé coûte ') }}
+          <strong id="privateCost" class="text-warning"></strong> {{ __('jetons par minute') }}.
         </p>
         <p class="text-info">
-          💡 En acceptant, 5 minutes (soit <strong id="privateTotalCost"></strong> jetons) seront débitées immédiatement.
+          💡 {{ __('En acceptant, 5 minutes') }}  ( {{ __('soit') }} <strong id="privateTotalCost"></strong> {{ __('jetons') }} ) {{ __('seront débitées immédiatement') }} .
         </p>
-        <p>Souhaitez-vous continuer ?</p>
+        <p> {{ __('Souhaitez-vous continuer') }} ?</p>
       </div>
       <div class="modal-footer border-0 justify-content-center">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
@@ -1165,7 +1165,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
   <!--wss://livebeautyofficial.com  http://localhost:3000/-->
 
 <script>
-  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
 const soundSurprise = document.getElementById("soundSurprise")

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -182,9 +182,9 @@
     <!-- FOOTER -->
     <footer>
         <p class="mb-0">
-            © {{ date('Y') }} <strong>LiveBeautyOfficielle.com</strong> — Tous droits réservés.<br>
-            <a href="{{ route('cgu') }}">Conditions d’utilisation</a> |
-            <a href="{{ route('pu') }}">Politique d’utilisation</a>
+            © {{ date('Y') }} <strong>LiveBeautyOfficielle.com</strong> — {{ __('Tous droits réservés') }}.<br>
+            <a href="{{ route('cgu') }}">{{ __('Conditions d’utilisation') }}</a> |
+            <a href="{{ route('pu') }}">{{ __('Politique d’utilisation') }}</a>
         </p>
     </footer>
 

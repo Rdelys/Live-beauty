@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIVE BEAUTY - Tableau de bord</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
 
   <style>
     /* 💎 MODAL PREMIUM — STYLE NETFLIX COMPACT & ÉLÉGANT */
@@ -788,7 +789,43 @@
       transform: scale(1.15);
       filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.6));
     }
+    /* Dropdown Langues */
+.lang-dropdown .nav-link {
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem !important;
+    border-radius: 8px;
+    transition: 0.3s ease;
+}
 
+.lang-dropdown .nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.dropdown-menu-dark {
+    background-color: #111;
+    border: 1px solid rgba(255,0,0,0.2);
+    border-radius: 12px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-menu-dark .dropdown-item {
+    color: #fff;
+    padding: 10px 18px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.dropdown-menu-dark .dropdown-item:hover {
+    background-color: rgba(255,0,0,0.25);
+    color: #ff4d4d !important;
+    transform: translateX(4px);
+}
+
+.flag-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+}
   </style>
   </head>
 <body>
@@ -821,6 +858,22 @@
                           <i class="fas fa-shopping-bag"></i>
                         </a>
                       </li>
+                      <li class="nav-item dropdown lang-dropdown">
+    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+        <span class="fi fi-{{ app()->getLocale() == 'fr' ? 'fr' : 'gb' }} me-2"></span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-dark shadow-lg">
+        <li>
+            <a class="dropdown-item d-flex align-items-center" href="{{ route('lang.switch','fr') }}">
+                <span class="fi fi-fr me-2"></span></a>
+        </li>
+        <li>
+            <a class="dropdown-item d-flex align-items-center" href="{{ route('lang.switch','en') }}">
+                <span class="fi fi-gb me-2"></span></a>
+        </li>
+    </ul>
+</li>
                       <!-- <li class="nav-item">
                           <a class="nav-link" href="#">Nouveaux Modèles</a>
                       </li> -->
@@ -871,14 +924,14 @@
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h5 class="section-title-vip">
-                  <i class="fas fa-star me-2 text-warning"></i> Cams en Direct
+                  <i class="fas fa-star me-2 text-warning"></i> {{ __('Cams en Direct') }}
                 </h5>
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
                 </div>
                 <h5 class="section-title-vip-gold">
                   <i class="fas fa-lock text-warning me-2"></i>
-                  Lives Privés VIP
+                  {{ __('Lives Privés VIP') }}
                 </h5>
                 <div id="privateLives"></div>
 
@@ -886,7 +939,7 @@
                 @if(Auth::check() && Auth::user()->favoris->count() > 0)
                   <div class="favoris-section mt-4">
                     <h5 class="section-title-favoris">
-                      <i class="fas fa-heart text-danger me-2"></i> Mes Favoris
+                      <i class="fas fa-heart text-danger me-2"></i> {{ __('Mes Favoris') }}
                     </h5>
 
                     @foreach(Auth::user()->favoris as $fav)
@@ -1282,7 +1335,7 @@ document.addEventListener("click", function(e) {
     <div class="modal-content text-white" style="background: #0d0d0d; border-radius: 20px; border: 2px solid #d6336c;">
       <div class="modal-header border-0">
         <h4 class="modal-title text-danger fw-bold" id="achatJetonsLabel">
-          <i class="fas fa-coins me-2"></i> Acheter des Jetons
+          <i class="fas fa-coins me-2"></i> {{ __('Acheter des Jetons') }}
         </h4>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
@@ -1304,7 +1357,8 @@ document.addEventListener("click", function(e) {
             <div class="card h-100 border-0 shadow-lg"
               style="background: linear-gradient(to bottom right, #1a1a1a, #000); border-radius: 15px;">
               <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="text-danger fw-bold mb-3">{{ $pack['jetons'] }} <i class="fas fa-fire"></i> Jetons</h5>
+                <h5 class="text-danger fw-bold mb-3">{{ $pack['jetons'] }} <i class="fas fa-fire"></i> {{ __('Jetons') }}
+</h5>
                 <p class="fs-4 text-white-50 mb-4">{{ $pack['prix'] }} €</p>
                 <div id="paypal-button-container-{{ $pack['jetons'] }}"></div>
               </div>
@@ -1329,41 +1383,41 @@ document.addEventListener("click", function(e) {
 
       <div class="modal-header border-0">
         <h5 class="modal-title fw-bold text-danger">
-          <i class="fas fa-user-edit me-2"></i> Modifier mon profil
+          <i class="fas fa-user-edit me-2"></i> {{ __('Modifier mon profil') }}
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
 
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label"><i class="fas fa-user text-danger me-2"></i>Nom</label>
+          <label class="form-label"><i class="fas fa-user text-danger me-2"></i>{{ __('Nom') }}</label>
           <input type="text" name="nom" class="form-control bg-dark text-white border-danger" value="{{ $user->nom }}">
         </div>
         <div class="mb-3">
-          <label class="form-label"><i class="fas fa-user-friends text-danger me-2"></i>Prénoms</label>
+          <label class="form-label"><i class="fas fa-user-friends text-danger me-2"></i>{{ __('Prénoms') }}</label>
           <input type="text" name="prenoms" class="form-control bg-dark text-white border-danger" value="{{ $user->prenoms }}">
         </div>
         <div class="mb-3">
-          <label class="form-label"><i class="fas fa-birthday-cake text-danger me-2"></i>Âge</label>
+          <label class="form-label"><i class="fas fa-birthday-cake text-danger me-2"></i>{{ __('Âge') }}</label>
           <input type="number" name="age" class="form-control bg-dark text-white border-danger" value="{{ $user->age }}">
         </div>
         <div class="mb-3">
-          <label class="form-label"><i class="fas fa-user-tag text-danger me-2"></i>Pseudo</label>
+          <label class="form-label"><i class="fas fa-user-tag text-danger me-2"></i>{{ __('Pseudo') }}</label>
           <input type="text" name="pseudo" class="form-control bg-dark text-white border-danger" value="{{ $user->pseudo }}">
         </div>
         <div class="mb-3">
-          <label class="form-label"><i class="fas fa-building text-danger me-2"></i>Département</label>
+          <label class="form-label"><i class="fas fa-building text-danger me-2"></i>{{ __('Département') }}</label>
           <input type="text" name="departement" class="form-control bg-dark text-white border-danger" value="{{ $user->departement }}">
         </div>
         <div class="mb-3">
-          <label class="form-label"><i class="fas fa-envelope text-danger me-2"></i>Email</label>
+          <label class="form-label"><i class="fas fa-envelope text-danger me-2"></i>{{ __('Email') }}</label>
           <input type="email" name="email" class="form-control bg-dark text-white border-danger" value="{{ $user->email }}">
         </div>
       </div>
 
       <div class="modal-footer border-0">
         <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill">
-          <i class="fas fa-save me-2"></i> Enregistrer les modifications
+          <i class="fas fa-save me-2"></i> {{ __('Enregistrer les modifications') }}
         </button>
       </div>
     </form>
@@ -1375,17 +1429,17 @@ document.addEventListener("click", function(e) {
     <div class="modal-content text-white" style="background:#1a1a1a; border-radius:15px; border:2px solid #d6336c;">
       <div class="modal-header border-0">
         <h5 class="modal-title fw-bold text-danger">
-          <i class="fas fa-lock me-2"></i> Live privé
+          <i class="fas fa-lock me-2"></i> {{ __('Live privé') }}
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center">
-        <p>Souhaitez-vous accéder au live privé ou le décaler ?</p>
+        <p>{{ __('Souhaitez-vous accéder au live privé ou le décaler ?') }}</p>
       </div>
       <div class="modal-footer border-0 justify-content-center">
-        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary rounded-pill" id="btnDecaler">Décaler</button>
-        <button type="button" class="btn btn-danger rounded-pill" id="btnAcceder">Accéder</button>
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+        <button type="button" class="btn btn-primary rounded-pill" id="btnDecaler">{{ __('Décaler') }}</button>
+        <button type="button" class="btn btn-danger rounded-pill" id="btnAcceder">{{ __('Accéder') }}</button>
       </div>
     </div>
   </div>
@@ -1401,11 +1455,11 @@ document.addEventListener("click", function(e) {
         </div>
         <h4 class="modal-title mb-3 text-uppercase fw-bold">Show Privé</h4>
         <p class="text-light mb-4">
-          🔒 Ce show est actuellement en <span class="text-danger fw-bold">mode privé</span>.<br>
-          Seuls les membres autorisés peuvent y accéder.
+          🔒 {{ __('Ce show est actuellement en') }} <span class="text-danger fw-bold"> {{ __('mode privé') }}</span>.<br>
+          {{ __('Seuls les membres autorisés peuvent y accéder') }}.
         </p>
         <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">
-          Fermer
+          {{ __('Fermer') }}
         </button>
       </div>
     </div>
@@ -1521,7 +1575,8 @@ document.addEventListener('click', async e => {
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content bg-black border-0">
       <div class="modal-header border-0">
-        <h5 class="modal-title text-white"><i class="fas fa-images me-2"></i> Galerie</h5>
+        <h5 class="modal-title text-white"><i class="fas fa-images me-2"></i> {{ __('Galerie') }}
+</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-0">
@@ -1545,25 +1600,26 @@ document.addEventListener('click', async e => {
       @csrf
       <input type="hidden" name="show_id" id="decaler_show_id">
       <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold text-danger"><i class="fas fa-calendar-alt me-2"></i> Décaler le show privé</h5>
+        <h5 class="modal-title fw-bold text-danger"><i class="fas fa-calendar-alt me-2"></i> {{ __('Décaler le show privé') }}
+</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Date</label>
+          <label class="form-label">{{ __('Date') }}</label>
           <input type="date" class="form-control bg-dark text-white border-danger" name="date" id="decaler_date" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Heure de début</label>
+          <label class="form-label">{{ __('Heure de début') }}</label>
           <input type="time" class="form-control bg-dark text-white border-danger" name="debut" id="decaler_debut" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Heure de fin</label>
+          <label class="form-label">{{ __('Heure de fin') }}</label>
           <input type="time" class="form-control bg-dark text-white border-danger" name="fin" id="decaler_fin" readonly>
         </div>
       </div>
       <div class="modal-footer border-0">
-        <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill">Enregistrer le nouveau créneau</button>
+        <button type="submit" class="btn btn-danger w-100 fw-bold rounded-pill">{{ __('Enregistrer le nouveau créneau') }}</button>
       </div>
     </form>
   </div>

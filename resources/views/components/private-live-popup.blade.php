@@ -3,11 +3,12 @@
      style="display:none;">
     <div class="popup-header">
         <i class="fas fa-lock text-danger me-2"></i>
-        <strong id="popupModelName">Live privé</strong>
+        <strong id="popupModelName">{{ __('Live privé') }}
+</strong>
         <span id="popupClose" class="popup-close">&times;</span>
     </div>
     <button id="popupJoinBtn" class="btn btn-sm btn-danger w-100 fw-bold mt-2">
-        🔥 Rejoindre
+        🔥 {{ __('Rejoindre') }}
     </button>
 </div>
 

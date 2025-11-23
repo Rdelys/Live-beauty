@@ -47,8 +47,8 @@
         <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v3H9V7zm9 5v7H6v-7h12z"/>
     </svg>
 
-    <h1 id="error-title">403 - Accès interdit</h1>
-    <p id="error-desc">Malheureusement, l'accès à ce site ou page est interdit pour vous ou votre pays.</p>
-    <a href="{{ url('/') }}" class="btn-home" role="button" aria-label="Retour à la page d'accueil">Retour à l'accueil</a>
+    <h1 id="error-title">403 - {{ __('Accès interdit') }}</h1>
+    <p id="error-desc">{{ __(''Malheureusement, l'accès à ce site ou page est interdit pour vous ou votre pays) }}.</p>
+    <a href="{{ url('/') }}" class="btn-home" role="button" aria-label="Retour à la page d'accueil">{{ __('Retour à l'accueil') }}</a>
 </div>
 @endsection

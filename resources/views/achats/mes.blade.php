@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
   <title>Mes achats premium</title>
@@ -129,7 +129,8 @@
 <body>
 
   <div class="header-fixed">
-    <h1><i class="fas fa-diamond me-2"></i> Mes achats Premium</h1>
+    <h1><i class="fas fa-diamond me-2"></i> {{ __('Mes achats Premium') }}
+</h1>
     <select id="modelFilter" class="filter-select">
       <option value="all">Tous les modèles</option>
       @foreach($groupes as $modeleId => $achats)
@@ -191,7 +192,8 @@
 
       @empty
         <div class="alert alert-info text-center w-100">
-          Vous n’avez encore acheté aucun contenu premium.
+          {{ __('Vous n’avez encore acheté aucun contenu premium.
+') }}
         </div>
       @endforelse
     </div>

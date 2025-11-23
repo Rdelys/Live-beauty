@@ -1,13 +1,14 @@
 @component('mail::message')
-# Code de vérification
+# {{ __('Code de vérification') }}
 
-Votre code à 6 chiffres est :
+
+{{ __('Votre code à 6 chiffres est') }} :
 
 ## **{{ $code }}**
 
-Ce code expire dans **10 minutes**.  
-Saisissez-le sur le site pour valider votre inscription.
+{{ __('Ce code expire dans **10 minutes**.') }}
+{{ __('Saisissez-le sur le site pour valider votre inscription') }}.
 
-Merci,  
-L’équipe LiveBeautyOfficielle
+{{ __('Merci') }},
+{{ __('L’équipe LiveBeautyOfficielle') }}
 @endcomponent

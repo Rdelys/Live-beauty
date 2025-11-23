@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,7 @@
     <title>LIVE BEAUTY</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
 
     <style>
        :root {
@@ -597,6 +598,44 @@ body {
       align-items: center;
     }
 
+    /* Dropdown Langues */
+.lang-dropdown .nav-link {
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem !important;
+    border-radius: 8px;
+    transition: 0.3s ease;
+}
+
+.lang-dropdown .nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.dropdown-menu-dark {
+    background-color: #111;
+    border: 1px solid rgba(255,0,0,0.2);
+    border-radius: 12px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-menu-dark .dropdown-item {
+    color: #fff;
+    padding: 10px 18px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.dropdown-menu-dark .dropdown-item:hover {
+    background-color: rgba(255,0,0,0.25);
+    color: #ff4d4d !important;
+    transform: translateX(4px);
+}
+
+.flag-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
     </style>
 </head>
 
@@ -632,6 +671,27 @@ body {
                     <i class="fas fa-female"></i>
                   </a>
                 </li>
+                <li class="nav-item dropdown lang-dropdown">
+    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+        <span class="fi fi-{{ app()->getLocale() == 'fr' ? 'fr' : 'gb' }} me-2"></span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-dark shadow-lg">
+        <li>
+            <a class="dropdown-item d-flex align-items-center" href="{{ route('lang.switch','fr') }}">
+                <span class="fi fi-fr me-2"></span></a>
+        </li>
+        <li>
+            <a class="dropdown-item d-flex align-items-center" href="{{ route('lang.switch','en') }}">
+                <span class="fi fi-gb me-2"></span></a>
+        </li>
+    </ul>
+</li>
+
+
+
+
+
                 <!-- <li class="nav-item">
                     <a class="nav-link" href="#">Nouveaux Modèles</a>
                 </li> -->
@@ -648,8 +708,10 @@ body {
                 <a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
                     <i class="fa-solid fa-envelope"></i>
                 </a>
-                  <button class="btn btn-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Connexion</button>
-                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">Inscription GRATUITE</button>
+                  <button class="btn btn-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">{{ __('Connexion') }}
+</button>
+                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">{{ __('Inscription GRATUITE') }}
+</button>
                 </div>
             </div>
         </div>
@@ -662,7 +724,7 @@ body {
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
                 <h5 class="section-title-vip">
-                  <i class="fas fa-star me-2 text-warning"></i> Cams en Direct
+                  <i class="fas fa-star me-2 text-warning"></i> {{ __('Cams en Direct') }}
                 </h5>                
                 <div id="activeLives">
                 <!-- Chargement dynamique -->
@@ -1013,27 +1075,27 @@ document.addEventListener('DOMContentLoaded', function () {
     <form method="POST" action="{{ route('login.submit') }}" class="modal-content auth-modal">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title">Connexion à votre compte</h5>
+        <h5 class="modal-title">{{ __('Connexion à votre compte') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Email</label>
+          <label class="form-label">{{ __('Email') }}</label>
           <input type="email" name="email" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Mot de passe</label>
+          <label class="form-label">{{ __('Mot de passe') }}</label>
           <input type="password" name="password" class="form-control" required>
         </div>
         <div class="text-end">
     <a href="#" class="text-light small" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">
-        Mot de passe oublié ?
+        {{ __('Mot de passe oublié ') }} ?
     </a>
 </div>
 
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-submit">Connexion</button>
+        <button type="submit" class="btn btn-submit">{{ __('Connexion') }} </button>
       </div>
     </form>
   </div>
@@ -1044,18 +1106,18 @@ document.addEventListener('DOMContentLoaded', function () {
     <form method="POST" action="{{ route('password.email') }}" class="modal-content auth-modal">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title">Réinitialiser le mot de passe</h5>
+        <h5 class="modal-title">{{ __('Réinitialiser le mot de passe') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Adresse Email</label>
+          <label class="form-label">{{ __('Adresse Emai') }}l</label>
           <input type="email" name="email" class="form-control" required>
         </div>
-        <p class="small">Vous recevrez un lien pour réinitialiser votre mot de passe.</p>
+        <p class="small">{{ __('Vous recevrez un lien pour réinitialiser votre mot de passe.') }}</p>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-submit">Envoyer</button>
+        <button type="submit" class="btn btn-submit">{{ __('Envoyer') }} </button>
       </div>
     </form>
   </div>
@@ -1070,31 +1132,34 @@ document.addEventListener('DOMContentLoaded', function () {
     <form method="POST" action="{{ route('register.submit') }}" class="modal-content auth-modal">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title">Créer un compte</h5>
+        <h5 class="modal-title">{{ __('Créer un compte') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Pseudo</label>
+          <label class="form-label">{{ __('Pseudo') }}</label>
           <input name="pseudo" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Email</label>
+          <label class="form-label">{{ __('Email') }}</label>
           <input name="email" type="email" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Mot de passe</label>
+          <label class="form-label">{{ __('Mot de passe') }}</label>
           <input name="password" type="password" class="form-control" required>
         </div>
         <div class="form-check mt-3">
           <input class="form-check-input" type="checkbox" id="cguCheck" required>
           <label class="form-check-label" for="cguCheck">
-            J'accepte les <a href="{{ route('cgu') }}" target="_blank">CGU</a> et la <a href="{{ route('pu') }}" target="_blank">Politique d’Utilisation</a>.
+{{ __("J'accepte les") }}
+<a href="{{ route('cgu') }}" target="_blank">CGU</a>
+{{ __("et la") }}
+<a href="{{ route('pu') }}" target="_blank">{{ __("Politique d’Utilisation") }}</a>.
           </label>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-submit">Inscription</button>
+        <button type="submit" class="btn btn-submit">{{ __('Inscription') }}</button>
       </div>
     </form>
   </div>
@@ -1106,13 +1171,13 @@ document.addEventListener('DOMContentLoaded', function () {
     <form method="POST" action="{{ route('register.verify') }}" class="modal-content auth-modal">
       @csrf
       <div class="modal-header">
-        <h5 class="modal-title" id="verifyEmailLabel">Vérification de votre email</h5>
+        <h5 class="modal-title" id="verifyEmailLabel">{{ __('Vérification de votre email') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <p class="mb-3">
-          Nous avons envoyé un code à 6 chiffres à <strong>{{ session('registration_data.email') }}</strong>.
-          Saisissez-le ci-dessous pour valider votre inscription.
+          {{ __('Nous avons envoyé un code à 6 chiffres à') }} <strong>{{ session('registration_data.email') }}</strong>.
+          {{ __('Saisissez-le ci-dessous pour valider votre inscription') }}.
         </p>
 
         <div class="d-flex justify-content-between gap-2 mb-3" style="max-width: 360px; margin:auto;">
@@ -1125,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <input type="hidden" name="code" id="fullCode">
 
         <div class="text-center">
-          <button type="submit" class="btn btn-submit" id="submitCodeBtn" disabled>Valider</button>
+          <button type="submit" class="btn btn-submit" id="submitCodeBtn" disabled>{{ __('Valider') }}</button>
         </div>
 
         <!--<div class="text-center mt-3">
@@ -1147,7 +1212,7 @@ document.addEventListener('DOMContentLoaded', function () {
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content bg-black border-0">
       <div class="modal-header border-0">
-        <h5 class="modal-title text-white"><i class="fas fa-images me-2"></i> Galerie</h5>
+        <h5 class="modal-title text-white"><i class="fas fa-images me-2"></i> {{ __('Galerie') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-0">

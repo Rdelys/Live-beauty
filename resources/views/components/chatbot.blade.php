@@ -201,12 +201,14 @@ if (!window._socketIOLoaded) {
 <!-- CHATBOX -->
 <div id="chatbot-container">
     <div id="chatbot-header">
-        🔥 Live Beauty CHAT – Bonjour {{ Auth::user()->pseudo }} !
+        🔥 Live Beauty CHAT – {{ __('Bonjour') }}
+ {{ Auth::user()->pseudo }} !
         <span id="close-chatbot">&times;</span>
     </div>
 
     <div id="chatbot-messages">
-        <div class="msg-left welcome-msg">🔥 Bienvenue {{ Auth::user()->pseudo }} !</div>
+        <div class="msg-left welcome-msg">🔥 {{ __('Bienvenue') }}
+ {{ Auth::user()->pseudo }} !</div>
         <div class="msg-left welcome-msg">😘 Comment puis-je t’aider aujourd’hui ?</div>
     </div>
 

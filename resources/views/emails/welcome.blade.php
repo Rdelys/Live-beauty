@@ -1,23 +1,23 @@
 @component('mail::message')
-# 😍 Bienvenue sur LiveBeautyOfficielle {{ $user->pseudo }} !
+# 😍 {{ __('Bienvenue sur LiveBeautyOfficielle') }} {{ $user->pseudo }} !
 
-Merci pour votre inscription 💖
+{{ __('Merci pour votre inscription') }} 💖
 
-🎁 **Promotion spéciale de bienvenue :**  
-Pour chaque crédit acheté, **1 crédit supplémentaire** vous est offert automatiquement 😱
+🎁 **{{ __('Promotion spéciale de bienvenue') }} :**  
 
-> Exemple : 5 crédits achetés = **10 crédits à utiliser !**
+{{ __('Pour chaque crédit acheté') }}, ** {{ __('1 crédit supplémentaire') }}** {{ __('vous est offert automatiquement') }} 😱
 
 ---
 
-Si vous avez des questions ou besoin d’assistance, notre équipe est à votre disposition à tout moment.
+{{ __('Si vous avez des questions ou besoin d’assistance, notre équipe est à votre disposition à tout moment') }}.
 
-🔥 Profitez-en dès maintenant pour vivre une expérience unique avec nos modèles en ligne !
+
+🔥 {{ __('Profitez-en dès maintenant pour vivre une expérience unique avec nos modèles en ligne') }} !
 
 @component('mail::button', ['url' => url('/dashboard')])
-👉 Accédez à votre espace membre
+👉 {{ __('Accédez à votre espace membre') }} 
 @endcomponent
 
-À très vite,  
-**L’équipe LiveBeautyOfficielle**
+{{ __('À très vite') }},  
+**{{ __('L’équipe LiveBeautyOfficielle') }}**
 @endcomponent

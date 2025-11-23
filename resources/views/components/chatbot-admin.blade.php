@@ -192,7 +192,8 @@
 
     <div id="adminChatPanel">
         <div id="adminChatHeader">
-            👑 Admin Chat
+            👑 {{ __('Admin Chat') }}
+
             <span id="adminChatClose">&times;</span>
         </div>
         <div id="adminChatList"></div>

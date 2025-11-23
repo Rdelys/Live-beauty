@@ -262,9 +262,9 @@ ul.list-unstyled li {
                 <h2 class="mb-0">
                     {{ $modele->prenom }}
                     @if ($modele->en_ligne)
-                        <span class="badge-online">En ligne</span>
+                        <span class="badge-online">{{ __('En ligne') }}</span>
                     @else
-                        <span class="badge-offline">Hors ligne</span>
+                        <span class="badge-offline">{{ __('Hors ligne') }}</span>
                     @endif
                 </h2>
 
@@ -274,7 +274,7 @@ ul.list-unstyled li {
                         data-modeleid="{{ $modele->id }}"
                         data-prix="{{ $modele->nombre_jetons_show_privee ?? 0 }}"
                         data-duree="{{ $modele->duree_show_privee ?? 30 }}">
-                     Show en privé
+                     {{ __('Show en privé') }}
                 </button>
 
                 <span class="badge bg-warning text-dark ms-2">
@@ -285,7 +285,7 @@ ul.list-unstyled li {
 
             @if($modele->age || $modele->taille)
                 <p>
-                    @if($modele->age)<strong>{{ $modele->age }} ans</strong>@endif
+                    @if($modele->age)<strong>{{ $modele->age }} {{ __('ans') }}</strong>@endif
                 </p>
             @endif
 
@@ -298,28 +298,28 @@ ul.list-unstyled li {
             @if($modele->taille || $modele->fesse || $modele->poitrine)
                 <h5>Bio :</h5>
                 <ul class="list-unstyled">
-                    @if($modele->taille)<li><strong>Taille :</strong> {{ $modele->taille }} cm</li>@endif
-                    @if($modele->fesse)<li><strong>Fesses :</strong> {{ $modele->fesse }}</li>@endif
-                    @if($modele->poitrine)<li><strong>Poitrine :</strong> {{ $modele->poitrine }}</li>@endif
+                    @if($modele->taille)<li><strong>{{ __('Taille') }} :</strong> {{ $modele->taille }} cm</li>@endif
+                    @if($modele->fesse)<li><strong>{{ __('Fesses') }} :</strong> {{ $modele->fesse }}</li>@endif
+                    @if($modele->poitrine)<li><strong>{{ __('Poitrine') }} :</strong> {{ $modele->poitrine }}</li>@endif
                 </ul>
             @endif
 
             @if($modele->services)
-                <h5 class="mt-3">Ce que je propose :</h5>
+                <h5 class="mt-3">{{ __('Ce que je propose') }} :</h5>
                 <p>{{ $modele->services }}</p>
             @endif
             @php
     $flags = [
-        'FR' => 'Francais',
-        'EN' => 'Anglais',
-        'ES' => 'Espagnol',
-        'IT' => 'Italien',
-        'DE' => 'Allemand',
-        'PT' => 'Portugais',
-        'AR' => 'Arabe',
-        'RU' => 'Russe',
-        'ZH' => 'Chinois',
-        'JP' => 'Japonais'
+        'FR' => '{{ __('Francais') }}',
+        'EN' => '{{ __('Anglais') }}',
+        'ES' => '{{ __('Espagnol') }}',
+        'IT' => '{{ __('Italien') }}',
+        'DE' => '{{ __('Allemand') }}',
+        'PT' => '{{ __('Portugais') }}',
+        'AR' => '{{ __('Arabe') }}',
+        'RU' => '{{ __('Russe') }}',
+        'ZH' => '{{ __('Chinois') }}',
+        'JP' => '{{ __('Japonais') }}'
     ];
 
     $langues = $modele->langue 
@@ -328,7 +328,7 @@ ul.list-unstyled li {
 @endphp
 
 @if(!empty($langues))
-    <h5 class="mt-3">Langues parlées :</h5>
+    <h5 class="mt-3">{{ __('Langues parlées') }} :</h5>
     <ul class="list-unstyled">
         @foreach($langues as $code)
             @if(isset($flags[$code]))
@@ -434,7 +434,7 @@ ul.list-unstyled li {
 
 @if($albums->count() > 0)
 <div class="gallery-container mb-5">
-    <h3 class="gallery-title">📁 Albums</h3>
+    <h3 class="gallery-title">📁 {{ __('Albums') }}</h3>
     <div class="row g-4 justify-content-center">
         @foreach($albums as $album)
         <div class="col-6 col-md-3">
@@ -445,7 +445,7 @@ ul.list-unstyled li {
                 <div class="card-body">
                     <h5 class="text-success mb-2">{{ $album->nom }}</h5>
                     <p class="text-white mb-1">{{ $album->photos_count }} photo(s)</p>
-                    <span class="badge bg-success">Voir l'album</span>
+                    <span class="badge bg-success">{{ __('Voir l'album') }}</span>
                 </div>
             </div>
         </div>
@@ -457,9 +457,9 @@ ul.list-unstyled li {
                  style="cursor:pointer;"
                  onclick="filterPhotosByAlbum(null)">
                 <div class="card-body">
-                    <h5 class="text-white mb-2">Tous les albums</h5>
-                    <p class="text-light mb-1">Afficher tout</p>
-                    <span class="badge bg-light text-dark">Afficher tout</span>
+                    <h5 class="text-white mb-2">{{ __('Tous les albums') }}</h5>
+                    <p class="text-light mb-1">{{ __('Afficher tout') }}</p>
+                    <span class="badge bg-light text-dark">{{ __('Afficher tout') }}</span>
                 </div>
             </div>
         </div>
@@ -467,7 +467,7 @@ ul.list-unstyled li {
 </div>
 @endif
 <div class="gallery-container mt-5">
-    <h3 class="gallery-title">📸 Galerie Photos</h3>
+    <h3 class="gallery-title">📸 {{ __('Galerie Photos') }}</h3>
 
 
     <div class="gallery-grid">
@@ -495,7 +495,7 @@ ul.list-unstyled li {
 
 @if($item->payant && $prixAlbum)
     <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
-        <span class="badge bg-success mb-2">{{ $prixAlbum }} jetons</span><br>
+        <span class="badge bg-success mb-2">{{ $prixAlbum }} {{ __('jetons') }}</span><br>
         <button class="btn btn-buy btn-buy-detail"
                 data-modeleid="{{ $modele->id }}"
                 data-path="{{ $item->photo_url }}"
@@ -509,7 +509,7 @@ ul.list-unstyled li {
 </div>
 
         @empty
-            <p class="text-muted text-center">Aucune photo disponible.</p>
+            <p class="text-muted text-center">{{ __('Aucune photo disponible') }}.</p>
         @endforelse
     </div>
 </div>
@@ -527,7 +527,7 @@ ul.list-unstyled li {
         <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
     </video>
     <div class="blur-overlay text-center text-white buy-overlay">
-        <span class="badge bg-success mb-2">{{ $video->prix }} jetons</span>
+        <span class="badge bg-success mb-2">{{ $video->prix }} {{ __('jetons') }}</span>
         <button class="btn btn-buy btn-buy-detail"
                 data-modeleid="{{ $modele->id }}"
                 data-path="{{ $video->video_url }}"
@@ -546,7 +546,7 @@ ul.list-unstyled li {
                            disablepictureinpicture
                            style="width: 100%; border-radius: 10px;">
                         <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
-                        Votre navigateur ne supporte pas la vidéo.
+                        {{ __('Votre navigateur ne supporte pas la vidéo') }}.
                     </video>
                 </div>
             @endif
@@ -642,7 +642,7 @@ document.getElementById("showPriveeForm").addEventListener("submit", function() 
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white">
       <div class="modal-header">
-        <h5 class="modal-title">Réserver un Show Privée</h5>
+        <h5 class="modal-title">{{ __('Réserver un Show Privée') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -651,23 +651,23 @@ document.getElementById("showPriveeForm").addEventListener("submit", function() 
             <input type="hidden" id="modeleId" name="modele_id">
 
             <div class="mb-3">
-                <label class="form-label">Date</label>
+                <label class="form-label">{{ __('Date') }}</label>
                 <input type="date" class="form-control" id="dateShow" name="date" required>
             </div>
 
             <div class="row">
                 <div class="col">
-                    <label class="form-label">Heure début</label>
+                    <label class="form-label">{{ __('Heure début') }}</label>
                     <input type="time" class="form-control" id="heureDebut" name="debut" required>
                 </div>
                 <div class="col">
-                    <label class="form-label">Heure fin</label>
+                    <label class="form-label">{{ __('Heure fin') }}</label>
                     <input type="time" class="form-control" id="heureFin" name="fin" required>
                 </div>
             </div>
 
             <div class="mt-3">
-                <label class="form-label">Coût total</label>
+                <label class="form-label">{{ __('Coût total') }}</label>
                 <input type="text" class="form-control" id="coutTotal" readonly>
                 <!-- champs cachés envoyés au serveur -->
                 <input type="hidden" id="coutTotalHidden" name="jetons_total">
@@ -676,8 +676,8 @@ document.getElementById("showPriveeForm").addEventListener("submit", function() 
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button type="submit" form="showPriveeForm" class="btn btn-success">Confirmer</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+        <button type="submit" form="showPriveeForm" class="btn btn-success">{{ __('Confirmer') }}</button>
       </div>
     </div>
   </div>
@@ -867,11 +867,11 @@ function filterPhotosByAlbum(albumId) {
             <i class="fas fa-shopping-bag fa-3x text-success"></i>
         </div>
 
-        <h4 class="fw-bold text-success">Photo ajoutée à votre galerie privée</h4>
-        <p class="mt-2">Vous pouvez dès maintenant la retrouver dans votre espace privé.</p>
+        <h4 class="fw-bold text-success">{{ __('Photo ajoutée à votre galerie privée') }}</h4>
+        <p class="mt-2">{{ __('Vous pouvez dès maintenant la retrouver dans votre espace privé') }}.</p>
 
         <a href="{{ route('achats.mes') }}" class="btn btn-success mt-3 px-4">
-            Voir ma galerie privée
+            {{ __('Voir ma galerie privée') }}
         </a>
 
     </div>

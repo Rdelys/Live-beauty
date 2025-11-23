@@ -281,7 +281,7 @@
                 <h2 class="profile-name">{{ $modele->prenom }}</h2>
 
                 @if($modele->age)
-                    <p><strong>{{ $modele->age }} ans</strong></p>
+                    <p><strong>{{ $modele->age }} {{ __('ans') }}</strong></p>
                 @endif
 
                 @if($modele->description)
@@ -295,35 +295,35 @@
                     <div class="profile-details">
                         <ul>
                             @if($modele->taille)
-                                <li><strong>Taille :</strong> {{ $modele->taille }} cm</li>
+                                <li><strong>{{ __('Taille') }} :</strong> {{ $modele->taille }} cm</li>
                             @endif
                             @if($modele->fesse)
-                                <li><strong>Fesses :</strong> {{ $modele->fesse }}</li>
+                                <li><strong>{{ __('Fesses') }} :</strong> {{ $modele->fesse }}</li>
                             @endif
                             @if($modele->poitrine)
-                                <li><strong>Poitrine :</strong> {{ $modele->poitrine }}</li>
+                                <li><strong>{{ __('Poitrine') }} :</strong> {{ $modele->poitrine }}</li>
                             @endif
                         </ul>
                     </div>
                 @endif
 
                 @if($modele->services)
-                    <h5 class="section-title">Services</h5>
+                    <h5 class="section-title">{{ __('Services') }}</h5>
                     <p>{{ $modele->services }}</p>
                 @endif
 
                 @php
                     $flags = [
-                        'FR' => 'Français',
-                        'EN' => 'Anglais',
-                        'ES' => 'Espagnol',
-                        'IT' => 'Italien',
-                        'DE' => 'Allemand',
-                        'PT' => 'Portugais',
-                        'AR' => 'Arabe',
-                        'RU' => 'Russe',
-                        'ZH' => 'Chinois',
-                        'JP' => 'Japonais'
+                         'FR' => '{{ __('Francais') }}',
+        'EN' => '{{ __('Anglais') }}',
+        'ES' => '{{ __('Espagnol') }}',
+        'IT' => '{{ __('Italien') }}',
+        'DE' => '{{ __('Allemand') }}',
+        'PT' => '{{ __('Portugais') }}',
+        'AR' => '{{ __('Arabe') }}',
+        'RU' => '{{ __('Russe') }}',
+        'ZH' => '{{ __('Chinois') }}',
+        'JP' => '{{ __('Japonais') }}'
                     ];
 
                     $langues = $modele->langue
@@ -332,7 +332,7 @@
                 @endphp
 
                 @if(!empty($langues))
-                    <h5 class="section-title">Langues parlées</h5>
+                    <h5 class="section-title">{{ __('Langues parlée') }}s</h5>
                     <ul class="lang-list list-unstyled">
                         @foreach($langues as $code)
                             <li>{!! $flags[$code] ?? $code !!}</li>
@@ -511,7 +511,7 @@ ul.list-unstyled li {
 
 @if($albums->count() > 0)
 <div class="gallery-container mb-5">
-    <h3 class="gallery-title">📁 Albums</h3>
+    <h3 class="gallery-title">📁 {{ __('Albums') }}</h3>
     <div class="row g-4 justify-content-center">
         @foreach($albums as $album)
         <div class="col-6 col-md-3">
@@ -532,9 +532,9 @@ ul.list-unstyled li {
             <div class="card album-card text-center shadow-lg"
                  onclick="filterPhotosByAlbum(null)">
                 <div class="card-body">
-                    <h5 class="album-title text-white">Tous les albums</h5>
-                    <p class="album-count text-white">Afficher tout</p>
-                    <span class="badge bg-light text-dark">Tout</span>
+                    <h5 class="album-title text-white">{{ __('Tous les albums') }}</h5>
+                    <p class="album-count text-white">{{ __('Afficher tout') }}</p>
+                    <span class="badge bg-light text-dark">{{ __('Tout') }}</span>
                 </div>
             </div>
         </div>
@@ -543,7 +543,7 @@ ul.list-unstyled li {
 @endif
 
 <div class="gallery-container mt-5">
-    <h3 class="gallery-title">📸 Galerie Photos</h3>
+    <h3 class="gallery-title">📸 {{ __('Galerie Photos') }}</h3>
     <div class="gallery-grid">
         @forelse($photos as $item)
             @php
@@ -569,21 +569,21 @@ ul.list-unstyled li {
 
 @if($item->payant && $prixAlbum)
     <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
-        <span class="badge bg-success mb-2">{{ $prixAlbum }} jetons</span><br>
+        <span class="badge bg-success mb-2">{{ $prixAlbum }} {{ __('jetons') }}</span><br>
     </div>
 @endif
 
 </div>
 
         @empty
-            <p class="text-muted text-center">Aucune photo disponible.</p>
+            <p class="text-muted text-center">{{ __('Aucune photo disponible') }}.</p>
         @endforelse
     </div>
 </div>
 
 @if($videos->count() > 0)
 <div class="gallery-container mt-5">
-    <h3 class="gallery-title">🎬 Vidéos</h3>
+    <h3 class="gallery-title">🎬 {{ __('Vidéos') }}</h3>
     <div class="gallery-grid">
         @foreach($videos as $video)
             @if($video->payant)
@@ -594,7 +594,7 @@ ul.list-unstyled li {
         <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
     </video>
     <div class="blur-overlay text-center text-white buy-overlay">
-        <span class="badge bg-success mb-2">{{ $video->prix }} jetons</span>
+        <span class="badge bg-success mb-2">{{ $video->prix }} {{ __('jetons') }}</span>
     </div>
 </div>
 
@@ -606,7 +606,7 @@ ul.list-unstyled li {
                            disablepictureinpicture
                            style="width: 100%; border-radius: 10px;">
                         <source src="{{ asset('storage/' . $video->video_url) }}" type="video/mp4">
-                        Votre navigateur ne supporte pas la vidéo.
+                        {{ __('Votre navigateur ne supporte pas la vidéo') }}.
                     </video>
                 </div>
             @endif
