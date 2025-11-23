@@ -13,10 +13,8 @@ window._chatAlreadyLoaded = true;
 
 <!-- 🔒 SOCKET.IO CHARGÉ UNE SEULE FOIS -->
 <script>
-if (!window._socketIOLoaded) {
-    window._socketIOLoaded = true;
-    document.write('<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"><\/script>');
-}
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js" defer></script>
+
 </script>
 
 <style>
