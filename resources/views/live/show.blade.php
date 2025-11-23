@@ -11,6 +11,25 @@
   <audio id="soundSurprise" src="{{ asset('sounds/cadeau.mp3') }}" preload="auto"></audio>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
+@php
+    // Récupération des photos, compatible array et collection
+    $photos = is_array($modele->photos)
+        ? $modele->photos
+        : $modele->photos->pluck('image_url')->toArray();
+
+    // Convertir en URLs complètes (storage)
+    $photosUrl = [];
+    foreach ($photos as $p) {
+        if ($p) $photosUrl[] = asset('storage/' . $p);
+    }
+
+    // Si aucune photo → fallback
+    if (empty($photosUrl)) {
+        $photosUrl = [asset('default-bg.jpg')];
+    }
+
+@endphp
+
 
   <style>
     :root{
@@ -40,24 +59,35 @@
 /* ===== Reset / Base ===== */
 * { box-sizing: border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 html,body { height:100%; }
+/* ===== Slideshow Background ===== */
+
 body {
   margin: 0;
   font-family: var(--font-sans);
   color: #fff;
-  background: radial-gradient(circle at 20% 20%, #ff2a6d20, transparent 60%),
-              radial-gradient(circle at 80% 70%, #8a2be220, transparent 60%),
-              radial-gradient(circle at 50% 40%, #ff008020, transparent 70%),
-              #0a0012;
-  background-size: 200% 200%;
-  animation: bgNeonSmoke 18s ease-in-out infinite alternate;
-  overflow-x: hidden;
+
+  --bg1: url('{{ $photosUrl[0] ?? asset("default-bg.jpg") }}');
+  --bg2: url('{{ $photosUrl[1] ?? $photosUrl[0] ?? asset("default-bg.jpg") }}');
+  --bg3: url('{{ $photosUrl[2] ?? $photosUrl[0] ?? asset("default-bg.jpg") }}');
+
+  background:
+      linear-gradient(180deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
+      var(--bg1) center/cover no-repeat fixed;
+
+  animation: bgSlide 20s infinite;
+  background-size: cover;
+      padding-top: 50px; /* ajuste si tu veux plus/moins */
+
 }
 
-@keyframes bgNeonSmoke {
-  0%   { background-position: 20% 20%; }
-  50%  { background-position: 80% 60%; }
-  100% { background-position: 40% 10%; }
+/* Animation slideshow */
+@keyframes bgSlide {
+  0%   { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg1); }
+  33%  { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg2); }
+  66%  { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg3); }
+  100% { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg1); }
 }
+
 
 
 /* subtle animated background */
@@ -65,7 +95,7 @@ body {
 
 /* ===== Layout container ===== */
 .container-live{
-  max-width:1600px;
+  max-width:100%;
   margin: 24px auto;
   display:flex;
   gap:20px;
@@ -76,7 +106,7 @@ body {
 /* left = video, right = chat column */
 .left-live{ flex:3; position:relative; min-width:0; }
 #videoContainer{
-  height:95vh;
+  height:100vh;
   border-radius:var(--radius-lg);
   background:var(--glass);
   padding:14px;
@@ -212,15 +242,45 @@ body {
 }
 
 /* ===== Token icons & menus (refactored, no duplication) ===== */
-.video-top-icons{
-  position:absolute;
-  top:14px;
-  right:14px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  z-index:1200;
-  align-items:center;
+.video-top-icons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px; /* espace régulier */
+
+    z-index: 1200;
+}
+.video-top-icons .token-icon,
+#clientCamControls button {
+    width: 48px !important;
+    height: 48px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 14px !important;
+    padding: 0 !important;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+}
+
+#clientCamControls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+#clientCamControls button {
+    background: rgba(255,255,255,0.12) !important;
+    color: white !important;
+    border: none !important;
+    font-size: 18px;
 }
 .token-icon{
   width:50px; height:50px;
@@ -340,7 +400,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 - Le formulaire de chat (#chatForm) est positionné naturellement en bas via flex column (il n'est pas "position:fixed" sur la page) — il reste collé au bas du #chatColumn et les messages défilent au-dessus.
 */
 #chatColumn {
-    margin-top: 240px !important;
+    margin-top: 250px !important;
 }
 
 /* ===== Bouton Retour ===== */
@@ -383,7 +443,6 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 
 /* ===== Affichage des jetons ===== */
 .jetons-display {
-    background: rgba(255,255,255,0.08);
     padding: 8px 14px;
     border-radius: var(--radius-md);
     font-weight: 700;
@@ -391,8 +450,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     align-items: center;
     gap: 6px;
     font-size: 1rem;
-    box-shadow: inset 0 0 12px rgba(0,0,0,0.25),
-                0 4px 14px rgba(0,0,0,0.3);
+
 }
 .jetons-display #userJetons {
     color: #ffd740;
@@ -631,39 +689,249 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     color: #fff !important;
 }
 
+/* === CARD PREMIUM MODELE === */
+.modele-premium-card {
+    display: flex;
+    align-items: center;
+    padding: 18px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+    gap: 16px;
+}
 
+.modele-avatar {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.modele-info {
+    color: #fff;
+}
+
+.modele-name {
+    font-size: 1.7rem;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(0,0,0,0.6);
+    font-weight: 700;
+}
+
+.modele-tags .tag {
+    display: inline-block;
+    margin-top: 6px;
+    margin-right: 6px;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #ff4081, #ff1744);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 3px 12px rgba(255,64,129,0.35);
+}
+
+.modele-details {
+    margin-top: 8px;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.model-photo {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+
+#localPreview {
+    position: absolute !important;
+    width: 160px !important;
+    height: 120px !important;
+    top: 15px !important;
+    left: 15px !important;
+    object-fit: cover !important;
+    z-index: 9999 !important;
+
+    /* 🔥 Correction essentielle */
+    display: none;
+}
+
+/* === TOP BAR === */
+.top-bar-live {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* gauche / centre / droite */
+    margin-bottom: 15px;
+
+    padding: 10px 16px;
+    border-radius: 14px;
+}
+
+/* === Bouton Retour === */
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 10px;
+
+    background: linear-gradient(135deg, #2c003b, #4a0061);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35),
+                inset 0 0 10px rgba(255,255,255,0.04);
+    transition: all .25s ease;
+}
+
+.back-btn:hover {
+    background: linear-gradient(135deg, #4a0061, #7c1fa1);
+    transform: translateY(-2px);
+}
+
+/* === Chrono privé === */
+.private-timer {
+    padding: 8px 16px;
+    border-radius: 10px;
+
+    background: rgba(0,0,0,0.55);
+    color: #ffd740;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.45),
+                inset 0 0 12px rgba(255,255,255,0.05);
+}
+
+/* === Jetons Display === */
+.jetons-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 14px;
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-weight: 700;
+    color: #ffd740;
+    letter-spacing: .3px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.jetons-display i {
+    color: #ffd740;
+    font-size: 1.2rem;
+}
+
+.top-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    z-index: 99999;
+
+    padding: 12px 20px;
+}
   </style>
 </head>
+@php
+    $photo = is_array($modele->photos)
+        ? ($modele->photos[0] ?? null)
+        : ($modele->photos->first()->image_url ?? null);
+@endphp
+
 <body>
+        <div class="top-bar-live top-fixed">
+    <button id="backBtn" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+    </button>
+
+    <div id="privateTimer" class="private-timer">00:00</div>
+
+    <div class="jetons-display">
+        <i class="fa-solid fa-coins"></i>
+        Jetons : <span id="userJetons">{{ Auth::user()->jetons ?? 0 }}</span>
+    </div>
+    
+</div>
+
+
   <div class="container-live">
     <!-- LIVE Section -->
     <div class="left-live">
-      <button id="backBtn" class="btn btn-secondary mb-3">
-          ← Retour
-      </button>
-      <h2>{{ $modele->prenom }} est en Live 🎥</h2>
+       @auth
 
-          <div class="badge-live">
-            🔴 EN DIRECT
-          </div>
 
-          @auth
+
+                @endauth
+
+      <!-- Bloc Premium Modèle -->
+
+ <!-- @auth
             <div class="jetons-display mb-2">
                 💰 Jetons : <span id="userJetons">{{ Auth::user()->jetons }}</span>
             </div>
+          @endauth -->
+          @if(!Auth::check())
+  <div id="countdownBox" class="text-center mt-2">
+    <p class="text-warning fs-5">
+      ⏳ Il vous reste <span id="countdown">10</span> secondes de live gratuit.
+    </p>
+    <p class="text-light small">
+      🔒 Connecte-toi ou crée un compte pour continuer à regarder le live.
+    </p>
+  </div>
+    @endif
+    @if(!Auth::check())
+    <script>
+      let seconds = 10;
+      const countdownElement = document.getElementById('countdown');
 
-          @endauth
+      const countdownInterval = setInterval(() => {
+        seconds--;
+        countdownElement.textContent = seconds;
 
-          <!-- Chrono privé -->
-          <div id="privateTimer"
-              style="position:absolute;top:10px;left:50%;transform:translateX(-50%);
-                      background:rgba(0,0,0,0.6);color:#fff;
-                      padding:6px 12px;border-radius:6px;
-                      font-weight:bold;z-index:10;">
-              00:00
-          </div>
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          window.location.href = "{{ route('home') }}";
+        }
+      }, 1000);
+    </script>
+    @endif
+<div class="modele-premium-card">
+<img src="{{ $photo ? asset('storage/' . $photo) : asset('default.jpg') }}"
+     class="model-photo"
+     alt="photo">
 
-          @auth
+    <div class="modele-info">
+        <h2 class="modele-name">
+            {{ $modele->prenom }}
+        </h2>
+
+        <div class="modele-tags">
+            <span class="tag">🔥 En Live</span>
+        </div>
+
+        <div class="modele-details">
+            <strong>Tarif privé :</strong> {{ $modele->nombre_jetons_show_privee }} jetons<br>
+            <strong>Durée :</strong> {{ $modele->duree_show_privee }} min
+        </div>
+    </div>
+   
+</div>
+
+      @auth
               @if(Auth::user()->role != 'modele' && !isset($showPriveId))
                   <div class="text-center my-3">
                       <button id="switchPrivateBtn" class="btn btn-danger">
@@ -672,7 +940,6 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
                   </div>
               @endif
           @endauth
-
         <div id="videoContainer" style="position: relative;">
 
           @auth
@@ -688,6 +955,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
             </div>
           @endauth
 
+    <video id="localPreview" autoplay muted playsinline></video>
 
           <video id="liveVideo" autoplay playsinline controls></video>
 
@@ -798,7 +1066,6 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
               </div>
 
               <!-- Mini preview locale (en bas à gauche du player) -->
-              <video id="localPreview" autoplay muted playsinline style="width:160px;height:120px;object-fit:cover;border-radius:8px;display:none;"></video>
 
               <!-- Menus (remplis via Blade) -->
               <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
@@ -852,46 +1119,22 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
               </div>
           </div>
         </div> 
-    </div> 
+    </div>       @auth
+
     <div id="chatColumn">
       <div id="messages" class="chat-wrapper"></div>
-      @auth
         @if(Auth::user()->role != 'modele')
         <form id="chatForm" onsubmit="sendMessage(event)">
             <input type="text" id="messageInput" placeholder="Tape ton message..." required>
             <button type="submit" class="btn btn-danger">Envoyer</button>
         </form>
         @endif
-      @endauth
     </div>
+          @endauth
+
   </div> 
 
-  @if(!Auth::check())
-  <div id="countdownBox" class="text-center mt-2">
-    <p class="text-warning fs-5">
-      ⏳ Il vous reste <span id="countdown">10</span> secondes de live gratuit.
-    </p>
-    <p class="text-light small">
-      🔒 Connecte-toi ou crée un compte pour continuer à regarder le live.
-    </p>
-  </div>
-    @endif
-    @if(!Auth::check())
-    <script>
-      let seconds = 10;
-      const countdownElement = document.getElementById('countdown');
 
-      const countdownInterval = setInterval(() => {
-        seconds--;
-        countdownElement.textContent = seconds;
-
-        if (seconds <= 0) {
-          clearInterval(countdownInterval);
-          window.location.href = "{{ route('home') }}";
-        }
-      }, 1000);
-    </script>
-    @endif
 
 
   <!-- Modal confirmation show privé -->
