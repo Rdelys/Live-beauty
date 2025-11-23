@@ -935,16 +935,19 @@
               <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
             @endif
 
-            {{-- Vidéo au hover --}}
+            <!-- {{-- Vidéo au hover --}}
             @if($hasVideo)
               <div class="model-video">
                 @if(!empty($modele->video_file) && is_array($modele->video_file))
-                  <video autoplay muted loop playsinline preload="none">
-                    <source src="{{ asset('storage/' . $modele->video_file[0]) }}" type="video/mp4">
+                  <video muted playsinline preload="none"
+                        onmouseenter="this.play()" onmouseleave="this.pause()">
+                      <source src="{{ asset('storage/' . $modele->video_file[0]) }}">
                   </video>
+
                 @elseif(!empty($modele->video_link) && is_array($modele->video_link))
                   <iframe
-                    src="{{ $modele->video_link[0] }}?autoplay=1&mute=1&controls=0&loop=1"
+                    src="{{ $modele->video_link[0] }}?mute=1&controls=0&loop=1
+"
                     frameborder="0"
                     allow="autoplay; encrypted-media"
                     allowfullscreen
@@ -952,7 +955,7 @@
                   </iframe>
                 @endif
               </div>
-            @endif
+            @endif -->
 
             {{-- Statut + Nom --}}
             <div class="status-name">

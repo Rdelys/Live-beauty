@@ -1,98 +1,87 @@
 @if(Auth::check())
-<style>
-/* ------------------------------------------ */
-/* BOUTON FLOTTANT LUXE ROUGE & NOIR          */
-/* ------------------------------------------ */
 
+<audio id="adminChatSound" src="/sounds/notificationAction.mp3" preload="auto"></audio>
+
+<!-- 🔒 ANTI-DOUBLE CHARGEMENT GLOBAL DU CHATBOT -->
+<script>
+if (window._chatAlreadyLoaded) {
+    console.warn("Chatbot déjà chargé → skip");
+    throw new Error("Chatbot already loaded");
+}
+window._chatAlreadyLoaded = true;
+</script>
+
+<!-- 🔒 SOCKET.IO CHARGÉ UNE SEULE FOIS -->
+<script>
+if (!window._socketIOLoaded) {
+    window._socketIOLoaded = true;
+    document.write('<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"><\/script>');
+}
+</script>
+
+<style>
+/* ----------------------------------------------------------- */
+/* 🔥 STYLE DU CHAT COMPLET - MODERNE, PREMIUM, ROUGE & NOIR   */
+/* ----------------------------------------------------------- */
+
+/* Bouton flottant */
 #chatbot-toggle {
     position: fixed;
     bottom: 20px;
     right: 20px;
-
     width: 75px;
     height: 75px;
     border-radius: 50%;
     cursor: pointer;
-
     background: radial-gradient(circle at 35% 35%, #222 0%, #000 70%);
     border: 3px solid #d40022;
-
     color: #ff2a4f;
     font-size: 36px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     box-shadow:
         0 0 15px rgba(212,0,34,0.8),
         0 0 25px rgba(212,0,34,0.5),
         inset 0 3px 9px rgba(255,0,60,0.25),
         inset 0 -4px 12px rgba(0,0,0,0.8);
-
     animation: pulseGlow 2s infinite ease-in-out;
-
     z-index: 10000;
     transition: 0.25s ease;
 }
 
 @keyframes pulseGlow {
-    0% {
-        box-shadow:
-            0 0 15px rgba(212,0,34,0.6),
-            0 0 25px rgba(212,0,34,0.4),
-            inset 0 3px 9px rgba(255,0,60,0.2),
-            inset 0 -4px 12px rgba(0,0,0,0.7);
-    }
-    50% {
-        box-shadow:
-            0 0 25px rgba(255,0,60,1),
-            0 0 35px rgba(255,0,60,0.9),
-            inset 0 5px 10px rgba(255,0,60,0.35),
-            inset 0 -5px 15px rgba(0,0,0,0.9);
-    }
-    100% {
-        box-shadow:
-            0 0 15px rgba(212,0,34,0.6),
-            0 0 25px rgba(212,0,34,0.4),
-            inset 0 3px 9px rgba(255,0,60,0.2),
-            inset 0 -4px 12px rgba(0,0,0,0.7);
-    }
+    0% { box-shadow: 0 0 15px rgba(212,0,34,0.6); }
+    50% { box-shadow: 0 0 35px rgba(255,0,60,1); }
+    100% { box-shadow: 0 0 15px rgba(212,0,34,0.6); }
 }
 
-#chatbot-toggle:hover {
-    transform: scale(1.12);
-}
+#chatbot-toggle:hover { transform: scale(1.12); }
 
-/* CHATBOX */
+/* ---------------- CHATBOX ---------------- */
 #chatbot-container {
     position: fixed;
     bottom: 110px;
     right: 20px;
     width: 360px;
     max-height: 520px;
-
     background: rgba(15, 15, 15, 0.95);
     backdrop-filter: blur(10px);
-
     border: 2px solid #d1001f;
     border-radius: 18px;
-
     box-shadow:
         0 0 25px rgba(212,0,34,0.4),
         0 0 10px rgba(255,0,60,0.5);
-
     overflow: hidden;
     display: none;
     flex-direction: column;
-
     animation: slideUp 0.3s ease;
     z-index: 9999;
 }
 
 @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 #chatbot-header {
@@ -104,22 +93,64 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.4);
 }
 
-#close-chatbot {
-    cursor: pointer;
-    font-size: 20px;
-}
+#close-chatbot { cursor: pointer; font-size: 20px; }
 
+/* Messages */
 #chatbot-messages {
     padding: 12px;
     height: 320px;
     overflow-y: auto;
     color: #eee;
-    font-size: 15px;
+    display: flex;
+    flex-direction: column;
 }
 
+/* BUBBLES */
+.msg-left {
+    background: #2a2a2a;
+    color: #ff5f7f;
+    padding: 8px 12px;
+    max-width: 80%;
+    border-radius: 12px 12px 12px 4px;
+    margin: 6px 0;
+    display: inline-block;
+    animation: fadeInLeft .25s ease;
+}
+
+.msg-right {
+    background: #d40022;
+    color: white;
+    padding: 8px 12px;
+    max-width: 80%;
+    border-radius: 12px 12px 4px 12px;
+    margin: 6px 0;
+    align-self: flex-end;
+    display: inline-block;
+    animation: fadeInRight .25s ease;
+}
+
+@keyframes fadeInLeft {
+    from { opacity:0; transform:translateX(-15px); }
+    to { opacity:1; transform:translateX(0); }
+}
+
+@keyframes fadeInRight {
+    from { opacity:0; transform:translateX(15px); }
+    to { opacity:1; transform:translateX(0); }
+}
+
+.welcome-msg {
+    animation: fadePop .5s ease-out;
+}
+
+@keyframes fadePop {
+    0% { opacity:0; transform:scale(.7); }
+    100% { opacity:1; transform:scale(1); }
+}
+
+/* Input */
 #chatbot-input {
     background: #0f0f0f;
     padding: 10px;
@@ -135,15 +166,39 @@
     color: white;
 }
 
-#chatbot-input input::placeholder {
-    color: #777;
+#chatbot-input input::placeholder { color: #777; }
+/* 🎨 SCROLLBAR PREMIUM ROUGE & NOIR */
+#chatbot-messages::-webkit-scrollbar {
+    width: 6px;
 }
+
+#chatbot-messages::-webkit-scrollbar-track {
+    background: #111;
+    border-radius: 10px;
+}
+
+#chatbot-messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d40022, #700010);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(212,0,34,0.7);
+}
+
+#chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ff0037, #b0001c);
+}
+
+/* Firefox */
+#chatbot-messages {
+    scrollbar-width: thin;
+    scrollbar-color: #d40022 #111;
+}
+
 </style>
 
 <!-- BOUTON -->
 <button id="chatbot-toggle">💋</button>
 
-<!-- CHAT -->
+<!-- CHATBOX -->
 <div id="chatbot-container">
     <div id="chatbot-header">
         🔥 Live Beauty CHAT – Bonjour {{ Auth::user()->pseudo }} !
@@ -151,16 +206,20 @@
     </div>
 
     <div id="chatbot-messages">
-        <p><strong style="color:#ff2a4f;">Bot :</strong> Bienvenue au chat VIP 😘</p>
-        <p><strong style="color:#ff2a4f;">Bot :</strong> Comment puis-je t’aider ?</p>
+        <div class="msg-left welcome-msg">🔥 Bienvenue {{ Auth::user()->pseudo }} !</div>
+        <div class="msg-left welcome-msg">😘 Comment puis-je t’aider aujourd’hui ?</div>
     </div>
 
     <div id="chatbot-input">
-        <input type="text" placeholder="Écris ton message…">
+        <input type="text" id="chatbot-user-input" placeholder="Écris ton message…">
     </div>
 </div>
 
+
 <script>
+/* --------------------
+   OUVERTURE / FERMETURE
+---------------------- */
 document.getElementById("chatbot-toggle").onclick = () => {
     document.getElementById("chatbot-container").style.display = "flex";
     document.getElementById("chatbot-toggle").style.display = "none";
@@ -172,18 +231,26 @@ document.getElementById("close-chatbot").onclick = () => {
 };
 </script>
 
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
 <script>
+/* -------------------------
+  SOCKET.IO - SINGLETON SAFE
+------------------------- */
 if (!window.socketChat) {
-    window.socketChat = io("http://localhost:4000");
+    window.socketChat = io("http://localhost:4000", {
+        transports: ["websocket"],
+        upgrade: false,
+        autoConnect: true
+    });
 }
 const socketChat = window.socketChat;
 
-const USER_ID = "{{ Auth::user()->id }}".toString();
+const USER_ID = "{{ Auth::user()->id }}";
 const USER_PSEUDO = "{{ Auth::user()->pseudo }}";
+const soundAdmin = document.getElementById("adminChatSound");
 
-// 🔥 IDENTIFICATION FIABLE APRÈS CONNECT
+
+/* IDENTIFICATION */
 socketChat.on("connect", () => {
     socketChat.emit("identify", {
         type: "client",
@@ -192,26 +259,53 @@ socketChat.on("connect", () => {
     });
 });
 
-// AFFICHAGE MESSAGE
-function addMessage(sender, msg, color = "#ff2a4f") {
+
+/* -------------------------------------------------
+   FONCTION D'AJOUT DE MESSAGE AVEC ALIGNEMENT + SON
+--------------------------------------------------- */
+function addStyledMessage(sender, msg) {
     const box = document.getElementById("chatbot-messages");
+
+    const side = (sender === "Moi") ? "msg-right" : "msg-left";
+
+    if (sender !== "Moi") {
+        soundAdmin.currentTime = 0;
+        soundAdmin.play().catch(() => {});
+    }
+
     box.innerHTML += `
-        <p><strong style="color:${color}">${sender} :</strong> ${msg}</p>
+        <div class="${side}">
+            <strong>${sender} :</strong> ${msg}
+        </div>
     `;
-    box.scrollTop = box.scrollHeight;
+
+    // 🔥 Scroll automatique vers le bas à chaque message
+    scrollChatToBottom();
 }
 
-// RECEPTION
-socketChat.on("chatbot-reply", d => addMessage(d.sender, d.message));
-socketChat.on("bot-reply", d => addMessage("Bot", d.message));
 
-// ENVOI
-document.querySelector("#chatbot-input input").addEventListener("keydown", function(e) {
+
+/* -------------------------
+  MESSAGES REÇUS SERVEUR
+-------------------------- */
+socketChat.on("chatbot-reply", d => {
+    addStyledMessage(d.sender, d.message);
+});
+
+socketChat.on("bot-reply", d => {
+    addStyledMessage("Bot", d.message);
+});
+
+
+/* -------------------------
+  ENVOI MESSAGE UTILISATEUR
+-------------------------- */
+document.getElementById("chatbot-user-input").addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
         const message = this.value.trim();
         if (!message) return;
 
-        addMessage("Moi", message, "#ff0044");
+        addStyledMessage("Moi", message);
 
         socketChat.emit("client-message", {
             userId: USER_ID,
@@ -221,6 +315,24 @@ document.querySelector("#chatbot-input input").addEventListener("keydown", funct
 
         this.value = "";
     }
+});
+</script>
+<script>
+/* 🔥 SCROLLER AUTOMATIQUE - TOP À L'OUVERTURE, BAS À CHAQUE MESSAGE */
+
+function scrollChatToTop() {
+    const box = document.getElementById("chatbot-messages");
+    box.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function scrollChatToBottom() {
+    const box = document.getElementById("chatbot-messages");
+    box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+}
+
+/* Quand on ouvre le chat → scroll tout en haut */
+document.getElementById("chatbot-toggle").addEventListener("click", () => {
+    setTimeout(scrollChatToTop, 150);
 });
 </script>
 

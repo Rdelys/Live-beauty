@@ -2710,7 +2710,6 @@ function deleteSelectedPhotos() {
     });
 }
 </script>
-@include('components.chatbot-modele')
 
 </body>
 </html>
