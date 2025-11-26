@@ -69,18 +69,35 @@ body {
     url('{{ asset("fondShow.png") }}') center/cover no-repeat fixed !important;
   background-size: cover !important;
   padding-top: 50px;
+      background-attachment: fixed;
+
+}
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.8s ease forwards;
 }
 
-
-/* Animation slideshow */
-@keyframes bgSlide {
-  0%   { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg1); }
-  33%  { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg2); }
-  66%  { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg3); }
-  100% { background-image: linear-gradient(180deg,rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--bg1); }
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
+body:hover {
+    background-position: center 51%;
+    transition: background-position 2s ease;
+}
 
+.token-icon {
+    animation: neonPulse 4s infinite ease-in-out;
+}
+
+@keyframes neonPulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(255,64,129,0.25); }
+    50%     { box-shadow: 0 0 32px rgba(255,64,129,0.6); }
+}
 
 /* subtle animated background */
 @keyframes bg-pan { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
@@ -733,9 +750,8 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     height: 110px;
     object-fit: cover;
     border-radius: 16px;
-    border: 2px solid rgba(255,255,255,0.2);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-}
+box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
+    border: 2px solid rgba(255,255,255,0.15);}
 
 #localPreview {
     position: absolute !important;
@@ -748,6 +764,23 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 
     /* 🔥 Correction essentielle */
     display: none;
+}
+
+#videoContainer::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 0%, rgba(255,64,129,0.35), transparent 60%);
+    filter: blur(18px);
+    z-index: -1;
+}
+.chat-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px rgba(255,64,129,0.4);
+}
+.chat-bubble {
+    border-radius: 18px !important;
 }
 
 /* === TOP BAR === */
@@ -835,6 +868,26 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 
     padding: 12px 20px;
 }
+
+#chatColumn::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255,64,129,0.25), transparent 70%);
+    filter: blur(18px);
+    z-index: -1;
+}
+@keyframes breathingGlow {
+    0% { filter: drop-shadow(0 0 6px #ff4081); }
+    50% { filter: drop-shadow(0 0 14px #ff77a9); }
+    100% { filter: drop-shadow(0 0 6px #ff4081); }
+}
+
+.model-photo {
+    animation: breathingGlow 4s infinite ease-in-out;
+}
+
   </style>
 </head>
 @php
@@ -859,7 +912,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 </div>
 
 
-  <div class="container-live">
+  <div class="container-live fade-in">
     <!-- LIVE Section -->
     <div class="left-live">
        @auth
