@@ -64,20 +64,13 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   color: #fff;
-
-  --bg1: url('{{ $photosUrl[0] ?? asset("default-bg.jpg") }}');
-  --bg2: url('{{ $photosUrl[1] ?? $photosUrl[0] ?? asset("default-bg.jpg") }}');
-  --bg3: url('{{ $photosUrl[2] ?? $photosUrl[0] ?? asset("default-bg.jpg") }}');
-
   background:
-      linear-gradient(180deg, rgba(0,0,0,0.70), rgba(0,0,0,0.70)),
-      var(--bg1) center/cover no-repeat fixed;
-
-  animation: bgSlide 20s infinite;
-  background-size: cover;
-      padding-top: 50px; /* ajuste si tu veux plus/moins */
-
+    linear-gradient(180deg, rgba(0,0,0,0.65), rgba(0,0,0,0.75)),
+    url('{{ asset("fondShow.png") }}') center/cover no-repeat fixed !important;
+  background-size: cover !important;
+  padding-top: 50px;
 }
+
 
 /* Animation slideshow */
 @keyframes bgSlide {
