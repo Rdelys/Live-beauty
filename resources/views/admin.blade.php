@@ -2066,6 +2066,39 @@ table {
     </div>
   </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const mobileMenu = document.getElementById("mobileMenu");
+    const navbarToggler = document.querySelector(".navbar-toggler");
+
+    // 🔥 Fermeture automatique du menu quand on clique sur un lien (mobile)
+    document.querySelectorAll("#mobileMenu .menu-link").forEach(link => {
+        link.addEventListener("click", function () {
+
+            // Si clic sur un menu avec sous-menu → on n'efface pas le menu principal
+            if (this.classList.contains("has-submenu")) return;
+
+            // On ferme le menu mobile
+            if (mobileMenu.classList.contains("show")) {
+                const bsCollapse = bootstrap.Collapse.getInstance(mobileMenu);
+                bsCollapse.hide();
+            }
+        });
+    });
+
+    // 🔥 Si on clique sur un sous-menu → fermeture du dropdown mobile
+    document.querySelectorAll("#mobileMenu .submenu a").forEach(sublink => {
+        sublink.addEventListener("click", function () {
+            if (mobileMenu.classList.contains("show")) {
+                const bsCollapse = bootstrap.Collapse.getInstance(mobileMenu);
+                bsCollapse.hide();
+            }
+        });
+    });
+
+});
+</script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
