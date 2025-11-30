@@ -245,6 +245,35 @@ textarea {
     }
 
 }
+/* ===================================================================
+   FIX ULTIME — SELECT SANS FOND BLANC (Chrome, Safari, Android, iOS)
+   =================================================================== */
+select.form-control,
+select {
+    background: rgba(255,255,255,0.06) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 12px !important;
+
+    /* Supprime le style natif du navigateur */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+/* Flèche custom (pour éviter celle blanche d’origine) */
+select.form-control {
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='14' viewBox='0 0 20 20' width='14' xmlns='http://www.w3.org/2000/svg'><polygon points='0,0 20,0 10,10'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+}
+
+/* Option dropdown */
+select option {
+    background: #111 !important;
+    color: #fff !important;
+}
 
     </style>
 
