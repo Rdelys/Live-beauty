@@ -191,47 +191,52 @@
     <div class="info-block">
 
         <!-- FORMULAIRE -->
-        <form>
+        <form action="{{ route('film.store') }}" method="POST">
+            @csrf
 
-            <!-- NOM DU MODÈLE -->
+            <!-- SELECT modèle -->
             <div class="mb-3">
-                <label class="label">Nom du modèle :</label>
-                <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="Ex : Sofia / Liza / Chloé...">
+                <label class="label">Modèle :</label>
+                <select name="modele_id" class="form-control bg-dark text-white border-secondary" required>
+                    <option value="">-- Choisir un modèle --</option>
+                    @foreach(\App\Models\Modele::all() as $m)
+                        <option value="{{ $m->id }}">{{ $m->pseudo ?? $m->nom }}</option>
+                    @endforeach
+                </select>
             </div>
 
-            <!-- DETAIL DU FILM -->
+            <!-- DETAIL -->
             <div class="mb-3">
-                <label class="label">Détail du film demandé :</label>
-                <textarea class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Décris ton film..."></textarea>
+                <label class="label">Détail du film :</label>
+                <textarea name="detail" class="form-control bg-dark text-white border-secondary" required></textarea>
             </div>
 
-            <!-- MINUTES (MANUEL) -->
+            <!-- MINUTES -->
             <div class="mb-3">
-                <label class="label">Nombre de minutes :</label>
-                <input type="number" id="minutesInput" class="form-control bg-dark text-white border-secondary" min="5" value="5">
+                <label class="label">Minutes :</label>
+                <input type="number" name="minutes" id="minutesInput"
+                    class="form-control bg-dark text-white border-secondary" min="5" value="5">
             </div>
 
-            <!-- MESSAGE JETONS -->
             <p id="jetonsMessage" class="text-warning fw-bold mt-2">
                 5 minutes = 250 jetons
             </p>
 
-            <!-- TYPE D'ENVOI -->
+            <!-- TYPE ENVOI -->
             <div class="mb-3">
-                <label class="label">Type d'envoi de la vidéo :</label>
-
-                <select class="form-control bg-dark text-white border-secondary">
+                <label class="label">Type d'envoi :</label>
+                <select name="type_envoi" class="form-control bg-dark text-white border-secondary">
                     <option value="whatsapp">Whatsapp</option>
                     <option value="email">Email</option>
                 </select>
             </div>
 
-            <!-- BOUTON ENVOYER -->
-            <button type="button" class="btn btn-danger w-100 fw-bold mt-3">
+            <button class="btn btn-danger w-100 fw-bold mt-3">
                 <i class="fas fa-paper-plane me-2"></i> Envoyer la demande
             </button>
 
         </form>
+
     </div>
 
     <!-- LISTE DES DEMANDES (STATIQUE) -->
@@ -242,8 +247,8 @@
     <table class="table table-dark table-bordered align-middle">
         <thead>
             <tr>
-                <th>Pseudo client</th>
-                <th>Email client</th>
+                <th>Pseudo </th>
+                <th>Email </th>
                 <th>Modèle</th>
                 <th>Film demandé</th>
                 <th>Minutes</th>
@@ -253,36 +258,27 @@
         </thead>
 
         <tbody>
-            <tr>
-                <td>Petit</td>
-                <td>petit@gmail.com</td>
-                <td>Sofia</td>
-                <td>Vidéo danse sensuelle</td>
-                <td>10</td>
-                <td>350</td>
-                <td><span class="badge bg-warning">En cours</span></td>
-            </tr>
-
-            <tr>
-                <td>Petit</td>
-                <td>petit@gmail.com</td>
-                <td>Liza</td>
-                <td>Film cosplay sexy</td>
-                <td>15</td>
-                <td>450</td>
-                <td><span class="badge bg-success">Envoyé</span></td>
-            </tr>
-
-            <tr>
-                <td>Petit</td>
-                <td>petit@gmail.com</td>
-                <td>Chloé</td>
-                <td>Vidéo POV romantique</td>
-                <td>20</td>
-                <td>550</td>
-                <td><span class="badge bg-danger">Terminé</span></td>
-            </tr>
+            @foreach(\App\Models\Film::where('user_id', $user->id)->latest()->get() as $film)
+                <tr>
+                    <td>{{ $film->user->pseudo }}</td>
+                    <td>{{ $film->user->email }}</td>
+                    <td>{{ $film->modele->pseudo ?? $film->modele->nom }}</td>
+                    <td>{{ $film->detail }}</td>
+                    <td>{{ $film->minutes }}</td>
+                    <td>{{ $film->jetons }}</td>
+                    <td>
+                        @if($film->statut == "en_cours")
+                            <span class="badge bg-warning">En cours</span>
+                        @elseif($film->statut == "envoye")
+                            <span class="badge bg-success">Envoyé</span>
+                        @else
+                            <span class="badge bg-danger">Terminé</span>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
         </tbody>
+
     </table>
 
 </div>

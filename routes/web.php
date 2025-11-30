@@ -335,3 +335,6 @@ Route::post('/acheter-album/{albumId}', [AchatController::class, 'acheterAlbum']
 
     Route::get('/user/{id}/profil', [App\Http\Controllers\UserController::class, 'profil'])
     ->name('user.profil');
+
+    Route::post('/film/demande', [App\Http\Controllers\FilmController::class, 'store'])
+     ->name('film.store');
