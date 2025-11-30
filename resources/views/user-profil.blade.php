@@ -9,119 +9,243 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #000;
-            color: #fff;
-            font-family: "Poppins", sans-serif;
-            overflow-x: hidden;
-        }
+        /* -------------------------------
+   GLOBAL
+--------------------------------*/
+body {
+    background: #0a0a0a;
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
+    overflow-x: hidden;
+}
 
-        /* --- HEADER DU PROFIL --- */
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
+/* Effet verre premium */
+.glass {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 25px rgba(255, 0, 60, 0.15);
+    border-radius: 18px;
+}
 
-        .profile-avatar {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #ff1a1a, #b30000);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 45px;
-            font-weight: bold;
-            color: #fff;
-            box-shadow: 0 0 20px rgba(255,0,0,0.4);
-        }
+/* Titres premium */
+h1, h2, h3, h4 {
+    font-weight: 700;
+    letter-spacing: 1px;
+}
 
-        /* --- TOP MENU --- */
-        .top-menu {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-        }
+/* -------------------------------
+   HEADER PROFILE
+--------------------------------*/
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 20px;
+    background: linear-gradient(to right, rgba(255,0,60,0.25), rgba(0,0,0,0.5));
+    backdrop-filter: blur(8px);
+}
 
-        .top-menu button {
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,0,0,0.4);
-            color: #fff;
-            padding: 10px 18px;
-            font-size: 0.95rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all .25s ease;
-        }
+.profile-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #ff003c, #7a001e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 
+        0 0 25px rgba(255,0,60,0.55),
+        0 0 60px rgba(255,0,60,0.25);
+    border: 3px solid #ff003c;
+}
 
-        .top-menu button i {
-            font-size: 1.1rem;
-        }
+/* -------------------------------
+   TOP MENU
+--------------------------------*/
+.top-menu {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 20px;
+}
 
-        .top-menu button:hover {
-            background: rgba(255,0,0,0.3);
-            border-color: #ff1a1a;
-            box-shadow: 0 0 15px rgba(255,0,0,0.5);
-            transform: translateY(-2px);
-        }
+.top-menu button {
+    flex: 1;
+    padding: 12px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 14px;
+    border: 2px solid rgba(255,0,60,0.4);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
 
-        .top-menu button.active {
-            background: #ff1a1a;
-            border-color: #fff;
-            color: #fff;
-            box-shadow: 0 0 20px rgba(255,0,0,0.7);
-        }
+.top-menu button:hover {
+    background: rgba(255,0,60,0.4);
+    border-color: #ff003c;
+    transform: translateY(-3px);
+    box-shadow: 0 0 15px rgba(255,0,60,0.6);
+}
 
-        /* --- CONTENT AREA --- */
-        .section {
-            display: none;
-            animation: fadeIn .35s ease;
-        }
+.top-menu button.active {
+    background: #ff003c;
+    border-color: #ffffff;
+    box-shadow: 0 0 22px rgba(255,0,60,0.85);
+}
 
-        .section.active {
-            display: block;
-        }
+/* -------------------------------
+   SECTIONS
+--------------------------------*/
+.section {
+    display: none;
+    animation: fadeIn .4s ease forwards;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+.section.active {
+    display: block;
+}
 
-        /* --- BLOCK INFO --- */
-        .info-block {
-            padding: 25px;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.07);
-            margin-top: 20px;
-        }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .label {
-            font-weight: 600;
-            color: #ff4d4d;
-        }
+/* -------------------------------
+   INFO BLOCK (CARTE PREMIUM)
+--------------------------------*/
+.info-block {
+    padding: 28px;
+    margin-top: 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 0 30px rgba(255,0,60,0.12);
+    transition: 0.3s ease;
+}
 
-        @media(max-width: 768px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
+.info-block:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 40px rgba(255,0,60,0.25);
+}
 
-            .top-menu {
-                flex-direction: column;
-                width: 100%;
-            }
+.label {
+    font-weight: 700;
+    color: #ff335a;
+}
 
-            .top-menu button {
-                width: 100%;
-                justify-content: center;
-            }
-        }
+/* -------------------------------
+   TABLE PREMIUM
+--------------------------------*/
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.table thead {
+    background: rgba(255,0,60,0.35);
+    color: #fff;
+}
+
+.table tbody tr {
+    background: rgba(255,255,255,0.03);
+    transition: 0.25s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(255,0,60,0.22);
+}
+
+/* -------------------------------
+   FORM PREMIUM
+--------------------------------*/
+.form-control {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    color: #fff !important;
+    border-radius: 12px;
+}
+
+.form-control:focus {
+    border-color: #ff003c !important;
+    box-shadow: 0 0 10px rgba(255,0,60,0.5) !important;
+}
+
+textarea {
+    min-height: 80px;
+}
+
+/* -------------------------------
+   BUTTONS
+--------------------------------*/
+.btn-danger {
+    background: linear-gradient(135deg, #ff003c, #90001f);
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: 0.25s ease;
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 18px rgba(255,0,60,0.6);
+}
+
+/* -------------------------------
+   BADGES
+--------------------------------*/
+.badge {
+    padding: 7px 10px;
+    border-radius: 10px;
+}
+
+/* -------------------------------
+   RESPONSIVE
+--------------------------------*/
+@media (max-width: 768px) {
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px;
+    }
+
+    .profile-avatar {
+        width: 115px;
+        height: 115px;
+        font-size: 38px;
+    }
+
+    .top-menu {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .top-menu button {
+        width: 100%;
+    }
+
+}
+
     </style>
 
     <script>
