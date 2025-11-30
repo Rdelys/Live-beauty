@@ -436,78 +436,115 @@ ul.list-unstyled li {
 @if($albums->count() > 0)
 <div class="gallery-container mb-5">
     <h3 class="gallery-title">📁 {{ __('Albums') }}</h3>
+
     <div class="row g-4 justify-content-center">
+        
         @foreach($albums as $album)
         <div class="col-6 col-md-3">
-            <div class="card bg-dark text-center border-success shadow-lg album-card"
-                style="cursor:pointer; transition:all 0.3s ease;"
-                onclick="filterPhotosByAlbum({{ $album->id }})"
-                data-album-id="{{ $album->id }}">
+            <div class="card bg-dark text-center album-card shadow-lg"
+                 data-album-id="{{ $album->id }}"
+                 onclick="filterPhotosByAlbum({{ $album->id }})">
+
                 <div class="card-body">
+
+                    <!-- Nom album -->
                     <h5 class="text-success mb-2">{{ $album->nom }}</h5>
-                    <p class="text-white mb-1">{{ $album->photos_count }} photo(s)</p>
-<span class="badge bg-success">{{ __("Voir l'album") }}</span>
+
+                    <!-- Nombre de photos -->
+                    <p class="text-white-50 mb-2">{{ $album->photos_count }} photo(s)</p>
+
+                    <!-- Prix ou gratuit -->
+                    @if($album->etat === 'payant')
+                        <span class="badge bg-danger mb-2">
+                            {{ $album->prix }} {{ __('jetons') }}
+                        </span>
+
+                        <button class="btn btn-buy btn-buy-detail mt-2"
+                                data-modeleid="{{ $modele->id }}"
+                                data-prix="{{ $album->prix }}"
+                                data-type="album"
+                                data-album="{{ $album->id }}">
+                            {{ __('Acheter l’album') }}
+                        </button>
+                    @else
+                        <span class="badge bg-success">
+                            {{ __('Gratuit') }}
+                        </span>
+                    @endif
+
                 </div>
             </div>
         </div>
         @endforeach
 
-        <!-- Bouton pour tout afficher -->
+        <!-- Afficher tout -->
         <div class="col-6 col-md-3">
-            <div class="card bg-secondary text-center border-light shadow-lg album-card"
-                 style="cursor:pointer;"
+            <div class="card bg-secondary text-center album-card shadow-lg"
                  onclick="filterPhotosByAlbum(null)">
+
                 <div class="card-body">
                     <h5 class="text-white mb-2">{{ __('Tous les albums') }}</h5>
-                    <p class="text-light mb-1">{{ __('Afficher tout') }}</p>
-                    <span class="badge bg-light text-dark">{{ __('Afficher tout') }}</span>
+                    <span class="badge bg-light text-dark">
+                        {{ __('Afficher tout') }}
+                    </span>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 @endif
+
+
 <div class="gallery-container mt-5">
     <h3 class="gallery-title">📸 {{ __('Galerie Photos') }}</h3>
 
 
     <div class="gallery-grid">
         @forelse($photos as $item)
-            @php
-                $flou = $item->type_flou;
-                $blurStyle = match($flou) {
-                    'strong' => 'filter: blur(10px);',
-                    'soft'   => 'filter: blur(4px);',
-                    'pixel'  => 'image-rendering: pixelated; filter: blur(2px);',
-                    default  => '',
-                };
-            @endphp
+           @php
+    // album associé
+    $album = $item->album;
 
-            <!-- Photo payante -->
-<div class="gallery-item text-center position-relative no-right-click"
-     data-album-id="{{ $item->album_id ?? '' }}"
-     oncontextmenu="return false;">
-    <img src="{{ asset('storage/' . $item->photo_url) }}" alt="Photo"
-         style="{{ $blurStyle }}" data-path="{{ $item->photo_url }}" />
+    // flou par défaut
+    $blurStyle = '';
 
-   @php
-    $prixAlbum = $item->album ? $item->album->prix : null;
+    if ($album && $album->etat === 'payant') {
+        $flou = $album->type_flou;
+
+        $blurStyle = match($flou) {
+            'strong' => 'filter: blur(10px);',
+            'soft'   => 'filter: blur(4px);',
+            'pixel'  => 'image-rendering: pixelated; filter: blur(2px);',
+            default  => '',
+        };
+    }
 @endphp
 
-@if($item->payant && $prixAlbum)
+<div class="gallery-item text-center position-relative no-right-click"
+     data-album-id="{{ $item->album_id }}"
+     oncontextmenu="return false;">
+
+    <img src="{{ asset('storage/' . $item->photo_url) }}"
+         data-path="{{ $item->photo_url }}"
+         style="{{ $blurStyle }}" />
+
+    <!-- {{-- Si album payant → overlay d'achat --}}
+    @if($album && $album->etat === 'payant')
     <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
-        <span class="badge bg-success mb-2">{{ $prixAlbum }} {{ __('jetons') }}</span><br>
+        <span class="badge bg-success mb-2">{{ $album->prix }} {{ __('jetons') }}</span><br>
+
         <button class="btn btn-buy btn-buy-detail"
                 data-modeleid="{{ $modele->id }}"
                 data-path="{{ $item->photo_url }}"
-                data-prix="{{ $prixAlbum }}"
+                data-prix="{{ $album->prix }}"
                 data-type="photo">
             Acheter
         </button>
     </div>
-@endif
-
+    @endif -->
 </div>
+
 
         @empty
             <p class="text-muted text-center">{{ __('Aucune photo disponible') }}.</p>
