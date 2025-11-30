@@ -17,10 +17,13 @@ class AlbumController extends Controller
             'prix' => 'nullable|numeric|min:0'
         ]);
 
-        $album->update([
-            'nom' => $request->nom,
+       $album->update([
+    'nom' => $request->nom,
+    'etat' => $request->etat,
+    'type_flou' => $request->type_flou,
             'prix' => $request->prix ?: null,
-        ]);
+]);
+
 
         return redirect()->back()->with('success', 'Album mis à jour avec succès !');
     }

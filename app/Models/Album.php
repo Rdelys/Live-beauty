@@ -9,7 +9,7 @@ class Album extends Model
     use HasFactory;
 
 // App\Models\Album.php
-protected $fillable = ['modele_id', 'nom', 'prix'];
+protected $fillable = ['modele_id', 'nom', 'prix','etat', 'type_flou'];
 
     public function photos()
     {

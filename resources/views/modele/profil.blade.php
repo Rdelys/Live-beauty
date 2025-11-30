@@ -695,21 +695,42 @@ select:-moz-focusring {
 <form action="{{ route('albums.store', $modele->id) }}" method="POST">
   @csrf
   <div class="row align-items-end">
+
     <div class="col-md-6 mb-3">
       <label class="form-label">Nom de l’album</label>
-      <input type="text" name="nom" class="form-control" required placeholder="Ex : Séance été 2025">
+      <input type="text" name="nom" class="form-control" required>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <label class="form-label">État</label>
+      <select name="etat" class="form-control">
+        <option value="gratuit">Gratuit</option>
+        <option value="payant">Payant</option>
+      </select>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <label class="form-label">Type de flou</label>
+      <select name="type_flou" class="form-control">
+        <option value="">Aucun</option>
+        <option value="soft">Flou doux</option>
+        <option value="strong">Flou fort</option>
+        <option value="pixel">Pixelisé</option>
+      </select>
     </div>
 
     <div class="col-md-3 mb-3">
       <label class="form-label">Prix (Jetons)</label>
-      <input type="number" step="0.01" name="prix" class="form-control" placeholder="Ex : 20">
+      <input type="number" step="0.01" name="prix" class="form-control">
     </div>
 
     <div class="col-md-3 mb-3">
-      <button class="btn btn-danger w-100">➕ Créer l’album</button>
+      <button class="btn btn-danger w-100">Créer l’album</button>
     </div>
+
   </div>
 </form>
+
 
 </div>
 
@@ -729,14 +750,18 @@ select:-moz-focusring {
         <button class="btn btn-outline-light btn-sm mt-2" onclick="filterPhotosByAlbum({{ $album->id }})">Voir les photos</button>
 
         <!-- Modifier (modal) -->
-        <button class="btn btn-sm btn-warning mt-2"
-                data-bs-toggle="modal"
-                data-bs-target="#editAlbumModal"
-                data-id="{{ $album->id }}"
-                data-nom="{{ e($album->nom) }}"
-                data-prix="{{ $album->prix ?? '' }}">
-          ✏️ Modifier
-        </button>
+        <!-- après -->
+<button class="btn btn-sm btn-warning mt-2"
+        data-bs-toggle="modal"
+        data-bs-target="#editAlbumModal"
+        data-id="{{ $album->id }}"
+        data-nom="{{ e($album->nom) }}"
+        data-prix="{{ $album->prix ?? '' }}"
+        data-etat="{{ $album->etat ?? 'gratuit' }}"
+        data-type_flou="{{ $album->type_flou ?? '' }}">
+  ✏️ Modifier
+</button>
+
 
         <!-- Supprimer -->
         <form action="{{ route('albums.destroy', $album->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer l\\'album et toutes ses photos ?')">
@@ -2656,6 +2681,24 @@ function filterPhotosByAlbum(albumId) {
             <label class="form-label">Prix (Jetons)</label>
             <input type="number" step="0.01" name="prix" id="editAlbumPrix" class="form-control" placeholder="Ex: 20">
           </div>
+          <div class="mb-3">
+            <label class="form-label">État</label>
+            <select name="etat" id="edit_etat" class="form-control">
+              <option value="gratuit">Gratuit</option>
+              <option value="payant">Payant</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Type de flou</label>
+            <select name="type_flou" id="edit_type_flou" class="form-control">
+              <option value="">Aucun</option>
+              <option value="soft">Flou doux</option>
+              <option value="strong">Flou fort</option>
+              <option value="pixel">Pixelisé</option>
+            </select>
+          </div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -2678,6 +2721,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('editAlbumNom').value = nom || '';
     document.getElementById('editAlbumPrix').value = prix || '';
+    document.getElementById("edit_etat").value = button.getAttribute("data-etat");
+    document.getElementById("edit_type_flou").value = button.getAttribute("data-type_flou");
 
     // cible du formulaire -> albums.update
     editForm.action = `/albums/${id}`; // correspond à route albums.update (PUT)

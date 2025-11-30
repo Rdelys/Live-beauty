@@ -158,18 +158,28 @@ public function reorder(Request $request)
 
 public function storeAlbum(Request $request, $modeleId)
 {
-    // 🔒 Validation
-    $request->validate([
-        'nom' => 'required|string|max:255',
-            'prix' => 'nullable|numeric|min:0',
-    ]);
+// 🔒 Validation
+$request->validate([
+    'nom'        => 'required|string|max:255',
+    'etat'       => 'required|in:gratuit,payant',
+    'type_flou'  => 'nullable|in:soft,strong,pixel',
+    'prix'       => $request->etat === 'payant'
+                        ? 'required|numeric|min:0'
+                        : 'nullable|numeric|min:0',
+]);
 
-    // 🧩 Création de l'album
-    Album::create([
-        'modele_id' => $modeleId,
-        'nom' => $request->nom,
-            'prix' => $request->prix ?: null,
-    ]);
+// 🧩 Création de l'album
+$album = Album::create([
+    'modele_id' => $modeleId,
+    'nom'       => $request->nom,
+    'etat'      => $request->etat,
+    'type_flou' => $request->type_flou,
+    'prix'      => $request->etat === 'payant'
+                        ? $request->prix
+                        : null,
+]);
+
+
 
     // 🔁 Récupération du modèle avec ses albums et photos
     $modele = Modele::with(['albums.photos' => function ($query) {
