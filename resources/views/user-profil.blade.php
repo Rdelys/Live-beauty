@@ -300,6 +300,7 @@ textarea {
             <p><span class="label">Âge :</span> {{ $user->age }}</p>
             <p><span class="label">Département :</span> {{ $user->departement }}</p>
             <p><span class="label">Email :</span> {{ $user->email }}</p>
+            <p><span class="label">WhatsApp :</span> {{ $user->numero_whatsapp }}</p>
             <p><span class="label">Jetons :</span> <i class="fas fa-coins text-warning"></i> {{ $user->jetons }}</p>
         </div>
 

@@ -1462,6 +1462,10 @@ document.addEventListener("click", function(e) {
           <label class="form-label"><i class="fas fa-envelope text-danger me-2"></i>{{ __('Email') }}</label>
           <input type="email" name="email" class="form-control bg-dark text-white border-danger" value="{{ $user->email }}">
         </div>
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-envelope text-danger me-2"></i>{{ __('WhatsApp') }}</label>
+          <input type="text" name="numero_whatsapp" class="form-control bg-dark text-white border-danger" value="{{ $user->numero_whatsapp }}">
+        </div>
       </div>
 
       <div class="modal-footer border-0">

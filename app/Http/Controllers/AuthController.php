@@ -192,10 +192,11 @@ public function toggleBan($id)
         'age' => 'nullable|integer',
         'pseudo' => 'required|string|max:255',
         'departement' => 'nullable|string|max:255',
+        'numero_whatsapp' => 'nullable|string|max:255',
         'email' => 'required|email|unique:users,email,' . $user->id,
     ]);
 
-    $user->update($request->only(['nom', 'prenoms', 'age', 'pseudo', 'departement', 'email']));
+    $user->update($request->only(['nom', 'prenoms', 'age', 'pseudo', 'departement', 'email','numero_whatsapp']));
 
     return redirect()->back()->with('success', 'Profil mis à jour avec succès.');
 }
