@@ -8,7 +8,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <audio id="soundMessage" src="{{ asset('sounds/notificationAction.mp3') }}" preload="auto"></audio>
   <audio id="soundSurprise" src="{{ asset('sounds/cadeau.mp3') }}" preload="auto"></audio>
-
+<script>
+  // place ceci en tout début de <head> ou juste avant tes scripts JS
+  window.isPassingToPrivate = false;
+</script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @php
     // Récupération des photos, compatible array et collection
@@ -1113,7 +1116,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
               <!-- Mini preview locale (en bas à gauche du player) -->
 
               <!-- Menus (remplis via Blade) -->
-              <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
+              <!-- <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
                 <div class="menu-title">{{ __('Jetons standards') }} </div>
                 @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
                 @foreach($jetonsGlobaux as $jeton)
@@ -1124,7 +1127,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
                 {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} {{ $jeton->modele_id ? '✨' : '💠' }}
                 </button>
                 @endforeach
-              </div>
+              </div> -->
 
               <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
                 <div class="menu-title">Actions de {{ $modele->prenom }}</div>
@@ -1403,6 +1406,7 @@ if (confirmModalEl) {
 // ✅ Si le bouton existe (uniquement pour les utilisateurs connectés)
 if (switchPrivateBtn) {
   switchPrivateBtn.addEventListener("click", async () => {
+    window.isPassingToPrivate = true; // blocage immédiat
     if (!isPrivate) {
       // 🧱 Protection invités (aucune action sans compte)
       @guest
@@ -1445,6 +1449,8 @@ if (switchPrivateBtn) {
         const confirmBtn = document.getElementById("confirmPrivateYes");
         if (confirmBtn) {
           confirmBtn.onclick = () => {
+    window.isPassingToPrivate = true;
+
             confirmModal.hide();
             startPrivateShow();
           };
@@ -1460,6 +1466,7 @@ if (switchPrivateBtn) {
       socket.emit("cancel-private", { pseudo: "{{ $modele->prenom ?? 'Modèle' }}" });
       switchPrivateBtn.textContent = "🚪 Passer en show privée";
       isPrivate = false;
+      isPassingToPrivate = false; // 🔄 jetons redeviennent normaux
 
       if (debitInterval) clearInterval(debitInterval);
 
@@ -1479,6 +1486,9 @@ if (switchPrivateBtn) {
     }
   });
 }
+confirmModalEl.addEventListener("hidden.bs.modal", () => {
+    if (!isPrivate) window.isPassingToPrivate = false;
+}, { once: true });
 
 
 function startPrivateShow() {
@@ -2187,6 +2197,7 @@ document.addEventListener("keydown", (e) => {
 const modelMenu = document.getElementById('modelTokenMenu') || null;
 const modelSurpriseTokensBtn = document.getElementById('modelSurpriseTokensBtn') || null;
 const modelSurpriseTokenMenu = document.getElementById('modelSurpriseTokenMenu') || null;
+let isPassingToPrivate = false;
 
 const videoContainer = document.getElementById('videoContainer');
 
@@ -2270,7 +2281,8 @@ document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item =>
         if (soundSurprise) soundSurprise.play().catch(() => {});
 
 });
-    function onTokenChoiceClick(e, isGolden) {
+    // UTILISER window.isPassingToPrivate (global)
+function onTokenChoiceClick(e, isGolden) {
     const btn = e.currentTarget;
     const name = btn.dataset.name || 'Jeton';
     const cost = parseInt(btn.dataset.cost || '0');
@@ -2278,11 +2290,31 @@ document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item =>
     const modeleId = {{ $modele->id }};
     const pseudo = "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}";
 
+    // Protection globale (utilise window.)
+    if (window.isPassingToPrivate === true) {
+        console.warn("⛔ Jeton bloqué car utilisateur passe en show privée.");
+        createTokenBubble(name, cost, isGolden);
+
+        if (typeof socket !== 'undefined') {
+            socket.emit("jeton-sent", {
+                name,
+                cost,
+                description,
+                pseudo,
+                isGolden,
+                modeleId: modeleId,
+                showPriveId: "{{ $showPriveId ?? '' }}"
+            });
+        }
+        return; // stop : PAS de fetch
+    }
+
+    // Normal case → fetch (débit réel)
     fetch("{{ route('use.jeton') }}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            "X-CSRF-TOKEN": document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content')
         },
         body: JSON.stringify({ name, cost, modele_id: modeleId })
     })
@@ -2293,30 +2325,18 @@ document.querySelectorAll('#modelSurpriseTokenMenu .token-item').forEach(item =>
             return;
         }
 
-        // bulle locale
         createTokenBubble(data.name, data.cost, isGolden);
 
-        // ✅ inclure pseudo + description
         if (typeof socket !== 'undefined') {
-           // Juste avant socket.emit("jeton-sent", ...), ajoutez :
-console.log("Envoi jeton-sent:", {
-    name: data.name,
-    cost: data.cost,
-    description: description,
-    pseudo: pseudo,
-    isGolden: isGolden
-});
-
-socket.emit("jeton-sent", {
-    name: data.name,
-    cost: data.cost,
-    description: description,
-    pseudo: pseudo,
-    isGolden: isGolden,
-        modeleId: {{ $modele->id }},
-
-    showPriveId: "{{ $showPriveId ?? '' }}"
-});
+            socket.emit("jeton-sent", {
+                name: data.name,
+                cost: data.cost,
+                description: description,
+                pseudo: pseudo,
+                isGolden: isGolden,
+                modeleId: modeleId,
+                showPriveId: "{{ $showPriveId ?? '' }}"
+            });
         }
 
         const soldeElem = document.getElementById("userJetons");
@@ -2324,6 +2344,7 @@ socket.emit("jeton-sent", {
     })
     .catch(err => console.error(err));
 }
+
 
 
 
