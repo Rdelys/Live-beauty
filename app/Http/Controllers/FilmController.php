@@ -44,4 +44,14 @@ class FilmController extends Controller
 
         return back()->with('success', 'Votre demande de film a été envoyée !');
     }
+
+    public function update(Request $request, $id)
+{
+    $film = Film::findOrFail($id);
+    $film->statut = $request->statut;
+    $film->save();
+
+    return back()->with('success', 'Statut mis à jour.');
+}
+
 }

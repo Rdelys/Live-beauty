@@ -338,3 +338,4 @@ Route::post('/acheter-album/{albumId}', [AchatController::class, 'acheterAlbum']
 
     Route::post('/film/demande', [App\Http\Controllers\FilmController::class, 'store'])
      ->name('film.store');
+Route::put('/films/{id}', [App\Http\Controllers\FilmController::class, 'update'])->name('films.update');

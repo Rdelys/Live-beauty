@@ -591,6 +591,19 @@ select:-moz-focusring {
     🎬 Gallery Vidéo
   </button>
 </li>
+<li class="nav-item" role="presentation">
+  <button class="nav-link" id="films-tab" data-bs-toggle="tab" data-bs-target="#films" type="button" role="tab">
+    🎬 Film
+    @php
+      $filmCount = \App\Models\Film::where('modele_id', $modele->id)
+                    ->where('statut', '!=', 'termine')
+                    ->count();
+    @endphp
+    @if($filmCount > 0)
+      <span class="tab-counter">{{ $filmCount }}</span>
+    @endif
+  </button>
+</li>
 
 
 </ul>
@@ -680,6 +693,75 @@ select:-moz-focusring {
 
   @if($modele->galleryPhotos->whereNotNull('video_url')->isEmpty())
     <p class="text-muted text-center">Aucune vidéo dans la galerie.</p>
+  @endif
+</div>
+<div class="tab-pane fade text-start" id="films" role="tabpanel" aria-labelledby="films-tab">
+  <h4 class="text-white mb-3">🎬 Demandes de Film</h4>
+
+  @php
+    $films = \App\Models\Film::where('modele_id', $modele->id)
+              ->orderBy('id','DESC')
+              ->get();
+  @endphp
+
+  @if($films->count() == 0)
+    <p class="text-muted">Aucune demande de film.</p>
+  @else
+  <div class="table-responsive">
+    <table class="table table-dark table-striped">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Détail</th>
+          <th>Durée</th>
+          <th>Jetons</th>
+          <th>Type d’envoi</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($films as $film)
+        <tr>
+          <td>{{ $film->user->pseudo ?? $film->user->nom }}</td>
+          <td>{{ $film->detail }}</td>
+          <td>{{ $film->minutes }} min</td>
+          <td>{{ $film->jetons }} Jetons</td>
+          <td>{{ ucfirst($film->type_envoi) }}</td>
+
+          <td>
+            @php
+              $badge = match($film->statut) {
+                'en_cours' => 'warning',
+                'envoye'   => 'info',
+                'termine'  => 'success',
+                default    => 'secondary'
+              };
+            @endphp
+
+            <span class="badge bg-{{ $badge }}">
+              {{ ucfirst($film->statut) }}
+            </span>
+          </td>
+
+          <td>
+            <form action="{{ route('films.update', $film->id) }}" method="POST">
+              @csrf
+              @method('PUT')
+              <select name="statut" class="form-select form-select-sm mb-2">
+                <option value="en_cours" {{ $film->statut=='en_cours' ? 'selected' : '' }}>En cours</option>
+                <option value="envoye" {{ $film->statut=='envoye' ? 'selected' : '' }}>Envoyé</option>
+                <option value="termine" {{ $film->statut=='termine' ? 'selected' : '' }}>Terminé</option>
+              </select>
+              <button class="btn btn-danger btn-sm w-100">Mettre à jour</button>
+            </form>
+          </td>
+
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
   @endif
 </div>
 
