@@ -360,9 +360,15 @@ select option {
             </div>
 
             <!-- DETAIL -->
+
             <div class="mb-3">
                 <label class="label">Détail du film :</label>
-                <textarea name="detail" class="form-control bg-dark text-white border-secondary" required></textarea>
+                <select name="detail" class="form-control bg-dark text-white border-secondary" required>
+                    <option value="">-- Choisir un détail prédefinis --</option>
+                    @foreach(\App\Models\FilmDescription::all() as $m)
+                        <option value="{{ $m->description }}">{{ $m->description ?? $m->description }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <!-- MINUTES -->
