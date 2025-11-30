@@ -1206,6 +1206,7 @@ table {
     <a href="#" class="menu-link">Liste des jetons proposés</a>
     <a href="#" class="menu-link">Ajout jetons proposés</a>
   </div>
+<a class="menu-link"><i class="fas fa-film"></i> Films descriptions</a>
 
   
   <form method="POST" action="{{ route('admin.logout') }}">
@@ -1327,6 +1328,108 @@ table {
 </div>
 
 </div>
+<div id="films-descriptions-content" class="content-section d-none">
+    <h2><i class="fas fa-film text-danger"></i> Films – Descriptions</h2>
+    <p>Ajoutez une description et gérez les entrées.</p>
+
+    <!-- Formulaire -->
+    <form action="{{ route('films.store') }}" method="POST" class="mb-4">
+        @csrf
+        <div class="mb-3">
+            <label class="form-label">Description du film</label>
+            <textarea name="description" class="form-control" required></textarea>
+        </div>
+        <button class="btn btn-primary">Ajouter</button>
+    </form>
+
+    <!-- Tableau -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle text-center">
+            <thead class="bg-danger text-white">
+                <tr>
+                    <th>ID</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            @foreach($films as $film)
+                <tr>
+                    <td>{{ $film->id }}</td>
+                    <td style="max-width:350px;white-space:normal;">{{ $film->description }}</td>
+                    <td>{{ $film->created_at->format('d/m/Y') }}</td>
+                    <td>
+                        <button 
+                            class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editFilmModal"
+                            data-id="{{ $film->id }}"
+                            data-description="{{ $film->description }}"
+                        >
+                            Modifier
+                        </button>
+
+                        <form action="{{ route('films.destroy', $film->id) }}" 
+                              method="POST" 
+                              style="display:inline-block;"
+                              onsubmit="return confirm('Supprimer ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="editFilmModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+
+      <form method="POST" id="filmEditForm">
+        @csrf
+        @method('PUT')
+
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier la description</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="edit-id" name="id">
+
+          <div class="mb-3">
+            <label>Description</label>
+            <textarea id="edit-description" name="description" class="form-control" required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary">Enregistrer</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('editFilmModal').addEventListener('show.bs.modal', function (event) {
+    let button = event.relatedTarget;
+
+    let id = button.getAttribute('data-id');
+    let desc = button.getAttribute('data-description');
+
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-description').value = desc;
+
+    document.getElementById('filmEditForm').action = "/admin/films-descriptions/" + id;
+});
+</script>
 
   <div id="dashboard-content" class="content-section">
   <h2 class="mb-4 text-white">Tableau de bord</h2>
@@ -2117,6 +2220,8 @@ document.addEventListener("DOMContentLoaded", function () {
  "Liste des jetons proposés": document.getElementById("liste-jetons-proposes-content"),
   "Ajout jetons proposés": document.getElementById("ajout-jetons-proposes-content"),
     "Jetons obtenu": document.getElementById("historique-jetons-content"),
+        "Films descriptions": document.getElementById("films-descriptions-content"),
+
 
       };
 

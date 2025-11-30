@@ -16,6 +16,8 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\GalleryPhotoController;
 use App\Http\Controllers\AdminLoginController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FilmDescriptionController;
+
 
 
 
@@ -339,3 +341,17 @@ Route::post('/acheter-album/{albumId}', [AchatController::class, 'acheterAlbum']
     Route::post('/film/demande', [App\Http\Controllers\FilmController::class, 'store'])
      ->name('film.store');
 Route::put('/films/{id}', [App\Http\Controllers\FilmController::class, 'update'])->name('films.update');
+Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
+
+    Route::get('films-descriptions', [FilmDescriptionController::class, 'index'])
+        ->name('films.index');
+
+    Route::post('films-descriptions', [FilmDescriptionController::class, 'store'])
+        ->name('films.store');
+
+    Route::put('films-descriptions/{id}', [FilmDescriptionController::class, 'update'])
+        ->name('films.update');
+
+    Route::delete('films-descriptions/{id}', [FilmDescriptionController::class, 'destroy'])
+        ->name('films.destroy');
+});

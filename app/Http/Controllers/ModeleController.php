@@ -12,6 +12,7 @@ use App\Models\Achat;
 use Carbon\Carbon;
 use App\Models\JetonPropose;
 use App\Models\HistoriqueJeton;
+use App\Models\FilmDescription;
 
 
 class ModeleController extends Controller
@@ -120,6 +121,7 @@ class ModeleController extends Controller
     $shows = ShowPrive::with('user', 'modele')->get();
     $achats = Achat::with(['user', 'modele'])->latest()->get();
     $jetonsProposes = JetonPropose::where('prise', 0)->get();
+    $films = FilmDescription::all();
 
     $nombreDeModeles = $modeles->count();
     $nombreDeJetons = $jetons->count();
@@ -154,7 +156,9 @@ class ModeleController extends Controller
         'nombreAchatsPhotos',
         'nombrejetonsProposes',
         'historiques',
-        'totalJetons'
+        'totalJetons',
+        'films'
+
     ));
 }
 
