@@ -179,15 +179,39 @@
 
         @else
           {{-- ✅ Cas "détail" : achats individuels --}}
+          @php
+    function resolveMediaPath($path) {
+        // Si c’est un lien complet HTTP
+        if (str_starts_with($path, 'http')) {
+            return $path;
+        }
+
+        // Si provient de gallery_photos ou uploads → chemin correct
+        if (str_starts_with($path, 'gallery_photos/') || str_starts_with($path, 'uploads/')) {
+            return asset('storage/' . $path);
+        }
+
+        // Si provient des photos du modèle (ex: ['modele_photos/...'])
+        return asset('storage/' . $path);
+    }
+@endphp
+
           @foreach($achats as $achat)
-            @if($achat->type === 'detail' && $achat->photo_path)
-              <a href="{{ asset('storage/' . $achat->photo_path) }}" 
-                 class="gallery-item glightbox modele-{{ $modele->id }}" 
-                 data-type="image" data-title="{{ $modele->prenom }}">
-                <img src="{{ asset('storage/' . $achat->photo_path) }}" alt="Photo {{ $modele->prenom }}">
-              </a>
-            @endif
-          @endforeach
+    @if(($achat->type === 'detail' || $achat->type === 'album') && $achat->photo_path)
+              @php  
+            $mediaUrl = resolveMediaPath($achat->photo_path);
+        @endphp
+
+        <a href="{{ $mediaUrl }}" 
+           class="gallery-item glightbox modele-{{ $modele->id }}"
+           data-type="image"
+           data-title="{{ $modele->prenom }}">
+           
+            <img src="{{ $mediaUrl }}" alt="Photo {{ $modele->prenom }}">
+        </a>
+
+    @endif
+@endforeach
         @endif
 
       @empty
