@@ -826,6 +826,50 @@
     font-size: 1.3rem;
     line-height: 1;
 }
+
+.pseudo-styled {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #ffffff;
+    color: #000;
+    font-weight: 700;
+    border-radius: 30px;
+    border: 2px solid #ff0000;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(255,0,0,0.2);
+}
+
+/* Icône profil */
+.pseudo-styled i {
+    font-size: 1.1rem;
+    color: #ff0000;
+    transition: all 0.3s ease;
+}
+
+/* Hover premium */
+.pseudo-styled:hover {
+    background: #ff0000;
+    color: #fff;
+    border-color: #fff;
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(255,0,0,0.6), 0 0 6px rgba(255,255,255,0.8);
+}
+
+/* Changer l’icône au hover */
+.pseudo-styled:hover i {
+    color: #fff;
+    transform: scale(1.2);
+}
+
+/* Effet clic */
+.pseudo-styled:active {
+    transform: scale(0.95);
+}
+
   </style>
   </head>
 <body>
@@ -898,12 +942,17 @@
                     </div>
                 @endif
                     <!-- <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span> -->
-                    <span class="text-white me-3 fw-bold">{{ Auth::user()->pseudo }}</span>
+                    <a href="{{ route('user.profil', Auth::user()->id) }}"
+                      target="_blank"
+                      class="pseudo-styled">
+                        <i class="fas fa-user-circle me-2"></i>
+                        {{ Auth::user()->pseudo }}
+                    </a>
+
                     <button class="btn btn-dark rounded-circle me-2 achat-jetons-icon-vip"
                             data-bs-toggle="modal" data-bs-target="#achatJetonsModal"
                             title="Acheter des jetons">
                       <i class="fas fa-coins"></i>
-                      <i class="fas fa-shopping-bag ms-1"></i>
                     </button>
                     <!-- Icône modifier profil -->
                     <a href="#" class="text-white fs-5 me-3" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Modifier mon profil">

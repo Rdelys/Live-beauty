@@ -57,7 +57,7 @@ Route::post('/modele/login/jetons/store', [JetonController::class, 'store'])->na
 
 // Auth pour modèle modeles.livebeautyofficial.com
 Route::get('/modele/login', function (Request $request) {
-    if ($request->getHost() !== 'modeles.livebeautyofficial.com') {
+    if ($request->getHost() !== '127.0.0.1') {
         abort(403, 'Accès interdit');
     }
     return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
@@ -332,3 +332,6 @@ Route::get('/lang/{locale}', function ($locale) {
 })->name('lang.switch');
 Route::post('/acheter-album/{albumId}', [AchatController::class, 'acheterAlbum'])
     ->name('acheter.album');
+
+    Route::get('/user/{id}/profil', [App\Http\Controllers\UserController::class, 'profil'])
+    ->name('user.profil');
