@@ -902,6 +902,16 @@
                           <i class="fas fa-shopping-bag"></i>
                         </a>
                       </li>
+
+                      <li class="nav-item">
+                          <a class="nav-link" 
+                            href="{{ route('user.profil', Auth::user()->id) }}" 
+                            title="Mon Profil" 
+                            target="_blank">
+                              <i class="fas fa-user-circle"></i>
+                          </a>
+                      </li>
+
                       <li class="nav-item dropdown lang-dropdown">
     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
         <span class="fi fi-{{ app()->getLocale() == 'fr' ? 'fr' : 'gb' }} me-2"></span>
@@ -942,12 +952,8 @@
                     </div>
                 @endif
                     <!-- <span class="text-white me-3 fw-bold">{{ Auth::user()->nom }} {{ Auth::user()->prenoms }}</span> -->
-                    <a href="{{ route('user.profil', Auth::user()->id) }}"
-                      target="_blank"
-                      class="pseudo-styled">
-                        <i class="fas fa-user-circle me-2"></i>
-                        {{ Auth::user()->pseudo }}
-                    </a>
+                                        <span class="text-white me-3 fw-bold">{{ Auth::user()->pseudo }}</span>
+
 
                     <button class="btn btn-dark rounded-circle me-2 achat-jetons-icon-vip"
                             data-bs-toggle="modal" data-bs-target="#achatJetonsModal"
