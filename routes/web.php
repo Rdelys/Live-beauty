@@ -330,3 +330,5 @@ Route::get('/lang/{locale}', function ($locale) {
     session(['locale' => $locale]);
     return back();
 })->name('lang.switch');
+Route::post('/acheter-album/{albumId}', [AchatController::class, 'acheterAlbum'])
+    ->name('acheter.album');

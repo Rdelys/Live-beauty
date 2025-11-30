@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -12,19 +11,17 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-   protected $fillable = [
-    'nom',
-    'prenoms',
-    'age',
-    'pseudo',
-    'departement',
-    'email',
-    'password',
+    protected $fillable = [
+        'nom',
+        'prenoms',
+        'age',
+        'pseudo',
+        'departement',
+        'email',
+        'password',
         'jetons', // ✅
-
-];
-
-
+        'album_id', // ✅ JSON/Array
+    ];
 
     protected $hidden = [
         'password',
@@ -33,15 +30,16 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'album_id' => 'array', // ✅ transforme automatiquement JSON <-> array
     ];
+
     public function favoris()
-{
-    return $this->belongsToMany(Modele::class, 'favoris');
-}
+    {
+        return $this->belongsToMany(Modele::class, 'favoris');
+    }
 
-public function achats()
-{
-    return $this->hasMany(\App\Models\Achat::class);
-}
-
+    public function achats()
+    {
+        return $this->hasMany(\App\Models\Achat::class);
+    }
 }

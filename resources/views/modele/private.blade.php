@@ -431,7 +431,11 @@ ul.list-unstyled li {
     $albums = \App\Models\Album::where('modele_id', $modele->id)
                 ->withCount('photos')
                 ->get();
+
+    // 🔥 Liste des albums achetés par l’utilisateur
+    $albumsAchetes = auth()->check() ? (auth()->user()->album_id ?? []) : [];
 @endphp
+
 
 @if($albums->count() > 0)
 <div class="gallery-container mb-5">
@@ -440,42 +444,54 @@ ul.list-unstyled li {
     <div class="row g-4 justify-content-center">
         
         @foreach($albums as $album)
-        <div class="col-6 col-md-3">
-            <div class="card bg-dark text-center album-card shadow-lg"
-                 data-album-id="{{ $album->id }}"
-                 onclick="filterPhotosByAlbum({{ $album->id }})">
+@php
+    $dejaAchete = in_array($album->id, $albumsAchetes);
+@endphp
 
-                <div class="card-body">
+<div class="col-6 col-md-3">
+    <div class="card bg-dark text-center album-card shadow-lg"
+         data-album-id="{{ $album->id }}"
+         onclick="filterPhotosByAlbum({{ $album->id }})">
 
-                    <!-- Nom album -->
-                    <h5 class="text-success mb-2">{{ $album->nom }}</h5>
+        <div class="card-body">
 
-                    <!-- Nombre de photos -->
-                    <p class="text-white-50 mb-2">{{ $album->photos_count }} photo(s)</p>
+            <!-- Nom album -->
+            <h5 class="text-success mb-2">{{ $album->nom }}</h5>
 
-                    <!-- Prix ou gratuit -->
-                    @if($album->etat === 'payant')
-                        <span class="badge bg-danger mb-2">
-                            {{ $album->prix }} {{ __('jetons') }}
-                        </span>
+            <!-- Nombre de photos -->
+            <p class="text-white-50 mb-2">{{ $album->photos_count }} photo(s)</p>
 
-                        <button class="btn btn-buy btn-buy-detail mt-2"
-                                data-modeleid="{{ $modele->id }}"
-                                data-prix="{{ $album->prix }}"
-                                data-type="album"
-                                data-album="{{ $album->id }}">
-                            {{ __('Acheter l’album') }}
-                        </button>
-                    @else
-                        <span class="badge bg-success">
-                            {{ __('Gratuit') }}
-                        </span>
-                    @endif
+            <!-- Payant -->
+            @if($album->etat === 'payant')
 
-                </div>
-            </div>
+                @if($dejaAchete)
+                    <!-- ✔ Album déjà acheté -->
+                    <span class="badge bg-success mb-2">Déjà acheté</span>
+                @else
+                    <!-- 💰 Pas encore acheté -->
+                    <span class="badge bg-danger mb-2">
+                        {{ $album->prix }} {{ __('jetons') }}
+                    </span>
+
+                    <button class="btn btn-buy btn-buy-album mt-2"
+                        data-album="{{ $album->id }}"
+                        data-prix="{{ $album->prix }}">
+                        {{ __('Acheter l’album') }}
+                    </button>
+                @endif
+
+            @else
+                <!-- Gratuit -->
+                <span class="badge bg-success">
+                    {{ __('Gratuit') }}
+                </span>
+            @endif
+
         </div>
-        @endforeach
+    </div>
+</div>
+@endforeach
+
 
         <!-- Afficher tout -->
         <div class="col-6 col-md-3">
@@ -501,23 +517,39 @@ ul.list-unstyled li {
 
 
     <div class="gallery-grid">
-        @forelse($photos as $item)
-           @php
-    // album associé
-    $album = $item->album;
+@php
+    $albumsAchetes = auth()->check() ? (auth()->user()->album_id ?? []) : [];
+@endphp
 
-    // flou par défaut
+@forelse($photos as $item)
+@php
+    $album = $item->album;
     $blurStyle = '';
+    $overlay = true; // par défaut, on montre l’overlay
 
     if ($album && $album->etat === 'payant') {
-        $flou = $album->type_flou;
 
-        $blurStyle = match($flou) {
-            'strong' => 'filter: blur(10px);',
-            'soft'   => 'filter: blur(4px);',
-            'pixel'  => 'image-rendering: pixelated; filter: blur(2px);',
-            default  => '',
-        };
+        // 👉 Vérifier si utilisateur possède l’album
+        $dejaAchete = in_array($album->id, $albumsAchetes);
+
+        if ($dejaAchete) {
+            // ⚡ Album acheté → aucun flou
+            $blurStyle = '';
+            $overlay = false;
+        } else {
+            // ⚠ Album NON acheté → appliquer le flou
+            $flou = $album->type_flou ?? 'soft';
+
+            $blurStyle = match($flou) {
+                'strong' => 'filter: blur(10px);',
+                'soft'   => 'filter: blur(4px);',
+                'pixel'  => 'image-rendering: pixelated; filter: blur(2px);',
+                default  => '',
+            };
+        }
+    } else {
+        // album gratuit → pas de flou
+        $overlay = false;
     }
 @endphp
 
@@ -529,28 +561,26 @@ ul.list-unstyled li {
          data-path="{{ $item->photo_url }}"
          style="{{ $blurStyle }}" />
 
-    <!-- {{-- Si album payant → overlay d'achat --}}
-    @if($album && $album->etat === 'payant')
-    <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
-        <span class="badge bg-success mb-2">{{ $album->prix }} {{ __('jetons') }}</span><br>
+    {{-- Overlay si album payant et NON acheté --}}
+    <!-- @if($overlay && $album && $album->etat === 'payant')
+        <div class="position-absolute top-50 start-50 translate-middle text-center buy-overlay">
+            <span class="badge bg-success mb-2">{{ $album->prix }} {{ __('jetons') }}</span><br>
 
-        <button class="btn btn-buy btn-buy-detail"
-                data-modeleid="{{ $modele->id }}"
-                data-path="{{ $item->photo_url }}"
-                data-prix="{{ $album->prix }}"
-                data-type="photo">
-            Acheter
-        </button>
-    </div>
+            <button class="btn btn-buy btn-buy-album"
+                    data-album="{{ $album->id }}"
+                    data-prix="{{ $album->prix }}">
+                Acheter l’album
+            </button>
+        </div>
     @endif -->
+
 </div>
 
-
-        @empty
-            <p class="text-muted text-center">{{ __('Aucune photo disponible') }}.</p>
-        @endforelse
-    </div>
+@empty
+    <p class="text-muted text-center">{{ __('Aucune photo disponible') }}.</p>
+@endforelse
 </div>
+
 
 @if($videos->count() > 0)
 <div class="gallery-container mt-5">
@@ -832,6 +862,48 @@ btn.style.color = '#fff';
       acheterDetail(modeleId, path, prix, type, btn);
     });
   });
+});
+
+document.querySelectorAll('.btn-buy-album').forEach(btn => {
+    btn.addEventListener('click', async function () {
+
+        const albumId = this.dataset.album;
+        const prix = this.dataset.prix;
+        const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+        this.disabled = true;
+        this.innerText = "Traitement...";
+
+        const resp = await fetch(`/acheter-album/${albumId}`, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": csrf,
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({})
+        });
+
+        const json = await resp.json();
+
+        if (!resp.ok || json.success === false) {
+            alert(json.error || "Erreur");
+            this.disabled = false;
+            this.innerText = "Acheter l’album";
+            return;
+        }
+
+        // Mise à jour du solde utilisateur
+        const span = document.getElementById('userJetons');
+        if (span && json.new_balance !== undefined) span.textContent = json.new_balance;
+
+        // Succès
+        const successModal = new bootstrap.Modal(document.getElementById('achatSuccessModal'));
+        successModal.show();
+
+        this.innerText = "Album acheté";
+        this.classList.add('disabled');
+    });
 });
 
 document.addEventListener("DOMContentLoaded", () => {

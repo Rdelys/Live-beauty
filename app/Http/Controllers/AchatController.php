@@ -165,4 +165,59 @@ class AchatController extends Controller
     return view('achats.mes', compact('groupes'));
 }
 
+public function acheterAlbum(Request $request, $albumId)
+{
+    try {
+        $user = Auth::user();
+        $album = \App\Models\Album::with('photos')->findOrFail($albumId);
+
+        if ($album->etat !== 'payant') {
+            return response()->json(['success' => false, 'error' => 'Cet album est gratuit'], 400);
+        }
+
+        $prix = $album->prix;
+
+        // Vérification jetons
+        if ($user->jetons < $prix) {
+            return response()->json(['success' => false, 'error' => 'Pas assez de jetons'], 403);
+        }
+
+        // Vérifier si déjà acheté
+        $albumsAchetes = $user->album_id ?? [];
+        if (in_array($album->id, $albumsAchetes)) {
+            return response()->json(['success' => true, 'message' => 'Album déjà acheté']);
+        }
+
+        DB::transaction(function () use ($user, $album, $prix, $albumsAchetes) {
+            // Débit jetons
+            $user->decrement('jetons', $prix);
+
+            // Ajouter album au JSON
+            $albumsAchetes[] = $album->id;
+            $user->album_id = $albumsAchetes;
+            $user->save();
+
+            // Ajouter toutes les photos dans achats
+            foreach ($album->photos as $photo) {
+                Achat::create([
+                    'user_id'    => $user->id,
+                    'modele_id'  => $album->modele_id,
+                    'jetons'     => 0,                 // déjà payé via l’album
+                    'type'       => 'album',
+                    'photo_path' => $photo->photo_url,
+                ]);
+            }
+        });
+
+        return response()->json([
+            'success'     => true,
+            'message'     => 'Album acheté avec succès',
+            'new_balance' => $user->fresh()->jetons
+        ]);
+
+    } catch (\Throwable $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+    }
+}
+
 }
