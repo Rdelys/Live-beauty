@@ -708,58 +708,92 @@ select:-moz-focusring {
     <p class="text-muted">Aucune demande de film.</p>
   @else
   <div class="table-responsive">
+    @php
+    $afficherMail = $films->contains('type_envoi', '!=', 'whatsapp');
+    $afficherWhatsapp = $films->contains('type_envoi', 'whatsapp');
+@endphp
+
     <table class="table table-dark table-striped">
       <thead>
-        <tr>
-          <th>Client</th>
-          <th>Détail</th>
-          <th>Durée</th>
-          <th>Jetons</th>
-          <th>Type d’envoi</th>
-          <th>Statut</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+  <tr>
+    <th>Client</th>
+
+    @if($afficherMail)
+        <th>Mail</th>
+    @endif
+
+    @if($afficherWhatsapp)
+        <th>WhatsApp</th>
+    @endif
+
+    <th>Détail</th>
+    <th>Durée</th>
+    <th>Jetons</th>
+    <th>Type d’envoi</th>
+    <th>Statut</th>
+    <th>Action</th>
+  </tr>
+</thead>
+
       <tbody>
-        @foreach($films as $film)
-        <tr>
-          <td>{{ $film->user->pseudo ?? $film->user->nom }}</td>
-          <td>{{ $film->detail }}</td>
-          <td>{{ $film->minutes }} min</td>
-          <td>{{ $film->jetons }} Jetons</td>
-          <td>{{ ucfirst($film->type_envoi) }}</td>
+@foreach($films as $film)
+<tr>
+  <td>{{ $film->user->pseudo ?? $film->user->nom }}</td>
 
-          <td>
-            @php
-              $badge = match($film->statut) {
-                'en_cours' => 'warning',
-                'envoye'   => 'info',
-                'termine'  => 'success',
-                default    => 'secondary'
-              };
-            @endphp
+  @if($afficherMail)
+      <td>
+          @if($film->type_envoi !== 'whatsapp')
+              {{ $film->user->email }}
+          @else
+              <span class="text-muted">—</span>
+          @endif
+      </td>
+  @endif
 
-            <span class="badge bg-{{ $badge }}">
-              {{ ucfirst($film->statut) }}
-            </span>
-          </td>
+  @if($afficherWhatsapp)
+      <td>
+          @if($film->type_envoi === 'whatsapp')
+              {{ $film->user->numero_whatsapp }}
+          @else
+              <span class="text-muted">—</span>
+          @endif
+      </td>
+  @endif
 
-          <td>
-            <form action="{{ route('films.update', $film->id) }}" method="POST">
-              @csrf
-              @method('PUT')
-              <select name="statut" class="form-select form-select-sm mb-2">
-                <option value="en_cours" {{ $film->statut=='en_cours' ? 'selected' : '' }}>En cours</option>
-                <option value="envoye" {{ $film->statut=='envoye' ? 'selected' : '' }}>Envoyé</option>
-                <option value="termine" {{ $film->statut=='termine' ? 'selected' : '' }}>Terminé</option>
-              </select>
-              <button class="btn btn-danger btn-sm w-100">Mettre à jour</button>
-            </form>
-          </td>
+  <td>{{ $film->detail }}</td>
+  <td>{{ $film->minutes }} min</td>
+  <td>{{ $film->jetons }} Jetons</td>
+  <td>{{ ucfirst($film->type_envoi) }}</td>
+  
+  <td>
+      @php
+        $badge = match($film->statut) {
+          'en_cours' => 'warning',
+          'envoye'   => 'info',
+          'termine'  => 'success',
+          default    => 'secondary'
+        };
+      @endphp
+      <span class="badge bg-{{ $badge }}">{{ ucfirst($film->statut) }}</span>
+  </td>
 
-        </tr>
-        @endforeach
-      </tbody>
+  <td>
+    <form action="{{ route('films.update', $film->id) }}" method="POST">
+      @csrf
+      @method('PUT')
+      <select name="statut" class="form-select form-select-sm mb-2">
+        <option value="en_cours" {{ $film->statut=='en_cours' ? 'selected' : '' }}>En cours</option>
+        <option value="envoye" {{ $film->statut=='envoye' ? 'selected' : '' }}>Envoyé</option>
+        <option value="termine" {{ $film->statut=='termine' ? 'selected' : '' }}>Terminé</option>
+      </select>
+      <button class="btn btn-danger btn-sm w-100">Mettre à jour</button>
+    </form>
+  </td>
+
+</tr>
+@endforeach
+</tbody>
+
     </table>
   </div>
   @endif

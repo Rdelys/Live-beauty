@@ -19,6 +19,7 @@ class User extends Authenticatable
         'departement',
         'email',
         'password',
+        'numero_whatsapp', // ✅ ajouté
         'jetons', // ✅
         'album_id', // ✅ JSON/Array
     ];
