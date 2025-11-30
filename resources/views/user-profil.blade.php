@@ -286,9 +286,9 @@ textarea {
             <i class="fas fa-film"></i> Demande Film
         </button>
 
-        <button id="btn-settings" onclick="showSection('settings')">
+        <!-- <button id="btn-settings" onclick="showSection('settings')">
             <i class="fas fa-gear"></i> Paramètres
-        </button>
+        </button> -->
     </div>
 
     <!-- SECTION PROFIL -->
@@ -413,7 +413,7 @@ textarea {
 
 
 
-    <!-- SECTION PARAMÈTRES -->
+    <!-- SECTION PARAMÈTRES
     <div id="settings" class="section">
 
         <h2 class="fw-bold mb-3" style="color:#ff003c;">
@@ -421,7 +421,7 @@ textarea {
         </h2>
 
         <p>Section à configurer ensemble (changement email, mot de passe, notif…)</p>
-    </div>
+    </div> -->
 
 </div>
 <script>
