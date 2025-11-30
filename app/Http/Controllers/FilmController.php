@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Film;
 use App\Models\Modele;
 use Illuminate\Http\Request;
+use App\Mail\FilmRequested;
+use Illuminate\Support\Facades\Mail;
 
 class FilmController extends Controller
 {
@@ -33,7 +35,8 @@ class FilmController extends Controller
         $user->save();
 
         // Enregistrement film
-        Film::create([
+        $film = Film::create([
+
             'user_id'   => $user->id,
             'modele_id' => $request->modele_id,
             'detail'    => $request->detail,
@@ -42,16 +45,39 @@ class FilmController extends Controller
             'type_envoi'=> $request->type_envoi,
         ]);
 
+        // 🔥 Envoi email au modèle
+        $modele = Modele::find($request->modele_id);
+
+        if ($modele && $modele->email) {
+            Mail::to($modele->email)->send(new FilmRequested($film));
+        }
         return back()->with('success', 'Votre demande de film a été envoyée !');
     }
 
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
 {
     $film = Film::findOrFail($id);
+
+    // Ancien statut pour comparer
+    $ancienStatut = $film->statut;
+
+    // Nouveau statut
     $film->statut = $request->statut;
     $film->save();
 
+    // Si le film vient juste d'être marqué comme "envoyé"
+    if ($request->statut === "envoye" && $ancienStatut !== "envoye") {
+
+        // Récupérer le client (user)
+        $client = $film->user;
+
+        if ($client && $client->email) {
+            Mail::to($client->email)->send(new \App\Mail\FilmSentToClient($film));
+        }
+    }
+
     return back()->with('success', 'Statut mis à jour.');
 }
+
 
 }
