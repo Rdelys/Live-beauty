@@ -19,10 +19,11 @@ class AuthController extends Controller
 public function register(Request $request)
 {
     $data = $request->validate([
-        'pseudo'   => ['required','string','max:255'],
-        'email'    => ['required','email','max:255','unique:users,email'],
-        'password' => ['required','string','min:6'],
+        'pseudo'   => ['required', 'string', 'max:255', 'unique:users,pseudo'],
+        'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:6'],
     ]);
+
 
     // Génère un code à 6 chiffres et le stocke 10 min (lié à l'email)
     $code = random_int(100000, 999999);

@@ -17,6 +17,7 @@ use App\Http\Controllers\GalleryPhotoController;
 use App\Http\Controllers\AdminLoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FilmDescriptionController;
+use App\Http\Controllers\UserController;
 
 
 
@@ -355,3 +356,6 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::delete('films-descriptions/{id}', [FilmDescriptionController::class, 'destroy'])
         ->name('films.destroy');
 });
+
+Route::post('/check-email', [UserController::class, 'checkEmail'])->name('check.email');
+Route::post('/check-pseudo', [UserController::class, 'checkPseudo'])->name('check.pseudo');

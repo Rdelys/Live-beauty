@@ -758,7 +758,9 @@ body {
       @if($hasVideo)
   <div class="model-video">
     @if(!empty($modele->video_file) && is_array($modele->video_file))
-  <video autoplay muted loop playsinline preload="none">
+  <!-- <video autoplay muted loop playsinline preload="none"> -->
+      <video  muted loop playsinline preload="none">
+
     <source src="{{ asset('storage/' . $modele->video_file[0]) }}" type="video/mp4">
     Votre navigateur ne supporte pas la vidéo.
   </video>
@@ -1138,11 +1140,13 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">{{ __('Pseudo') }}</label>
-          <input name="pseudo" class="form-control" required>
+          <input id="pseudo" name="pseudo" class="form-control" required>
+          <small id="pseudoMessage" class="d-none"></small>
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Email') }}</label>
-          <input name="email" type="email" class="form-control" required>
+          <input id="email" name="email" type="email" class="form-control" required>
+          <small  id="emailMessage" class="d-none"></small>
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Mot de passe') }}</label>
@@ -1263,6 +1267,80 @@ document.addEventListener("DOMContentLoaded", () => {
       container.style.setProperty("--photo-bg", `url('${img.src}')`);
     }
   });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Vérif EMAIL ---
+    const emailInput = document.getElementById('email');
+    const emailMsg = document.getElementById('emailMessage');
+
+    emailInput.addEventListener('input', function () {
+        const email = this.value;
+
+        if (email.length < 4) {
+            emailMsg.classList.add('d-none');
+            return;
+        }
+
+        fetch("{{ route('check.email') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({ email })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                emailMsg.textContent = "Cet email est déjà utilisé ❌";
+                emailMsg.classList.remove('d-none', 'text-success');
+                emailMsg.classList.add('text-danger');
+            } else {
+                emailMsg.textContent = "Email disponible ✔️";
+                emailMsg.classList.remove('d-none', 'text-danger');
+                emailMsg.classList.add('text-success');
+            }
+        });
+    });
+
+
+    // --- Vérif PSEUDO ---
+    const pseudoInput = document.getElementById('pseudo');
+    const pseudoMsg = document.getElementById('pseudoMessage');
+
+    pseudoInput.addEventListener('input', function () {
+        const pseudo = this.value;
+
+        if (pseudo.length < 3) {
+            pseudoMsg.classList.add('d-none');
+            return;
+        }
+
+        fetch("{{ route('check.pseudo') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({ pseudo })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                pseudoMsg.textContent = "Ce pseudo est déjà pris ❌";
+                pseudoMsg.classList.remove('d-none', 'text-success');
+                pseudoMsg.classList.add('text-danger');
+            } else {
+                pseudoMsg.textContent = "Pseudo disponible ✔️";
+                pseudoMsg.classList.remove('d-none', 'text-danger');
+                pseudoMsg.classList.add('text-success');
+            }
+        });
+    });
+
 });
 </script>
 
