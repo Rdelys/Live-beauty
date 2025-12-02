@@ -1124,6 +1124,71 @@ document.addEventListener('DOMContentLoaded', function () {
     </form>
   </div>
 </div>
+<!-- LOADER PREMIUM -->
+<div id="loader-screen" style="
+    position: fixed;
+    inset:0;
+    background-color:#000;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    z-index:9999;
+    transition: opacity 0.5s ease;
+">
+    <h1 style="
+        font-size:3rem;
+        font-weight:800;
+        color:red;
+        text-transform:uppercase;
+        text-shadow:0 0 15px red;
+        margin-bottom:2rem;
+        animation:pulse 1.5s infinite;
+    ">Live Beauty</h1>
+
+    <div style="position:relative; width:100px; height:100px; margin-bottom:2rem;">
+        <!-- Cercle -->
+        <div style="
+            width:100px; height:100px;
+            border:8px solid #800000;
+            border-top-color:#ff0000;
+            border-radius:50%;
+            animation: spin 1s linear infinite;
+        "></div>
+    </div>
+
+    <p style="
+        font-size:1.5rem;
+        font-weight:bold;
+        color:white;
+        text-shadow:0 0 10px red;
+        animation:pulse 1.5s infinite;
+    ">Camgirls</p>
+</div>
+
+<style>
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+@keyframes pulse {
+    0%, 100% { opacity:1; }
+    50% { opacity:0.5; }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Affiche loader 1,5s puis cache
+    setTimeout(() => {
+        const loader = document.getElementById("loader-screen");
+        loader.style.opacity = "0";
+        setTimeout(() => loader.style.display = "none", 500);
+    }, 1500);
+});
+</script>
 
 
 
