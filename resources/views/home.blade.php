@@ -1087,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Mot de passe') }}</label>
-          <input type="password" name="password" class="form-control" required>
+          <input type="password" name="password" class="form-control" required autocomplete="current-password>
         </div>
         <div class="text-end">
     <a href="#" class="text-light small" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">
@@ -1226,7 +1226,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Mot de passe') }}</label>
-          <input name="password" type="password" class="form-control" required>
+          <input name="password" type="password" class="form-control" required autocomplete="new-password">
         </div>
         <div class="form-check mt-3">
           <input class="form-check-input" type="checkbox" id="cguCheck" required>
