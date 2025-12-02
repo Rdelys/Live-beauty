@@ -1181,14 +1181,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Affiche loader 1,5s puis cache
-    setTimeout(() => {
-        const loader = document.getElementById("loader-screen");
-        loader.style.opacity = "0";
-        setTimeout(() => loader.style.display = "none", 500);
-    }, 1500);
+    const loader = document.getElementById("loader-screen");
+
+    // Vérifie si le loader a déjà été affiché
+    if (!localStorage.getItem("loaderShown")) {
+        // Affiche loader 1,5s puis cache
+        setTimeout(() => {
+            loader.style.opacity = "0";
+            setTimeout(() => loader.style.display = "none", 500);
+        }, 1500);
+
+        // Marque comme affiché
+        localStorage.setItem("loaderShown", "true");
+    } else {
+        // Cache directement si déjà affiché
+        loader.style.display = "none";
+    }
 });
 </script>
+
 
 
 
