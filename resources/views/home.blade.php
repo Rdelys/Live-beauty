@@ -766,7 +766,7 @@ body {
   </video>
 @elseif(!empty($modele->video_link) && is_array($modele->video_link))
   <iframe
-    src="{{ $modele->video_link[0] }}?autoplay=1&mute=1&controls=0&loop=1"
+    src="{{ $modele->video_link[0] }}"
     frameborder="0"
     allow="autoplay; encrypted-media"
     allowfullscreen
