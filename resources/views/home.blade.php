@@ -1083,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">{{ __('Email') }}</label>
-          <input type="email" name="email" class="form-control" required>
+          <input type="email" name="email" class="form-control" required autocomplete="username">
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Mot de passe') }}</label>
@@ -1221,7 +1221,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Email') }}</label>
-          <input id="email" name="email" type="email" class="form-control" required>
+          <input id="email" name="email" type="email" class="form-control" required autocomplete="username">
           <small  id="emailMessage" class="d-none"></small>
         </div>
         <div class="mb-3">
