@@ -17,7 +17,16 @@ class StripeController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $session = Session::create([
-            'payment_method_types' => ['card'],
+'payment_method_types' => [
+    'card',        // Apple Pay + Google Pay inclus automatiquement
+    'link',
+    'revolut_pay',
+    'bancontact',
+    'blik',
+    'eps',
+    'twint',
+    'klarna',
+],
             'line_items' => [[
                 'price_data' => [
                     'currency' => 'eur',
