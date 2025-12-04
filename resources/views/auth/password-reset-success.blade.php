@@ -13,7 +13,7 @@
   {{ __("secondes") }}.
 </p>
 
-        <p class="small text-muted">{{ __('Si la redirection ne fonctionne pas') }}
+        <p class="small">{{ __('Si la redirection ne fonctionne pas') }}
 , <a href="{{ url('/') }}" class="text-warning">{{ __('cliquez ici') }}
 </a>.</p>
       </div>
