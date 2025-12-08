@@ -75,6 +75,68 @@ body {
       background-attachment: fixed;
 
 }
+/* ===== Grille Jetons Perso (3 colonnes, 3 lignes max) ===== */
+#modelTokenMenu .token-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);   /* 3 colonnes */
+    gap: 10px;
+    margin-top: 8px;
+
+    max-height: 240px;                       /* ≈ 3 lignes */
+    overflow-y: auto;                        /* Scroll souris + tactile */
+    padding-right: 4px;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+#modelTokenMenu .token-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+#modelTokenMenu .token-grid::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+    border-radius: 8px;
+}
+
+/* ===== Style des items ===== */
+#modelTokenMenu .token-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px 6px;
+    border-radius: 12px;
+
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease;
+
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+}
+
+#modelTokenMenu .token-item:hover {
+    transform: translateY(-4px) scale(1.05);
+    background: linear-gradient(135deg,#ff4081,#7c4dff);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+#modelTokenMenu .token-item .token-emoji {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+}
+
+#modelTokenMenu .token-item .token-cost {
+    font-size: 1.1rem;
+    color: #ffd740;
+    margin-top: 4px;
+}
+
 .fade-in {
     opacity: 0;
     transform: translateY(20px);
@@ -348,9 +410,55 @@ body:hover {
 .token-choice:hover{ transform:scale(1.02); background: linear-gradient(135deg,#ff4081,#7c4dff); box-shadow: 0 8px 24px rgba(255,64,129,0.18) }
 
 /* grid for surprises */
-.token-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:8px; }
-.token-item{ border-radius:10px; padding:10px 8px; text-align:center; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); transition: transform .18s ease, box-shadow .18s ease;}
-.token-item:hover{ transform:translateY(-4px) scale(1.03); box-shadow:0 10px 30px rgba(0,0,0,0.45); background: linear-gradient(135deg,#ff4081,#7c4dff); }
+/* ===== Grille Jetons 3x3 Scrollable ===== */
+.token-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);   /* 3 colonnes */
+    gap: 10px;
+
+    max-height: 240px;                       /* ≈ 3 lignes */
+    overflow-y: auto;                        /* scroll souris + tactile */
+    padding-right: 4px;
+
+    scrollbar-width: thin;                   /* Firefox */
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+/* Scrollbar (Chrome, Edge…) */
+.token-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.token-grid::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+    border-radius: 8px;
+}
+
+.token-item {
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.token-item:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 28px rgba(255,64,129,0.35);
+    background: linear-gradient(135deg,#ff4081,#7c4dff);
+}
+
+.token-emoji {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+}
+
+.token-cost {
+    font-weight: 700;
+    color: #ffd740;
+}
 .token-emoji{ font-size:1.8rem; margin-bottom:6px; }
 
 /* token bubbles that animate above the video */
@@ -1130,17 +1238,26 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
               </div> -->
 
               <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
-                <div class="menu-title">Actions de {{ $modele->prenom }}</div>
-                @php $jetonsPerso = $jetons->where('modele_id', $modele->id); @endphp
-                @foreach($jetonsPerso as $jeton)
-                <button class="token-choice"
-                    data-name="{{ $jeton->nom }}"
-                    data-cost="{{ $jeton->nombre_de_jetons }}"
-                    data-description="{{ $jeton->description }}">
-                    {{ $jeton->nom }} — {{ $jeton->nombre_de_jetons }} ✨
-                </button>
-                @endforeach
-              </div>
+    <div class="menu-title">Actions de {{ $modele->prenom }}</div>
+
+    <div class="token-grid"> <!-- AJOUT ICI -->
+        @php 
+            $jetonsPerso = $jetons->where('modele_id', $modele->id); 
+        @endphp
+
+        @foreach($jetonsPerso as $jeton)
+        <button class="token-item"
+            data-name="{{ $jeton->nom }}"
+            data-cost="{{ $jeton->nombre_de_jetons }}"
+            data-description="{{ $jeton->description }}">
+            <div class="token-name">{{ $jeton->nom }}</div>
+            <div class="token-cost">{{ $jeton->nombre_de_jetons }}</div>
+
+        </button>
+        @endforeach
+    </div>
+</div>
+
               <!-- Menu Surprise -->
               <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
                 <div class="menu-title">{{ __('Envoyer une Surprise') }} ✨</div>
