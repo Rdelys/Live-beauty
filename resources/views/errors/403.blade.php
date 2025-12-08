@@ -49,8 +49,8 @@
 
     <h1 id="error-title">403 - {{ __('Accès interdit') }}</h1>
 <p id="error-desc">
-    {{ __('Malheureusement, l\'accès à ce site ou page est interdit pour vous ou votre pays.') }}
+    {{ __("Malheureusement, l'accès à ce site ou page est interdit pour vous ou votre pays.") }}
 </p>
-    <a href="{{ url('/') }}" class="btn-home" role="button" aria-label="Retour à la page d'accueil">{{ __('Retour à l'accueil') }}</a>
+    <a href="{{ url('/') }}" class="btn-home" role="button" aria-label="Retour à la page d'accueil">{{ __("Retour à l'accueil") }}</a>
 </div>
 @endsection
