@@ -1238,25 +1238,25 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
               </div> -->
 
               <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
-    <div class="menu-title">Actions de {{ $modele->prenom }}</div>
+                  <div class="menu-title">Actions de {{ $modele->prenom }}</div>
 
-    <div class="token-grid"> <!-- AJOUT ICI -->
-        @php 
-            $jetonsPerso = $jetons->where('modele_id', $modele->id); 
-        @endphp
+                  <div class="token-grid"> <!-- AJOUT ICI -->
+                      @php 
+                          $jetonsPerso = $jetons->where('modele_id', $modele->id); 
+                      @endphp
 
-        @foreach($jetonsPerso as $jeton)
-        <button class="token-item"
-            data-name="{{ $jeton->nom }}"
-            data-cost="{{ $jeton->nombre_de_jetons }}"
-            data-description="{{ $jeton->description }}">
-            <div class="token-name">{{ $jeton->nom }}</div>
-            <div class="token-cost">{{ $jeton->nombre_de_jetons }}</div>
+                      @foreach($jetonsPerso as $jeton)
+                      <button class="token-item"
+                          data-name="{{ $jeton->nom }}"
+                          data-cost="{{ $jeton->nombre_de_jetons }}"
+                          data-description="{{ $jeton->description }}">
+                          <div class="token-name">{{ $jeton->nom }}</div>
+                          <div class="token-cost">{{ $jeton->nombre_de_jetons }}</div>
 
-        </button>
-        @endforeach
-    </div>
-</div>
+                      </button>
+                      @endforeach
+                  </div>
+              </div>
 
               <!-- Menu Surprise -->
               <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
@@ -2500,5 +2500,24 @@ if (backBtnEl) {
 }
 
 
+</script>
+<script>
+function updateTokenVisibility() {
+    const tokenCosts = document.querySelectorAll('.token-cost');
+
+    tokenCosts.forEach(cost => {
+        if (window.isPassingToPrivate === true) {
+            cost.style.display = "none"; // cacher
+        } else {
+            cost.style.display = "block"; // afficher
+        }
+    });
+}
+
+// Appel initial
+updateTokenVisibility();
+
+// Surveille les changements de mode privé
+setInterval(updateTokenVisibility, 300);
 </script>
 
