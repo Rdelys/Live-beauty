@@ -10,44 +10,43 @@ use Stripe\Checkout\Session;
 class StripeController extends Controller
 {
     public function createCheckoutSession(Request $request)
-    {
-        $user = Auth::user();
-        $pack = $request->input('pack'); // { jetons: int, prix: float }
+{
+    $user = Auth::user();
+    $pack = $request->input('pack');
+    $currency = $request->input('currency', 'eur'); // eur ou chf
 
-        Stripe::setApiKey(config('services.stripe.secret'));
+    Stripe::setApiKey(config('services.stripe.secret'));
 
-        $session = Session::create([
-'payment_method_types' => [
-    'card',        // Apple Pay + Google Pay inclus automatiquement
-    'link',
-    'revolut_pay',
-    'bancontact',
-    'blik',
-    'eps',
-    'twint',
-    'klarna',
-],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'eur',
-                    'product_data' => [
-                        'name' => $pack['jetons'].' Jetons',
-                    ],
-                    'unit_amount' => intval($pack['prix'] * 100),
+    // Choix des moyens de paiement selon devise
+    $paymentMethods = $currency === 'chf'
+        ? ['card', 'twint']  // TWINT seulement en CHF
+        : ['card', 'link', 'klarna', 'revolut_pay', 'bancontact', 'blik', 'eps'];
+
+    $session = Session::create([
+        'payment_method_types' => $paymentMethods,
+        'line_items' => [[
+            'price_data' => [
+                'currency' => $currency,
+                'product_data' => [
+                    'name' => $pack['jetons'].' Jetons',
                 ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-            'success_url' => route('stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('stripe.cancel'),
-            'metadata' => [
-                'user_id' => $user->id,
-                'jetons'  => $pack['jetons'],
+                'unit_amount' => intval($pack['prix'] * 100),
             ],
-        ]);
+            'quantity' => 1,
+        ]],
+        'mode' => 'payment',
+        'success_url' => route('stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => route('stripe.cancel'),
+        'metadata' => [
+            'user_id' => $user->id,
+            'jetons'  => $pack['jetons'],
+            'currency' => $currency,
+        ],
+    ]);
 
-        return response()->json(['id' => $session->id]);
-    }
+    return response()->json(['id' => $session->id]);
+}
+
 
     public function success(Request $request)
     {
