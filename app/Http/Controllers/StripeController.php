@@ -13,14 +13,35 @@ class StripeController extends Controller
 {
     $user = Auth::user();
     $pack = $request->input('pack');
-    $currency = $request->input('currency', 'eur'); // eur ou chf
 
     Stripe::setApiKey(config('services.stripe.secret'));
 
-    // Choix des moyens de paiement selon devise
-    $paymentMethods = $currency === 'chf'
-        ? ['card', 'twint']  // TWINT seulement en CHF
-        : ['card', 'link', 'klarna', 'revolut_pay', 'bancontact', 'blik', 'eps'];
+    // Détection pays (à adapter si tu as un champ user->pays)
+    $isSwiss = false;
+    if ($request->getClientIp()) {
+        try {
+            $geo = geoip($request->getClientIp());
+            $isSwiss = $geo['country'] === 'CH';
+        } catch (\Exception $e) {}
+    }
+
+    // Règles devises + moyens de paiement
+    if ($isSwiss) {
+        $currency = 'chf';
+        $paymentMethods = ['card', 'link'];
+    } else {
+        $currency = 'eur';
+        $paymentMethods = [
+            'card',
+            'link',
+            'revolut_pay',
+            'bancontact',
+            'blik',
+            'eps',
+            'twint',
+            'klarna',
+        ];
+    }
 
     $session = Session::create([
         'payment_method_types' => $paymentMethods,
