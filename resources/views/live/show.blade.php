@@ -182,9 +182,7 @@ body:hover {
 #videoContainer{
   height:100vh;
   border-radius:var(--radius-lg);
-  background:var(--glass);
   padding:14px;
-  box-shadow: var(--shadow-1), inset 0 0 25px rgba(255,255,255,0.03);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -196,8 +194,6 @@ body:hover {
   height:100%;
   object-fit:cover;
   border-radius: 14px;
-  border: 3px solid rgba(255,255,255,0.06);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
 }
 
 /* ===== Chat Column (fixed input at bottom) ===== */
@@ -1113,7 +1109,18 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
 
     <video id="localPreview" autoplay muted playsinline></video>
 
-          <video id="liveVideo" autoplay playsinline controls></video>
+<canvas id="blurBackground" style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(12px);
+      z-index: 1;
+  "></canvas>
+
+  <video id="liveVideo" autoplay playsinline controls style="position: relative; z-index: 2;"></video>
 
             <!-- ✅ Overlay Premium quand la vidéo est en pause -->
 
@@ -2519,5 +2526,24 @@ updateTokenVisibility();
 
 // Surveille les changements de mode privé
 setInterval(updateTokenVisibility, 300);
+
+
+const constraints = {
+  video: { 
+    width: { ideal: 3840 },   // résolution horizontale 4K
+    height: { ideal: 2160 },  // résolution verticale 4K
+    frameRate: { ideal: 120 }  // nombre d'images par seconde
+  },
+  audio: true
+};
+
+navigator.mediaDevices.getUserMedia(constraints)
+  .then(stream => {
+    const video = document.getElementById('liveVideo');
+    video.srcObject = stream;
+    video.play();
+  })
+  .catch(err => console.error('Erreur getUserMedia:', err));
+
 </script>
 
