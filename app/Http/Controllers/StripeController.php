@@ -9,6 +9,45 @@ use Stripe\Checkout\Session;
 
 class StripeController extends Controller
 {
+
+    private function getPaymentConfig(?string $iso)
+{
+    switch ($iso) {
+
+        // 🇨🇭 Suisse
+        case 'CH':
+            return [
+                'currency' => 'chf',
+                'methods'  => ['card', 'link', 'twint'],
+            ];
+
+        // 🇪🇺 Zone euro
+        case 'FR': case 'BE': case 'LU': case 'DE': case 'ES': case 'IT':
+        case 'NL': case 'AT': case 'FI': case 'GR': case 'PT': case 'IE':
+            return [
+                'currency' => 'eur',
+                'methods'  => [
+                    'card', 'link', 'revolut_pay', 'bancontact',
+                    'blik', 'eps', 'klarna'
+                ],
+            ];
+
+        // 🇬🇧 Royaume-Uni
+        case 'GB':
+            return [
+                'currency' => 'gbp',
+                'methods'  => ['card', 'link'],
+            ];
+
+        // 🌍 par défaut
+        default:
+            return [
+                'currency' => 'eur',
+                'methods'  => ['card', 'link'],
+            ];
+    }
+}
+
     public function createCheckoutSession(Request $request)
 {
     $user = Auth::user();
@@ -16,35 +55,18 @@ class StripeController extends Controller
 
     Stripe::setApiKey(config('services.stripe.secret'));
 
-    // Détection pays (à adapter si tu as un champ user->pays)
-    $isSwiss = false;
-    if ($request->getClientIp()) {
-        try {
-            $geo = geoip($request->getClientIp());
-            $isSwiss = $geo['country'] === 'CH';
-        } catch (\Exception $e) {}
-    }
+    // Récupérer le pays détecté dans le middleware
+    $iso = session('user_country_iso'); // ex : CH, FR, BE...
 
-    // Règles devises + moyens de paiement
-    if ($isSwiss) {
-        $currency = 'chf';
-        $paymentMethods = ['card', 'link'];
-    } else {
-        $currency = 'eur';
-        $paymentMethods = [
-            'card',
-            'link',
-            'revolut_pay',
-            'bancontact',
-            'blik',
-            'eps',
-            'twint',
-            'klarna',
-        ];
-    }
+    // Charger la config de paiement selon le pays
+    $config = $this->getPaymentConfig($iso);
+
+    $currency = $config['currency'];
+    $paymentMethods = $config['methods'];
 
     $session = Session::create([
         'payment_method_types' => $paymentMethods,
+
         'line_items' => [[
             'price_data' => [
                 'currency' => $currency,
@@ -55,18 +77,22 @@ class StripeController extends Controller
             ],
             'quantity' => 1,
         ]],
+
         'mode' => 'payment',
         'success_url' => route('stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url' => route('stripe.cancel'),
+
         'metadata' => [
-            'user_id' => $user->id,
-            'jetons'  => $pack['jetons'],
+            'user_id'  => $user->id,
+            'jetons'   => $pack['jetons'],
             'currency' => $currency,
+            'country'  => $iso,
         ],
     ]);
 
     return response()->json(['id' => $session->id]);
 }
+
 
 
     public function success(Request $request)

@@ -98,6 +98,12 @@ class BlockCountries
             });
         }
 
+        // Stocker le pays dans la session pour Stripe
+        session([
+            'user_country_iso' => $iso,
+            'user_country_name' => $country,
+        ]);
+
         return $next($request);
     }
 }
