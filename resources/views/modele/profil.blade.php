@@ -537,6 +537,27 @@ select:-moz-focusring {
     border: 2px solid #ff416c;
 }
 
+/* Rend le select scrollable si plus de 10 options */
+#select-jeton-propose {
+    max-height: 220px; /* ≃ 10 lignes */
+    overflow-y: auto;
+}
+
+/* Style des options (déjà sombre mais on sécurise) */
+#select-jeton-propose option {
+    padding: 8px 10px;
+    background: #111;
+    color: #fff;
+}
+
+/* Scrollbar propre */
+#select-jeton-propose::-webkit-scrollbar {
+    width: 6px;
+}
+#select-jeton-propose::-webkit-scrollbar-thumb {
+    background: #e50914;
+    border-radius: 10px;
+}
 
   </style>
 </head>
@@ -1184,7 +1205,7 @@ select:-moz-focusring {
                           data-nom="{{ e($jp->nom) }}"
                           data-description="{{ e($jp->description) }}"
                           data-nombre="{{ $jp->nombre_de_jetons }}">
-                    {{ $jp->nom }}
+{{ $jp->nom }}{{ $jp->prise == 1 ? ' ❤️‍🔥' : '' }}
                   </option>
                 @endforeach
               </select>

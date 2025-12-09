@@ -13,9 +13,12 @@ class JetonPropose extends Model
         'description',
         'nombre_de_jetons',
         'inputs',
+                'prise',  // 🔥 AJOUT ICI
     ];
 
     protected $casts = [
         'inputs' => 'array',
+                'prise'  => 'integer', // 🔥 IMPORTANT pour que Blade lise bien 0 ou 1
+
     ];
 }
