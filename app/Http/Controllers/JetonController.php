@@ -45,7 +45,11 @@ class JetonController extends Controller
                 $jeton->jeton_propose_prise = 1;
 
                 JetonPropose::where('id', $request->jeton_propose_id)
-                    ->update(['prise' => 1]);
+                ->update([
+                    'prise' => 1,
+                    'modele_id' => session('modele_id') // <— ✔ ici
+                ]);
+
             }
 
             $jeton->save();
@@ -158,9 +162,11 @@ class JetonController extends Controller
         if (session()->has('modele_id') && $jeton->modele_id == session('modele_id')) {
             if ($jeton->jeton_propose_id) {
                 JetonPropose::where('id', $jeton->jeton_propose_id)
-                    ->update(['prise' => 0]);
+                    ->update([
+                        'prise' => 0,
+                        'modele_id' => null
+                    ]);
             }
-
             $jeton->delete();
 
             return redirect()->route('modele.profil')->with('success', 'Jeton supprimé avec succès.');

@@ -14,6 +14,8 @@ class JetonPropose extends Model
         'nombre_de_jetons',
         'inputs',
                 'prise',  // 🔥 AJOUT ICI
+                    'modele_id',   // <—— ✔ AJOUT
+
     ];
 
     protected $casts = [
@@ -21,4 +23,10 @@ class JetonPropose extends Model
                 'prise'  => 'integer', // 🔥 IMPORTANT pour que Blade lise bien 0 ou 1
 
     ];
+
+    public function modele()
+{
+    return $this->belongsTo(Modele::class);
+}
+
 }
