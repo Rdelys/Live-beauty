@@ -1202,11 +1202,21 @@ select:-moz-focusring {
                 <option value="">-- Choisir un jeton proposé (préremplir) --</option>
                 @foreach($jetonsProposes as $jp)
                   <option value="{{ $jp->id }}"
-                          data-nom="{{ e($jp->nom) }}"
-                          data-description="{{ e($jp->description) }}"
-                          data-nombre="{{ $jp->nombre_de_jetons }}">
-{{ $jp->nom }}{{ $jp->prise == 1 ? ' ❤️‍🔥' : '' }}
-                  </option>
+        data-nom="{{ e($jp->nom) }}"
+        data-description="{{ e($jp->description) }}"
+        data-nombre="{{ $jp->nombre_de_jetons }}"
+        {{ $jp->modele_id == session('modele_id') ? 'disabled style=background:#444;color:#777;cursor:not-allowed;' : '' }}>
+    
+    {{ $jp->nom }}
+
+    @if($jp->modele_id == session('modele_id'))
+        ❤️‍🔥 (Déjà pris par vous)
+    @elseif($jp->modele_id)
+        🔒 (Pris par un autre modèle)
+    @endif
+</option>
+
+
                 @endforeach
               </select>
             </div>
