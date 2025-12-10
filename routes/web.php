@@ -179,6 +179,7 @@ Route::post('/use-jeton', [\App\Http\Controllers\JetonController::class, 'useJet
     Route::post('/admin/clients/{id}/add-tokens', [App\Http\Controllers\Admin\ClientController::class, 'addTokens'])->name('admin.clients.addTokens');
 Route::post('/admin/clients/{id}/remove-tokens', [App\Http\Controllers\Admin\ClientController::class, 'removeTokens'])->name('admin.clients.removeTokens');
 Route::post('/admin/clients/{id}/toggle-ban', [App\Http\Controllers\Admin\ClientController::class, 'toggleBan'])->name('admin.clients.toggleBan');
+Route::delete('/admin/clients/{id}/delete', [App\Http\Controllers\Admin\ClientController::class, 'delete'])->name('admin.clients.delete');
 
 // routes/web.php
 

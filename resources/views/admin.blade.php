@@ -1368,7 +1368,8 @@ table {
                             data-id="{{ $film->id }}"
                             data-description="{{ $film->description }}"
                         >
-                            Modifier
+                                <i class="fa fa-edit"></i>
+
                         </button>
 
                         <form action="{{ route('films.destroy', $film->id) }}" 
@@ -1377,7 +1378,8 @@ table {
                               onsubmit="return confirm('Supprimer ?')">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-danger btn-sm">Supprimer</button>
+                            <button class="btn btn-danger btn-sm">        <i class="fa fa-trash"></i>
+</button>
                         </form>
                     </td>
                 </tr>
@@ -1773,13 +1775,14 @@ document.getElementById('editFilmModal').addEventListener('show.bs.modal', funct
    class="btn btn-sm btn-primary" 
    target="_blank" 
    rel="noopener noreferrer">
-   Modifier
+    <i class="fa fa-edit"></i>
 </a>
 
   <form action="{{ route('modeles.destroy', $modele->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Confirmer la suppression ?')">
     @csrf
     @method('DELETE')
-    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+    <button type="submit" class="btn btn-sm btn-danger">        <i class="fa fa-trash"></i>
+</button>
   </form>
 </td>
 
@@ -2056,21 +2059,58 @@ document.getElementById('editFilmModal').addEventListener('show.bs.modal', funct
             <!-- Bouton Ajouter Jetons -->
             <form action="{{ route('admin.clients.addTokens', $client->id) }}" method="POST" style="display:inline-block;">
                 @csrf
-                <input type="number" name="jetons" min="1" class="form-control form-control-sm" style="width:80px;display:inline-block;">
-                <button type="submit" class="btn btn-success btn-sm">+ Jetons</button>
+                <input type="number" name="jetons" min="1" 
+                      class="form-control form-control-sm" 
+                      style="width:80px;display:inline-block;">
+                
+                <button type="submit" 
+                        class="btn btn-success btn-sm"
+                        title="Ajouter des jetons"
+                        aria-label="Ajouter des jetons">
+                    <i class="fa fa-plus-circle"></i>
+                </button>
             </form>
+
             <!-- Bouton Retirer Jetons -->
             <form action="{{ route('admin.clients.removeTokens', $client->id) }}" method="POST" style="display:inline-block;">
                 @csrf
-                <input type="number" name="jetons" min="1" class="form-control form-control-sm" style="width:80px;display:inline-block;">
-                <button type="submit" class="btn btn-danger btn-sm">- Jetons</button>
+                <input type="number" name="jetons" min="1" 
+                      class="form-control form-control-sm" 
+                      style="width:80px;display:inline-block;">
+                
+                <button type="submit" 
+                        class="btn btn-danger btn-sm"
+                        title="Retirer des jetons"
+                        aria-label="Retirer des jetons">
+                    <i class="fa fa-minus-circle"></i>
+                </button>
             </form>
+
 
             <!-- Bouton Bannir/Débloquer -->
             <form action="{{ route('admin.clients.toggleBan', $client->id) }}" method="POST" style="display:inline-block;">
                 @csrf
-                <button type="submit" class="btn btn-{{ $client->banni ? 'warning' : 'danger' }} btn-sm">
-                    {{ $client->banni ? 'Débloquer' : 'Bannir' }}
+                <button type="submit" 
+                        class="btn btn-{{ $client->banni ? 'warning' : 'danger' }} btn-sm"
+                        title="{{ $client->banni ? 'Débloquer' : 'Bannir' }}"
+                        aria-label="{{ $client->banni ? 'Débloquer' : 'Bannir' }}">
+                    
+                    @if($client->banni)
+                        <i class="fa fa-unlock"></i>
+                    @else
+                        <i class="fa fa-ban"></i>
+                    @endif
+                </button>
+            </form>
+
+
+            <!-- Bouton Supprimer -->
+            <form action="{{ route('admin.clients.delete', $client->id) }}" method="POST" style="display:inline-block;" 
+                  onsubmit="return confirm('Voulez-vous vraiment supprimer ce client ? Cette action est irréversible.');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Supprimer">
+                    <i class="fa fa-trash"></i>
                 </button>
             </form>
         </td>

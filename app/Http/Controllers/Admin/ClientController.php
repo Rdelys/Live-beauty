@@ -56,4 +56,13 @@ class ClientController extends Controller
 
         return back()->with('success', $client->banni ? "🚫 Client banni" : "✅ Client débloqué");
     }
+
+    public function delete($id)
+    {
+        $client = User::findOrFail($id);
+        $client->delete();
+
+        return back()->with('success', "🗑️ Le client {$client->pseudo} a été supprimé.");
+    }
+
 }
