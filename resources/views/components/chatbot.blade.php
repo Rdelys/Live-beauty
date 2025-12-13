@@ -205,10 +205,16 @@ window._chatAlreadyLoaded = true;
         <div class="msg-left welcome-msg">😘 {{ __('Comment puis-je t’aider aujourd’hui') }} ?</div>
         
         <!-- Historique des réponses stockées -->
-        @php
-            use App\Services\ChatStorageService;
-            $history = ChatStorageService::getUserHistory(Auth::user()->id);
-        @endphp
+        <!-- Historique des réponses stockées -->
+@php
+    // Si vous utilisez le service
+    if(class_exists('App\Services\ChatStorageService')) {
+        $history = App\Services\ChatStorageService::getUserHistory(Auth::user()->id);
+    } else {
+        // Fallback en cas d'absence du service
+        $history = collect(); // ou un tableau vide []
+    }
+@endphp
         
         @foreach($history as $message)
             @if($message->sender == 'admin')

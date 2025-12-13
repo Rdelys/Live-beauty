@@ -1,3 +1,4 @@
+@include('components.chatbot')
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
   <head>
@@ -1939,7 +1940,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-@include('components.chatbot')
 
 </body>
 </html>
