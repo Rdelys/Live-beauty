@@ -1338,7 +1338,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
 <script>
-  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
 
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
@@ -1962,22 +1962,51 @@ function onClientCancelPrivate() {
 }
 
 
+// Dans la partie socket.on("typing")
 socket.on("typing", (data) => {
-    const typingIndicator = document.getElementById("typingIndicator");
-    if (!typingIndicator) {
-        const indicator = document.createElement("div");
+    // Pour la zone de chat principale (#messages)
+    const messagesDiv = document.getElementById("messages");
+    const floatingMsgs = document.getElementById("chatFloatingMsgs");
+    
+    let indicator = document.getElementById("typingIndicator");
+    let floatingIndicator = document.getElementById("typingIndicatorFloating");
+        updateTypingIndicator(data, true);
+
+    if (!indicator && messagesDiv) {
+        indicator = document.createElement("div");
         indicator.id = "typingIndicator";
         indicator.className = 'chat-bubble';
         indicator.innerHTML = `<em>${data.isModel ? "{{ $modele->nom }} {{ $modele->prenom }}" : data.pseudo} : (...)</em>`;
-        document.getElementById("messages").appendChild(indicator);
-        document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+        messagesDiv.appendChild(indicator);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    // Pour la zone de chat flottante
+    if (!floatingIndicator && floatingMsgs) {
+        floatingIndicator = document.createElement("div");
+        floatingIndicator.id = "typingIndicatorFloating";
+        floatingIndicator.className = 'chat-bubble';
+        floatingIndicator.style.fontSize = '0.9em';
+        floatingIndicator.style.opacity = '0.8';
+        floatingIndicator.innerHTML = `<em>${data.isModel ? "{{ $modele->nom }} {{ $modele->prenom }}" : data.pseudo} : (...)</em>`;
+        floatingMsgs.appendChild(floatingIndicator);
+        floatingMsgs.scrollTop = floatingMsgs.scrollHeight;
     }
 });
 
+// Dans la partie socket.on("stopTyping")
 socket.on("stopTyping", () => {
+    // Supprimer les deux indicateurs
     const typingIndicator = document.getElementById("typingIndicator");
+    const floatingIndicator = document.getElementById("typingIndicatorFloating");
+        updateTypingIndicator(null, false);
+
     if (typingIndicator) {
         typingIndicator.remove();
+    }
+    
+    if (floatingIndicator) {
+        floatingIndicator.remove();
     }
 });
   // Quand le broadcaster envoie une offre SDP
@@ -2155,11 +2184,58 @@ document.getElementById("fullscreenBtn").addEventListener("click", () => {
 
 /* === Sync new messages to floating chat === */
 function pushToFloating(msgHtml) {
+    // Vérifier si c'est un indicateur de frappe
+    if (msgHtml.includes('(...)') || msgHtml.includes('typingIndicator')) {
+        return; // Ne pas ajouter l'indicateur de frappe via cette méthode
+    }
+    
+    const chatFloatingMsgs = document.getElementById("chatFloatingMsgs");
+    if (!chatFloatingMsgs) return;
+    
     const div = document.createElement("div");
     div.className = "chat-bubble";
     div.innerHTML = msgHtml;
     chatFloatingMsgs.appendChild(div);
     chatFloatingMsgs.scrollTop = chatFloatingMsgs.scrollHeight;
+}
+
+// Fonction pour gérer les indicateurs de frappe dans les deux zones
+function updateTypingIndicator(data, isStarting) {
+    const messagesDiv = document.getElementById("messages");
+    const floatingMsgs = document.getElementById("chatFloatingMsgs");
+    
+    if (isStarting) {
+        // Créer/remplacer dans #messages
+        let indicator = document.getElementById("typingIndicator");
+        if (!indicator && messagesDiv) {
+            indicator = document.createElement("div");
+            indicator.id = "typingIndicator";
+            indicator.className = 'chat-bubble';
+            indicator.innerHTML = `<em>${data.isModel ? "{{ $modele->nom }} {{ $modele->prenom }}" : data.pseudo} : (...)</em>`;
+            messagesDiv.appendChild(indicator);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // Créer/remplacer dans #chatFloatingMsgs
+        let floatingIndicator = document.getElementById("typingIndicatorFloating");
+        if (!floatingIndicator && floatingMsgs) {
+            floatingIndicator = document.createElement("div");
+            floatingIndicator.id = "typingIndicatorFloating";
+            floatingIndicator.className = 'chat-bubble';
+            floatingIndicator.style.fontSize = '0.9em';
+            floatingIndicator.style.opacity = '0.8';
+            floatingIndicator.innerHTML = `<em>${data.isModel ? "{{ $modele->nom }} {{ $modele->prenom }}" : data.pseudo} : (...)</em>`;
+            floatingMsgs.appendChild(floatingIndicator);
+            floatingMsgs.scrollTop = floatingMsgs.scrollHeight;
+        }
+    } else {
+        // Supprimer les deux indicateurs
+        const typingIndicator = document.getElementById("typingIndicator");
+        const floatingIndicator = document.getElementById("typingIndicatorFloating");
+        
+        if (typingIndicator) typingIndicator.remove();
+        if (floatingIndicator) floatingIndicator.remove();
+    }
 }
 
 /* Intercepter tes messages existants */
