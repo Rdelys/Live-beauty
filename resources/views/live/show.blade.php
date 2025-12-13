@@ -715,10 +715,14 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     opacity: 1;
 }
 
+/* Assurez-vous que ce style existe */
+#chatFloating {
+    display: none !important; /* Forcer le masquage par défaut */
+}
 
-/* === FULLSCREEN MODE: floating chat bubble === */
 #videoContainer:fullscreen #chatFloating,
 #videoContainer:-webkit-full-screen #chatFloating {
+    display: flex !important; /* Afficher seulement en plein écran */
     position: absolute;
     bottom: 20px;
     right: 20px;
@@ -730,7 +734,6 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     border: 1px solid rgba(255,255,255,0.12);
     padding: 12px;
     z-index: 999999999;
-    display: flex;
     flex-direction: column;
     gap: 6px;
     animation: floatIn .25s ease-out;
@@ -2168,9 +2171,10 @@ const floatingInput = document.getElementById("floatingMsgInput");
 const floatingSendBtn = document.getElementById("floatingSendBtn");
 
 /* === FULLSCREEN: show floating chat === */
+// === FULLSCREEN: show floating chat ===
 document.getElementById("fullscreenBtn").addEventListener("click", () => {
     const v = document.getElementById("videoContainer");
-
+    
     if (!document.fullscreenElement) {
         v.requestFullscreen();
         setTimeout(() => {
@@ -2178,10 +2182,45 @@ document.getElementById("fullscreenBtn").addEventListener("click", () => {
         }, 400);
     } else {
         document.exitFullscreen();
+        // Masquer le chat flottant quand on quitte le plein écran
         chatFloating.style.display = "none";
     }
 });
 
+// === Écouter les changements de mode plein écran ===
+document.addEventListener("fullscreenchange", handleFullscreenChange);
+document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+function handleFullscreenChange() {
+    if (!document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && 
+        !document.msFullscreenElement) {
+        // On a quitté le mode plein écran
+        chatFloating.style.display = "none";
+    } else {
+        // On est entré en mode plein écran
+        setTimeout(() => {
+            chatFloating.style.display = "flex";
+        }, 100);
+    }
+}
+
+// === Aussi gérer la touche Échap pour quitter le plein écran ===
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && 
+        (document.fullscreenElement || 
+         document.webkitFullscreenElement || 
+         document.mozFullScreenElement || 
+         document.msFullscreenElement)) {
+        // Masquer le chat flottant quand on quitte avec Échap
+        setTimeout(() => {
+            chatFloating.style.display = "none";
+        }, 50);
+    }
+});
 /* === Sync new messages to floating chat === */
 function pushToFloating(msgHtml) {
     // Vérifier si c'est un indicateur de frappe
