@@ -1,8 +1,9 @@
+<!-- components/chatbot.blade.php -->
 @if(Auth::check())
 
 <audio id="adminChatSound" src="/sounds/notificationAction.mp3" preload="auto"></audio>
 
-<!-- 🔒 ANTI-DOUBLE CHARGEMENT GLOBAL DU CHATBOT -->
+<!-- 🔒 ANTI-DOUBLE CHARGEMENT -->
 <script>
 if (window._chatAlreadyLoaded) {
     console.warn("Chatbot déjà chargé → skip");
@@ -195,16 +196,30 @@ window._chatAlreadyLoaded = true;
 <!-- CHATBOX -->
 <div id="chatbot-container">
     <div id="chatbot-header">
-        🔥 Live Beauty CHAT – {{ __('Bonjour') }}
- {{ Auth::user()->pseudo }} !
+        🔥 Live Beauty CHAT – {{ __('Bonjour') }} {{ Auth::user()->pseudo }} !
         <span id="close-chatbot">&times;</span>
     </div>
 
     <div id="chatbot-messages">
-        <div class="msg-left welcome-msg">🔥 {{ __('Bienvenue') }}
- {{ Auth::user()->pseudo }} !</div>
-        <div class="msg-left welcome-msg">😘 {{ __('Comment puis-je t’aider aujourd’hui') }}
- ?</div>
+        <div class="msg-left welcome-msg">🔥 {{ __('Bienvenue') }} {{ Auth::user()->pseudo }} !</div>
+        <div class="msg-left welcome-msg">😘 {{ __('Comment puis-je t’aider aujourd’hui') }} ?</div>
+        
+        <!-- Historique des réponses stockées -->
+        @php
+            use App\Services\ChatStorageService;
+            $history = ChatStorageService::getUserHistory(Auth::user()->id);
+        @endphp
+        
+        @foreach($history as $message)
+            @if($message->sender == 'admin')
+                <div class="msg-left">
+                    <strong>Support :</strong> {{ $message->message }}
+                    <small style="color:#888; font-size:11px">
+                        ({{ $message->created_at->format('H:i') }})
+                    </small>
+                </div>
+            @endif
+        @endforeach
     </div>
 
     <div id="chatbot-input">
@@ -212,7 +227,7 @@ window._chatAlreadyLoaded = true;
     </div>
 </div>
 
-
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 /* --------------------
    OUVERTURE / FERMETURE
@@ -226,12 +241,9 @@ document.getElementById("close-chatbot").onclick = () => {
     document.getElementById("chatbot-container").style.display = "none";
     document.getElementById("chatbot-toggle").style.display = "flex";
 };
-</script>
 
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-<script>
 /* -------------------------
-  SOCKET.IO - SINGLETON SAFE
+  SOCKET.IO
 ------------------------- */
 if (!window.socketChat) {
     window.socketChat = io("https://livebeautyofficial.com", {
@@ -242,14 +254,10 @@ if (!window.socketChat) {
     });
 }
 
-
-
 const socketChat = window.socketChat;
-
 const USER_ID = "{{ Auth::user()->id }}";
 const USER_PSEUDO = "{{ Auth::user()->pseudo }}";
 const soundAdmin = document.getElementById("adminChatSound");
-
 
 /* IDENTIFICATION */
 socketChat.on("connect", () => {
@@ -258,55 +266,45 @@ socketChat.on("connect", () => {
         userId: USER_ID,
         pseudo: USER_PSEUDO
     });
+    console.log("Client connecté au chat");
 });
 
-
-/* -------------------------------------------------
-   FONCTION D'AJOUT DE MESSAGE AVEC ALIGNEMENT + SON
---------------------------------------------------- */
-function addStyledMessage(sender, msg) {
+/* MESSAGES */
+function addStyledMessage(sender, msg, timestamp = null) {
     const box = document.getElementById("chatbot-messages");
-
     const side = (sender === "Moi") ? "msg-right" : "msg-left";
-
-    if (sender !== "Moi") {
-        soundAdmin.currentTime = 0;
-        soundAdmin.play().catch(() => {});
+    
+    let timeHtml = '';
+    if (timestamp) {
+        const date = new Date(timestamp);
+        timeHtml = `<small style="color:#888; font-size:11px">(${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')})</small>`;
     }
 
     box.innerHTML += `
         <div class="${side}">
-            <strong>${sender} :</strong> ${msg}
+            <strong>${sender} :</strong> ${msg} ${timeHtml}
         </div>
     `;
 
-    // 🔥 Scroll automatique vers le bas à chaque message
     scrollChatToBottom();
 }
 
-
-
-/* -------------------------
-  MESSAGES REÇUS SERVEUR
--------------------------- */
+/* RÉCEPTION MESSAGES */
 socketChat.on("chatbot-reply", d => {
-    addStyledMessage(d.sender, d.message);
+    addStyledMessage(d.sender, d.message, new Date());
 });
 
 socketChat.on("bot-reply", d => {
-    addStyledMessage("Bot", d.message);
+    addStyledMessage("Bot", d.message, new Date());
 });
 
-
-/* -------------------------
-  ENVOI MESSAGE UTILISATEUR
--------------------------- */
+/* ENVOI MESSAGE */
 document.getElementById("chatbot-user-input").addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
         const message = this.value.trim();
         if (!message) return;
 
-        addStyledMessage("Moi", message);
+        addStyledMessage("Moi", message, new Date());
 
         socketChat.emit("client-message", {
             userId: USER_ID,
@@ -317,23 +315,15 @@ document.getElementById("chatbot-user-input").addEventListener("keydown", functi
         this.value = "";
     }
 });
-</script>
-<script>
-/* 🔥 SCROLLER AUTOMATIQUE - TOP À L'OUVERTURE, BAS À CHAQUE MESSAGE */
 
-function scrollChatToTop() {
-    const box = document.getElementById("chatbot-messages");
-    box.scrollTo({ top: 0, behavior: "smooth" });
-}
-
+/* SCROLL */
 function scrollChatToBottom() {
     const box = document.getElementById("chatbot-messages");
     box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
 }
 
-/* Quand on ouvre le chat → scroll tout en haut */
 document.getElementById("chatbot-toggle").addEventListener("click", () => {
-    setTimeout(scrollChatToTop, 150);
+    setTimeout(scrollChatToBottom, 150);
 });
 </script>
 

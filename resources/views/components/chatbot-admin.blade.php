@@ -1,3 +1,4 @@
+<!-- components/chatbot-admin.blade.php -->
 
 <style>
 /* ===========================================================
@@ -76,8 +77,8 @@
 
 /* ===================== 📦 PANEL ===================== */
 #adminChatPanel {
-    width: 430px; /* PLUS LARGE */
-    max-height: 650px; /* PLUS HAUT */
+    width: 500px; /* PLUS LARGE */
+    max-height: 700px; /* PLUS HAUT */
     background: rgba(12,12,12,0.95);
     border: 2px solid #ff0037;
     border-radius: 22px;
@@ -109,11 +110,23 @@
     color: #fff;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 19px;
     border-radius: 22px 22px 0 0;
 }
 
 #adminChatClose { cursor: pointer; font-size: 26px; }
+
+/* Stats */
+#adminChatStats {
+    padding: 10px 16px;
+    background: rgba(255,0,55,0.1);
+    border-bottom: 1px solid #550010;
+    font-size: 14px;
+    color: #ff7799;
+    display: flex;
+    justify-content: space-between;
+}
 
 /* List */
 #adminChatList {
@@ -164,11 +177,25 @@
     font-size: 17px;
 }
 
+.adminChatBlock .timestamp {
+    font-size: 12px;
+    color: #888;
+    margin-left: 10px;
+}
+
 /* Messages */
 .thread p {
     margin: 5px 0;
-    font-size: 15px; /* PLUS GRAND */
+    font-size: 15px;
     line-height: 1.4;
+}
+
+.stored-message {
+    opacity: 0.8;
+    border-left: 3px solid #ff0037;
+    padding-left: 10px;
+    margin: 5px 0;
+    font-style: italic;
 }
 
 /* Input */
@@ -185,7 +212,6 @@
 </style>
 
 <div id="adminChatWrapper" class="adminchat-wrapper">
-
     <div id="adminChatToggle">
         💬 <div id="adminChatUnread"></div>
     </div>
@@ -193,36 +219,46 @@
     <div id="adminChatPanel">
         <div id="adminChatHeader">
             👑 {{ __('Admin Chat') }}
-
             <span id="adminChatClose">&times;</span>
         </div>
+        
+        <div id="adminChatStats">
+            <span id="onlineUsers">En ligne: 0</span>
+            <span id="storedMessages">Messages stockés: 0</span>
+        </div>
+        
         <div id="adminChatList"></div>
     </div>
 
     <audio id="adminChatSound" src="/sounds/notificationAction.mp3" preload="auto"></audio>
 </div>
 
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 const panel  = document.getElementById("adminChatPanel");
 const toggle = document.getElementById("adminChatToggle");
 const unread = document.getElementById("adminChatUnread");
 const list   = document.getElementById("adminChatList");
 const sound  = document.getElementById("adminChatSound");
-let unreadCount = 0;
+const stats  = document.getElementById("adminChatStats");
+const onlineSpan = document.getElementById("onlineUsers");
+const storedSpan = document.getElementById("storedMessages");
 
-/* Ouvrir */
+let unreadCount = 0;
+let connectedClients = {};
+
 /* Ouvrir */
 toggle.onclick = () => {
     panel.style.display = "flex";
     toggle.style.display = "none";
-
+    
+    // Charger les messages stockés
+    socket.emit("load-stored-messages");
+    
     // reset du badge
     unreadCount = 0;
     unread.style.display = "none";
 };
-
 
 /* Fermer */
 document.getElementById("adminChatClose").onclick = () => {
@@ -237,16 +273,43 @@ const socket = io("https://livebeautyofficial.com", {
     upgrade: true
 });
 
-
 socket.on("connect", () => {
     socket.emit("identify", { type: "admin" });
+    console.log("👑 Admin connecté au socket");
 });
 
-/* ====================================================
-   📨 RÉCEPTION MESSAGE CLIENT – AFFICHAGE PREMIUM
-   ==================================================== */
-socket.on("admin-new-message", data => {
+/* MESSAGES STOCKÉS */
+socket.on("stored-messages-count", data => {
+    storedSpan.textContent = `Messages stockés: ${data.count}`;
+});
 
+socket.on("stored-messages", messages => {
+    messages.forEach(group => {
+        let block = document.getElementById("client-" + group.userId);
+        
+        if (!block) {
+            list.innerHTML += `
+                <div class="adminChatBlock" id="client-${group.userId}">
+                    <h4>${group.pseudo} <span class="timestamp">(stocké)</span></h4>
+                    <div class="thread"></div>
+                    <input class="adminReply" data-id="${group.userId}" placeholder="Répondre…">
+                </div>
+            `;
+            block = document.getElementById("client-" + group.userId);
+        }
+        
+        const thread = block.querySelector(".thread");
+        group.messages.forEach((msg, index) => {
+            thread.innerHTML += `<p class="stored-message"><strong>${group.pseudo} :</strong> ${msg}</p>`;
+        });
+        
+        // Marquer comme lu
+        socket.emit("mark-as-read", { userId: group.userId });
+    });
+});
+
+/* NOUVEAU MESSAGE EN DIRECT */
+socket.on("admin-new-message", data => {
     let block = document.getElementById("client-" + data.userId);
 
     if (!block) {
@@ -267,23 +330,33 @@ socket.on("admin-new-message", data => {
     sound.play().catch(()=>{});
 
     /* Notification */
-    /* Notification */
-if (panel.style.display === "none") {
-    unreadCount++;
-    unread.innerText = unreadCount;
-    unread.style.display = "flex";
-}
-
+    if (panel.style.display === "none") {
+        unreadCount++;
+        unread.innerText = unreadCount;
+        unread.style.display = "flex";
+    }
 
     list.scrollTop = list.scrollHeight;
 });
 
-/* ====================================================
-   ✏️ ENVOI REPONSE ADMIN
-   ==================================================== */
+/* STATS CLIENTS EN LIGNE */
+socket.on("client-connected", data => {
+    connectedClients[data.userId] = data.pseudo;
+    updateOnlineStats();
+});
+
+socket.on("client-disconnected", data => {
+    delete connectedClients[data.userId];
+    updateOnlineStats();
+});
+
+function updateOnlineStats() {
+    onlineSpan.textContent = `En ligne: ${Object.keys(connectedClients).length}`;
+}
+
+/* ENVOI REPONSE */
 document.addEventListener("keydown", e => {
     if (e.target.classList.contains("adminReply") && e.key === "Enter") {
-
         const msg = e.target.value.trim();
         if (!msg) return;
 
@@ -299,4 +372,3 @@ document.addEventListener("keydown", e => {
     }
 });
 </script>
-
