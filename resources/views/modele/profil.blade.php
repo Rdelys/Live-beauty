@@ -1089,6 +1089,19 @@ select:-moz-focusring {
 
   <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
     <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
+    <!-- Sélecteur de caméra -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Sélectionner la caméra</label>
+            <select id="cameraSelect" class="form-control">
+                <option value="">Chargement des caméras...</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn btn-sm btn-outline-light mt-1" onclick="refreshCameraList()">
+   <i class="fas fa-sync-alt"></i> Actualiser la liste
+ </button>
     <div id="showStatusContainer" class="text-center my-3">
     <button id="showStatusBtn" class="btn show-status-btn public">
         🔓 Public
@@ -1352,7 +1365,17 @@ select:-moz-focusring {
 </div>
 <div class="tab-pane fade text-start" id="workspaceprive" role="tabpanel">
   <h4 class="text-white mb-3">Mes Shows Privés</h4>
-
+  <div class="row mb-3">
+      <div class="col-md-6">
+          <label class="form-label">Sélectionner la caméra</label>
+          <select id="cameraSelectPrivate" class="form-control">
+              <option value="">Chargement des caméras...</option>
+          </select>
+      </div>
+  </div>
+<button class="btn btn-sm btn-outline-light mt-1" onclick="refreshCameraList()">
+   <i class="fas fa-sync-alt"></i> Actualiser la liste
+ </button>
   {{-- Liste des shows privés liés au modèle --}}
   @if(isset($modele->showPrives) && $modele->showPrives->count() > 0)
     <div class="table-responsive">
@@ -1519,7 +1542,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("http://localhost:3000/", {
+socket = io("wss://livebeautyofficial.com", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -1890,12 +1913,78 @@ pauseLiveBtn?.addEventListener("click", () => {
             : "▶️ Le modèle a repris le live."
     });
 });
+/* === GESTION DES CAMÉRAS === */
+let cameraDevices = [];
+
+// Fonction pour récupérer les caméras disponibles
+async function getCameraDevices() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameraDevices = devices.filter(device => device.kind === 'videoinput');
+        
+        // Mettre à jour les selecteurs
+        updateCameraSelect('cameraSelect', cameraDevices);
+        updateCameraSelect('cameraSelectPrivate', cameraDevices);
+        
+        return cameraDevices;
+    } catch (error) {
+        console.error('Erreur lors de la récupération des caméras:', error);
+        return [];
+    }
+}
+
+// Mettre à jour un sélecteur de caméra
+function updateCameraSelect(selectId, devices) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Par défaut (caméra principale)</option>';
+    
+    devices.forEach((device, index) => {
+        const label = device.label || `Caméra ${index + 1}`;
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.textContent = label;
+        select.appendChild(option);
+    });
+}
+
+// Obtenir les contraintes de caméra basées sur la sélection
+function getCameraConstraints(selectId) {
+    const select = document.getElementById(selectId);
+    const deviceId = select ? select.value : null;
+    
+    if (!deviceId) {
+        return { video: true, audio: true }; // Caméra par défaut
+    }
+    
+    return {
+        video: { 
+            deviceId: { exact: deviceId },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 30 }
+        },
+        audio: true
+    };
+}
+
+// Récupérer les caméras au chargement
+document.addEventListener('DOMContentLoaded', async () => {
+    await getCameraDevices();
+    
+    // Détecter les changements de périphériques
+    navigator.mediaDevices.addEventListener('devicechange', getCameraDevices);
+});
 
 /* === LANCER LE LIVE === */
 startBtn.addEventListener('click', async () => {
     try {
         // Caméra + micro
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const constraints = getCameraConstraints('cameraSelect');
+        
+        // Caméra + micro avec la caméra sélectionnée
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
         liveVideo.srcObject = stream;
         liveSection.style.display = 'block';
         startBtn.style.display = 'none';
@@ -2224,6 +2313,11 @@ function stopPrivateShow() {
 clearInterval(timerInterval);
 document.getElementById("privateTimer").textContent = "00:00";
 
+function refreshCameraList() {
+    getCameraDevices().then(() => {
+        alert('Liste des caméras actualisée');
+    });
+}
 // === LANCER LIVE PRIVÉ ===
 startPrivateForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -2231,7 +2325,9 @@ startPrivateForm?.addEventListener("submit", async (e) => {
   if(!currentShowPriveId) return alert("Sélectionnez un show privé.");
 
   try {
-    privateStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const constraints = getCameraConstraints('cameraSelectPrivate');
+    
+    privateStream = await navigator.mediaDevices.getUserMedia(constraints);
     privateLiveVideo.srcObject = privateStream;
     privateLiveSection.style.display = 'block';
     startPrivateForm.style.display = 'none';
