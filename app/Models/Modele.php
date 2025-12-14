@@ -119,4 +119,17 @@ class Modele extends Authenticatable implements CanResetPasswordContract
     return $this->hasMany(Album::class);
 }
 
+// App\Models\Modele.php
+public function historiques()
+{
+    return $this->hasMany(\App\Models\ModeleHistorique::class);
+}
+
+public function derniereConnexion()
+{
+    return $this->hasOne(\App\Models\ModeleHistorique::class)
+                ->latest('created_at');
+}
+
+
 }

@@ -265,6 +265,13 @@ class ModeleController extends Controller
         return view('modele.show', compact('modele'));
     }
 
+    public function showprofil($id)
+    {
+        $modele = Modele::with('derniereConnexion')->findOrFail($id);
+
+        return view('modele.profile', compact('modele'));
+    }
+
     public function accueil()
     {
         $modeles = Modele::all();

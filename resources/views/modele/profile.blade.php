@@ -237,6 +237,48 @@
   font-size: 0.95rem;
 }
 
+.last-connexion-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    margin-top: 0.6rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #eaeaea;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 215, 0, 0.12),
+        rgba(229, 9, 20, 0.12)
+    );
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 0 18px rgba(255, 193, 7, 0.25),
+        inset 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.last-connexion-premium .lc-icon {
+    font-size: 1rem;
+}
+
+.last-connexion-premium .lc-label {
+    color: #ffc107;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.last-connexion-premium .lc-separator {
+    opacity: 0.6;
+}
+
+.last-connexion-premium .lc-date {
+    color: #ffffff;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
 </style>
 
 <div class="container modele-container">
@@ -279,6 +321,7 @@
         <div class="col-12 col-md-6">
             <div class="profile-info">
                 <h2 class="profile-name">{{ $modele->prenom }}</h2>
+
 
                 @if($modele->age)
                     <p><strong>{{ $modele->age }} {{ __('ans') }}</strong></p>
@@ -340,6 +383,14 @@
                         @endforeach
                     </ul>
                 @endif
+                <div class="last-connexion-premium">
+                    <span class="lc-icon">🕒</span>
+                    <span class="lc-label">{{ __('Dernière connexion') }}</span>
+                    <span class="lc-separator">•</span>
+                    <span class="lc-date">
+                        {{ optional($modele->derniereConnexion)->created_at?->locale('fr')->translatedFormat('d F Y à H:i') ?? __('Aucune connexion') }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
