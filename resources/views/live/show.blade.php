@@ -1041,7 +1041,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
           @if(!Auth::check())
   <div id="countdownBox" class="text-center mt-2">
     <p class="text-warning fs-5">
-      ⏳ {{ __('Il vous reste') }} <span id="countdown">10</span> {{ __('secondes de live gratuit') }} .
+      ⏳ {{ __('Il vous reste') }} <span id="countdown">2:00</span> {{ __('secondes de live gratuit') }} .
     </p>
     <p class="text-light small">
       🔒 {{ __('Connecte-toi ou crée un compte pour continuer à regarder le live') }}.
@@ -1050,19 +1050,27 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
     @endif
     @if(!Auth::check())
     <script>
-      let seconds = 10;
-      const countdownElement = document.getElementById('countdown');
+  let seconds = 120;
+  const countdownElement = document.getElementById('countdown');
 
-      const countdownInterval = setInterval(() => {
-        seconds--;
-        countdownElement.textContent = seconds;
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
-        if (seconds <= 0) {
-          clearInterval(countdownInterval);
-          window.location.href = "{{ route('home') }}";
-        }
-      }, 1000);
-    </script>
+  countdownElement.textContent = formatTime(seconds);
+
+  const countdownInterval = setInterval(() => {
+    seconds--;
+    countdownElement.textContent = formatTime(seconds);
+
+    if (seconds <= 0) {
+      clearInterval(countdownInterval);
+      window.location.href = "{{ route('home') }}";
+    }
+  }, 1000);
+</script>
     @endif
 <div class="modele-premium-card">
 <img src="{{ $photo ? asset('storage/' . $photo) : asset('default.jpg') }}"
