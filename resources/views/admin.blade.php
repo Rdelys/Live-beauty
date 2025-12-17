@@ -1306,7 +1306,11 @@ table {
 <a href="#" class="menu-link" onclick="showSection('historique-lives-content')">
     <i class="fas fa-history"></i> Historique Lives
 </a>
-  
+<!-- Dans la section du menu latéral, avec les autres liens -->
+<a href="#" class="menu-link" onclick="showSection('connexions-modeles-content')">
+    <i class="fas fa-sign-in-alt"></i> Connexions Modèles
+</a>
+
   <form method="POST" action="{{ route('admin.logout') }}">
     @csrf
     <button class="btn btn-danger w-100 mt-3">
@@ -1659,6 +1663,200 @@ table {
     </div>
   @endif
 </div>
+
+<!-- 🔥 Section Connexions Modèles -->
+<div id="connexions-modeles-content" class="content-section d-none">
+  <h2><i class="fas fa-sign-in-alt text-danger"></i> Historique des Connexions Modèles</h2>
+  <p>Suivi complet des connexions et déconnexions des modèles avec durée des sessions.</p>
+
+  <!-- Filtres -->
+  <div class="card p-3 mb-4 bg-dark text-white">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Modèle :</label>
+        <select id="filterConnexionModele" class="form-control">
+          <option value="">-- Tous les modèles --</option>
+          @foreach($modeles as $modele)
+            <option value="{{ $modele->id }}">
+              {{ $modele->prenom }} {{ $modele->nom }}
+            </option>
+          @endforeach
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Statut :</label>
+        <select id="filterConnexionStatut" class="form-control">
+          <option value="">-- Tous --</option>
+          <option value="en_cours">En cours</option>
+          <option value="terminee">Terminée</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Du :</label>
+        <input type="date" id="filterConnexionStart" class="form-control">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Au :</label>
+        <input type="date" id="filterConnexionEnd" class="form-control">
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-secondary w-100" onclick="resetConnexionFilters()">
+          <i class="fas fa-eraser"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Total Connexions</h6>
+          <p class="display-5 text-danger mb-0">{{ $statsConnexions['total_connexions'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Aujourd'hui</h6>
+          <p class="display-5 text-warning mb-0">{{ $statsConnexions['connexions_aujourdhui'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Sessions en cours</h6>
+          <p class="display-5 text-success mb-0">{{ $statsConnexions['sessions_en_cours'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Durée moyenne</h6>
+          <p class="display-5 text-info mb-0">
+            @if(isset($statsConnexions['duree_moyenne']))
+              {{ floor($statsConnexions['duree_moyenne'] / 60) }} min
+            @else
+              0 min
+            @endif
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle text-center">
+      <thead class="bg-danger text-white">
+        <tr>
+          <th>ID</th>
+          <th>Modèle</th>
+          <th>Date Connexion</th>
+          <th>Date Déconnexion</th>
+          <th>Durée</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody id="connexionsBody">
+        @foreach($connexions as $connexion)
+          @php
+            // Calcul de la durée
+            $duree = '—';
+            $statut = 'Terminée';
+            $statutClass = 'secondary';
+            
+            if ($connexion->date_deconnexion && $connexion->date_connexion) {
+              $minutes = $connexion->duree_session_secondes ? floor($connexion->duree_session_secondes / 60) : 
+                        $connexion->date_connexion->diffInMinutes($connexion->date_deconnexion);
+              
+              if ($minutes < 60) {
+                $duree = $minutes . ' min';
+              } else {
+                $heures = floor($minutes / 60);
+                $minutesRestantes = $minutes % 60;
+                $duree = $heures . 'h ' . $minutesRestantes . 'min';
+              }
+            } elseif (!$connexion->date_deconnexion) {
+              $statut = 'En cours';
+              $statutClass = 'success';
+              
+              // Calculer la durée en cours
+              $minutes = $connexion->date_connexion->diffInMinutes(now());
+              if ($minutes < 60) {
+                $duree = $minutes . ' min (en cours)';
+              } else {
+                $heures = floor($minutes / 60);
+                $minutesRestantes = $minutes % 60;
+                $duree = $heures . 'h ' . $minutesRestantes . 'min (en cours)';
+              }
+            }
+          @endphp
+          
+          <tr data-modele-id="{{ $connexion->modele_id }}" 
+              data-statut="{{ $connexion->date_deconnexion ? 'terminee' : 'en_cours' }}"
+              data-date="{{ $connexion->date_connexion->format('Y-m-d') }}">
+            <td>{{ $connexion->id }}</td>
+            <td>
+              @if($connexion->modele)
+                <strong>{{ $connexion->modele->prenom }} {{ $connexion->modele->nom }}</strong>
+                <br>
+                <small class="text-muted">{{ $connexion->modele->email }}</small>
+              @else
+                <span class="text-danger">Modèle supprimé</span>
+              @endif
+            </td>
+            <td>
+              <div class="text-nowrap">
+                {{ $connexion->date_connexion->format('d/m/Y') }}<br>
+                <small>{{ $connexion->date_connexion->format('H:i:s') }}</small>
+              </div>
+            </td>
+            <td>
+              @if($connexion->date_deconnexion)
+                <div class="text-nowrap">
+                  {{ $connexion->date_deconnexion->format('d/m/Y') }}<br>
+                  <small>{{ $connexion->date_deconnexion->format('H:i:s') }}</small>
+                </div>
+              @else
+                <span class="badge bg-warning">En cours...</span>
+              @endif
+            </td>
+            <td>
+              <strong class="{{ $statutClass == 'success' ? 'text-success' : 'text-info' }}">
+                {{ $duree }}
+              </strong>
+            </td>
+            <td>
+              <span class="badge bg-{{ $statutClass }}">
+                {{ $statut }}
+              </span>
+            </td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if($connexions->hasPages())
+    <div class="d-flex justify-content-center mt-4">
+      {{ $connexions->links() }}
+    </div>
+  @endif
+</div>
+
 
 <div id="films-descriptions-content" class="content-section d-none">
     <h2><i class="fas fa-film text-danger"></i> Films – Descriptions</h2>
@@ -2594,6 +2792,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "Jetons obtenu": document.getElementById("historique-jetons-content"),
         "Films descriptions": document.getElementById("films-descriptions-content"),
           "Historique Lives": document.getElementById("historique-lives-content"), // ← Nouveau
+  "Connexions Modèles": document.getElementById("connexions-modeles-content"), // ← Nouveau
 
 
 
@@ -3198,7 +3397,67 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 });
 </script>
-
+<script>
+// 🔥 Filtrage des connexions modèles (côté client)
+document.addEventListener('DOMContentLoaded', function() {
+  const connexionRows = document.querySelectorAll('#connexionsBody tr');
+  
+  function filterConnexions() {
+    const modeleId = document.getElementById('filterConnexionModele').value;
+    const statut = document.getElementById('filterConnexionStatut').value;
+    const startDate = document.getElementById('filterConnexionStart').value;
+    const endDate = document.getElementById('filterConnexionEnd').value;
+    
+    connexionRows.forEach(row => {
+      const rowModeleId = row.getAttribute('data-modele-id');
+      const rowStatut = row.getAttribute('data-statut');
+      const rowDate = row.getAttribute('data-date');
+      
+      let visible = true;
+      
+      // Filtre par modèle
+      if (modeleId && rowModeleId !== modeleId) {
+        visible = false;
+      }
+      
+      // Filtre par statut
+      if (statut && rowStatut !== statut) {
+        visible = false;
+      }
+      
+      // Filtre par date de début
+      if (startDate && rowDate < startDate) {
+        visible = false;
+      }
+      
+      // Filtre par date de fin
+      if (endDate && rowDate > endDate) {
+        visible = false;
+      }
+      
+      row.style.display = visible ? '' : 'none';
+    });
+  }
+  
+  // Écouteurs d'événements
+  document.getElementById('filterConnexionModele').addEventListener('change', filterConnexions);
+  document.getElementById('filterConnexionStatut').addEventListener('change', filterConnexions);
+  document.getElementById('filterConnexionStart').addEventListener('change', filterConnexions);
+  document.getElementById('filterConnexionEnd').addEventListener('change', filterConnexions);
+  
+  // Fonction de réinitialisation
+  window.resetConnexionFilters = function() {
+    document.getElementById('filterConnexionModele').value = '';
+    document.getElementById('filterConnexionStatut').value = '';
+    document.getElementById('filterConnexionStart').value = '';
+    document.getElementById('filterConnexionEnd').value = '';
+    
+    connexionRows.forEach(row => {
+      row.style.display = '';
+    });
+  };
+});
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>

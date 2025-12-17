@@ -14,6 +14,7 @@ use App\Models\JetonPropose;
 use App\Models\HistoriqueJeton;
 use App\Models\FilmDescription;
 use App\Models\HistoriqueLive;
+use App\Models\ModeleConnexion;
 
 
 class ModeleController extends Controller
@@ -143,6 +144,33 @@ class ModeleController extends Controller
     $historiques = $query->paginate(20);
     $totalJetons = (clone $query)->sum('nombre_jetons');
 
+    // === 🔥 Partie Historique Connexions Modèles ===
+        $connexionsQuery = ModeleConnexion::with('modele')->latest();
+        
+        // Filtres pour les connexions
+        if ($request->filled('modele_connexion_id')) {
+            $connexionsQuery->where('modele_id', $request->modele_connexion_id);
+        }
+        
+        if ($request->filled('date_debut_connexion')) {
+            $connexionsQuery->whereDate('date_connexion', '>=', $request->date_debut_connexion);
+        }
+        
+        if ($request->filled('date_fin_connexion')) {
+            $connexionsQuery->whereDate('date_connexion', '<=', $request->date_fin_connexion);
+        }
+        
+        $connexions = $connexionsQuery->paginate(50);
+        
+        // Statistiques des connexions
+        $statsConnexions = [
+            'total_connexions' => ModeleConnexion::count(),
+            'connexions_aujourdhui' => ModeleConnexion::whereDate('date_connexion', Carbon::today())->count(),
+            'sessions_en_cours' => ModeleConnexion::whereNull('date_deconnexion')->count(),
+            'duree_moyenne' => ModeleConnexion::whereNotNull('duree_session_secondes')
+                ->avg('duree_session_secondes'),
+        ];
+
      $historiqueLivesQuery = HistoriqueLive::with('modele')->latest();
 
     // Filtres simples
@@ -185,7 +213,9 @@ class ModeleController extends Controller
         'films',
         // 🔥 Ajoutez ces nouvelles variables
         'historiqueLives',
-        'statsLives'
+        'statsLives',
+                    'connexions',
+            'statsConnexions'
     ));
 }
 
