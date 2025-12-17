@@ -13,4 +13,6 @@ class AdminController extends Controller
         // La page admin.blade.php
         return view('admin');
     }
+
+    
 }

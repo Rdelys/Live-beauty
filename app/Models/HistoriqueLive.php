@@ -16,7 +16,8 @@ class HistoriqueLive extends Model
         'statut',
         'is_prive',
         'date_commencement',
-        'date_fin'
+        'date_fin',
+        'duree', // ← IMPORTANT : inclure la nouvelle colonne
     ];
 
     protected $casts = [

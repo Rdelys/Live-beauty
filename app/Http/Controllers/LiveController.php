@@ -52,45 +52,49 @@ class LiveController extends Controller
     }
 
     public function stop(Request $request)
-    {
-        $modele = Modele::find(session('modele_id'));
-        
-        if (!$modele) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Modèle non trouvé.'
-            ]);
-        }
-
-        // Mettre à jour le statut du modèle
-        $modele->en_live = false;
-        $modele->prive = 0;
-        $modele->save();
-        
-        // Récupérer le dernier live "commencer" pour ce modèle
-        $dernierLive = HistoriqueLive::where('modele_id', $modele->id)
-            ->where('statut', 'commencer')
-            ->where('is_prive', false)
-            ->latest('date_commencement')
-            ->first();
-
-        if ($dernierLive) {
-            // Créer un nouvel enregistrement pour la fin du live
-            HistoriqueLive::create([
-                'modele_id' => $modele->id,
-                'statut' => 'fin',
-                'is_prive' => false,
-                'date_commencement' => $dernierLive->date_commencement, // Garder la même date de début
-                'date_fin' => Carbon::now(), // Date actuelle pour la fin
-            ]);
-        }
-
+{
+    $modele = Modele::find(session('modele_id'));
+    
+    if (!$modele) {
         return response()->json([
-            'success' => true,
-            'message' => 'Live arrêté avec succès.'
+            'success' => false,
+            'message' => 'Modèle non trouvé.'
         ]);
     }
 
+    // Mettre à jour le statut du modèle
+    $modele->en_live = false;
+    $modele->prive = 0;
+    $modele->save();
+    
+    // Récupérer le dernier live "commencer" pour ce modèle
+    $dernierLive = HistoriqueLive::where('modele_id', $modele->id)
+        ->where('statut', 'commencer')
+        ->where('is_prive', false)
+        ->latest('date_commencement')
+        ->first();
+
+    if ($dernierLive) {
+        $debut = Carbon::parse($dernierLive->date_commencement);
+        $fin = Carbon::now();
+        $duree = $debut->diffInMinutes($fin);
+        
+        // Créer un nouvel enregistrement pour la fin du live
+        HistoriqueLive::create([
+            'modele_id' => $modele->id,
+            'statut' => 'fin',
+            'is_prive' => false,
+            'date_commencement' => $dernierLive->date_commencement,
+            'date_fin' => $fin,
+            'duree' => $duree, // Ajouter la durée calculée
+        ]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Live arrêté avec succès.'
+    ]);
+}
 
     public function active()
 {
@@ -251,58 +255,59 @@ public function debiterJetonsLive(Request $request)
     }
 
 
+
 public function stopPrivate(Request $request)
-    {
-        $request->validate([
-            'modele_id' => 'required|exists:modeles,id'
+{
+    $request->validate([
+        'modele_id' => 'required|exists:modeles,id'
+    ]);
+
+    $modele = Modele::findOrFail($request->modele_id);
+    $user = Auth::user();
+
+    // Mettre à jour le modèle
+    $modele->prive = 0;
+    $modele->save();
+
+    // Récupérer le dernier show privé "commencer" pour ce modèle
+    $dernierPrive = HistoriqueLive::where('modele_id', $modele->id)
+        ->where('statut', 'commencer')
+        ->where('is_prive', true)
+        ->latest('date_commencement')
+        ->first();
+
+    if ($dernierPrive) {
+        $debut = Carbon::parse($dernierPrive->date_commencement);
+        $fin = Carbon::now();
+        $duree = $debut->diffInMinutes($fin);
+        
+        // Créer un nouvel enregistrement pour la fin du show privé
+        HistoriqueLive::create([
+            'modele_id' => $modele->id,
+            'statut' => 'fin',
+            'is_prive' => true,
+            'date_commencement' => $dernierPrive->date_commencement,
+            'date_fin' => $fin,
+            'duree' => $duree, // Ajouter la durée calculée
         ]);
 
-        $modele = Modele::findOrFail($request->modele_id);
-        $user = Auth::user();
-
-        // Mettre à jour le modèle
-        $modele->prive = 0;
-        $modele->save();
-
-        // Récupérer le dernier show privé "commencer" pour ce modèle
-        $dernierPrive = HistoriqueLive::where('modele_id', $modele->id)
-            ->where('statut', 'commencer')
-            ->where('is_prive', true)
-            ->latest('date_commencement')
-            ->first();
-
-        if ($dernierPrive) {
-            // Créer un nouvel enregistrement pour la fin du show privé
-            HistoriqueLive::create([
-                'modele_id' => $modele->id,
-                'statut' => 'fin',
-                'is_prive' => true,
-                'date_commencement' => $dernierPrive->date_commencement, // Garder la même date de début
-                'date_fin' => Carbon::now(), // Date actuelle pour la fin
-            ]);
-
-            // Calculer les jetons à rembourser si fin prématurée
-            $debut = Carbon::parse($dernierPrive->date_commencement);
-            $fin = Carbon::now();
-            $minutesEcoulees = $debut->diffInMinutes($fin);
+        // Calculer les jetons à rembourser si fin prématurée
+        if ($duree < 5) {
+            $coutParMinute = ceil($modele->nombre_jetons_show_privee / $modele->duree_show_privee);
+            $minutesNonUtilisees = 5 - $duree;
+            $remboursement = $coutParMinute * $minutesNonUtilisees;
             
-            if ($minutesEcoulees < 5) {
-                $coutParMinute = ceil($modele->nombre_jetons_show_privee / $modele->duree_show_privee);
-                $minutesNonUtilisees = 5 - $minutesEcoulees;
-                $remboursement = $coutParMinute * $minutesNonUtilisees;
-                
-                $user->jetons += $remboursement;
-                $user->save();
-            }
+            $user->jetons += $remboursement;
+            $user->save();
         }
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Show privé terminé.',
-            'jetons_restants' => $user->jetons
-        ]);
     }
 
+    return response()->json([
+        'success' => true, 
+        'message' => 'Show privé terminé.',
+        'jetons_restants' => $user->jetons
+    ]);
+}
 
 public function canStartPrivate(Request $request)
     {

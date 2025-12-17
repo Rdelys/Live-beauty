@@ -1165,6 +1165,100 @@ table {
     }
 }
 
+/* 🔥 Historique Lives - Styles */
+#historique-lives-content h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ef233c !important;
+  text-shadow: 0 0 8px rgba(239,35,60,0.4);
+}
+
+#historique-lives-content p {
+  color: #bbb !important;
+  margin-bottom: 20px;
+}
+
+/* Cartes statistiques */
+#historique-lives-content .card.bg-dark {
+  background: rgba(25,25,25,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+#historique-lives-content .card.bg-dark:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+#historique-lives-content .display-5 {
+  font-weight: 800;
+  font-size: 2.2rem;
+}
+
+/* Tableau */
+#historique-lives-content table {
+  background: rgba(20,20,20,0.9) !important;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+#historique-lives-content thead th {
+  background: #d90429 !important;
+  color: #fff !important;
+  padding: 14px 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  border: none !important;
+}
+
+#historique-lives-content tbody tr {
+  transition: background 0.2s ease;
+}
+
+#historique-lives-content tbody tr:hover {
+  background: rgba(239,35,60,0.06) !important;
+}
+
+#historique-lives-content td {
+  padding: 14px !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  vertical-align: middle;
+  color: #000000ff !important;
+}
+
+/* Badges améliorés */
+#historique-lives-content .badge {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+#historique-lives-content .badge.bg-success {
+  background: linear-gradient(90deg, #28a745, #1e7e34) !important;
+}
+
+#historique-lives-content .badge.bg-warning {
+  background: linear-gradient(90deg, #ffc107, #e0a800) !important;
+  color: #000 !important;
+}
+
+#historique-lives-content .badge.bg-info {
+  background: linear-gradient(90deg, #17a2b8, #138496) !important;
+}
+
+/* Durée en gras */
+#historique-lives-content strong.text-success {
+  color: #20c997 !important;
+}
+
+#historique-lives-content strong.text-info {
+  color: #17a2b8 !important;
+}
   </style>
 </head>
 <body>
@@ -1207,7 +1301,11 @@ table {
     <a href="#" class="menu-link">Ajout jetons proposés</a>
   </div>
 <a class="menu-link"><i class="fas fa-film"></i> Films descriptions</a>
-
+<!-- Dans la section du menu latéral -->
+<!-- Dans la section du menu, avec les autres liens -->
+<a href="#" class="menu-link" onclick="showSection('historique-lives-content')">
+    <i class="fas fa-history"></i> Historique Lives
+</a>
   
   <form method="POST" action="{{ route('admin.logout') }}">
     @csrf
@@ -1328,6 +1426,240 @@ table {
 </div>
 
 </div>
+
+<!-- 🔥 Section Historique des Lives -->
+<div id="historique-lives-content" class="content-section d-none">
+  <h2><i class="fas fa-video text-danger"></i> Historique des Lives</h2>
+  <p>Consultation de tous les lives passés et en cours avec filtres avancés.</p>
+
+  <!-- Filtres Rapides -->
+  <div class="card p-3 mb-4 bg-dark text-white">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Modèle :</label>
+        <select id="filterLiveModele" class="form-control">
+          <option value="">-- Tous les modèles --</option>
+          @foreach($modeles as $modele)
+            <option value="{{ $modele->id }}">
+              {{ $modele->prenom }} {{ $modele->nom }}
+            </option>
+          @endforeach
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Statut :</label>
+        <select id="filterLiveStatut" class="form-control">
+          <option value="">-- Tous --</option>
+          <option value="commencer">En cours</option>
+          <option value="fin">Terminé</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Type :</label>
+        <select id="filterLiveType" class="form-control">
+          <option value="">-- Tous --</option>
+          <option value="1">Privé</option>
+          <option value="0">Public</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Date :</label>
+        <input type="date" id="filterLiveDate" class="form-control">
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-secondary w-100" onclick="resetLiveFilters()">
+          <i class="fas fa-eraser"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Total Lives</h6>
+          <p class="display-5 text-danger mb-0">{{ $statsLives['total_lives'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Lives Privés</h6>
+          <p class="display-5 text-warning mb-0">{{ $statsLives['total_prives'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">Lives Publics</h6>
+          <p class="display-5 text-success mb-0">{{ $statsLives['total_publics'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card bg-dark text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title text-white">En cours</h6>
+          <p class="display-5 text-info mb-0">{{ $statsLives['lives_en_cours'] ?? 0 }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle text-center">
+      <thead class="bg-danger text-white">
+        <tr>
+          <th>ID</th>
+          <th>Modèle</th>
+          <th>Statut</th>
+          <th>Type</th>
+          <th>Date Début</th>
+          <th>Date Fin</th>
+          <th>Durée</th>
+          <th>Créé le</th>
+        </tr>
+      </thead>
+      <tbody id="liveHistoryBody">
+        @foreach($historiqueLives as $historique)
+          @php
+            // Calcul de la durée
+            $duree = '—';
+            $estEnCours = false;
+            
+            if ($historique->statut == 'fin' && $historique->date_commencement && $historique->date_fin) {
+              $debut = \Carbon\Carbon::parse($historique->date_commencement);
+              $fin = \Carbon\Carbon::parse($historique->date_fin);
+              $minutes = $debut->diffInMinutes($fin);
+              
+              if ($minutes < 60) {
+                $duree = $minutes . ' min';
+              } else {
+                $heures = floor($minutes / 60);
+                $minutesRestantes = $minutes % 60;
+                $duree = $heures . 'h ' . $minutesRestantes . 'min';
+              }
+            } elseif ($historique->statut == 'commencer' && $historique->date_commencement) {
+              $duree = '<span class="badge bg-warning">En cours</span>';
+              $estEnCours = true;
+            }
+          @endphp
+          
+          <tr data-modele-id="{{ $historique->modele_id }}" 
+              data-statut="{{ $historique->statut }}" 
+              data-type="{{ $historique->is_prive }}"
+              data-date="{{ $historique->date_commencement ? $historique->date_commencement->format('Y-m-d') : '' }}">
+            <td>{{ $historique->id }}</td>
+            <td>
+              @if($historique->modele)
+                <strong class="text">{{ $historique->modele->prenom }}</strong>
+                <br>
+                <small class="text">{{ $historique->modele->nom }}</small>
+              @else
+                <span class="text-danger">Modèle supprimé</span>
+              @endif
+            </td>
+            <td>
+              @if($historique->statut == 'commencer')
+                <span class="badge bg-success">🎬 Debut</span>
+              @else
+                <span class="badge bg-secondary">✅ Fin</span>
+              @endif
+            </td>
+            <td>
+              @if($historique->is_prive)
+                <span class="badge bg-warning">🔒 Privé</span>
+              @else
+                <span class="badge bg-info">🌐 Public</span>
+              @endif
+            </td>
+            <td>
+              @if($historique->date_commencement)
+                <div class="text-nowrap">
+                  {{ $historique->date_commencement->format('d/m/Y') }}<br>
+                  <small>{{ $historique->date_commencement->format('H:i') }}</small>
+                </div>
+              @else
+                —
+              @endif
+            </td>
+            <td>
+              @if($historique->date_fin)
+                <div class="text-nowrap">
+                  {{ $historique->date_fin->format('d/m/Y') }}<br>
+                  <small>{{ $historique->date_fin->format('H:i') }}</small>
+                </div>
+              @else
+                —
+              @endif
+            </td>
+            <td>
+    @php
+        // Déterminer si c'est en cours
+        $estEnCours = $historique->statut == 'commencer' && !$historique->date_fin;
+        
+        // Calculer la durée
+        if ($historique->statut == 'fin' && $historique->duree !== null) {
+            $minutes = $historique->duree;
+            $heures = floor($minutes / 60);
+            $minRestantes = $minutes % 60;
+            
+            if ($heures > 0) {
+                $duree = $heures . "h " . $minRestantes . "min";
+            } else {
+                $duree = $minutes . " min";
+            }
+        } elseif ($estEnCours) {
+            // Calculer la durée en cours
+            $debut = \Carbon\Carbon::parse($historique->date_commencement);
+            $minutes = $debut->diffInMinutes(now());
+            $duree = "0";
+        } else {
+            $duree = "-";
+            $minutes = 0;
+        }
+    @endphp
+    
+    @if($estEnCours)
+        {!! $duree !!}
+    @else
+        <strong class="{{ $minutes > 60 ? 'text-success' : 'text-info' }}">
+            {{ $duree }}
+        </strong>
+    @endif
+</td>
+            <td>
+              <div class="text-nowrap">
+                {{ $historique->created_at->format('d/m/Y') }}<br>
+                <small>{{ $historique->created_at->format('H:i') }}</small>
+              </div>
+            </td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if($historiqueLives->hasPages())
+    <div class="d-flex justify-content-center mt-4">
+      {{ $historiqueLives->links() }}
+    </div>
+  @endif
+</div>
+
 <div id="films-descriptions-content" class="content-section d-none">
     <h2><i class="fas fa-film text-danger"></i> Films – Descriptions</h2>
     <p>Ajoutez une description et gérez les entrées.</p>
@@ -2261,6 +2593,8 @@ document.addEventListener("DOMContentLoaded", function () {
   "Ajout jetons proposés": document.getElementById("ajout-jetons-proposes-content"),
     "Jetons obtenu": document.getElementById("historique-jetons-content"),
         "Films descriptions": document.getElementById("films-descriptions-content"),
+          "Historique Lives": document.getElementById("historique-lives-content"), // ← Nouveau
+
 
 
       };
@@ -2803,6 +3137,66 @@ document.addEventListener("DOMContentLoaded", () => {
     applyAllFilters();
 });
 
+// 🔥 Filtrage des historiques lives (côté client)
+document.addEventListener('DOMContentLoaded', function() {
+  const liveRows = document.querySelectorAll('#liveHistoryBody tr');
+  
+  function filterLiveHistory() {
+    const modeleId = document.getElementById('filterLiveModele').value;
+    const statut = document.getElementById('filterLiveStatut').value;
+    const type = document.getElementById('filterLiveType').value;
+    const date = document.getElementById('filterLiveDate').value;
+    
+    liveRows.forEach(row => {
+      const rowModeleId = row.getAttribute('data-modele-id');
+      const rowStatut = row.getAttribute('data-statut');
+      const rowType = row.getAttribute('data-type');
+      const rowDate = row.getAttribute('data-date');
+      
+      let visible = true;
+      
+      // Filtre par modèle
+      if (modeleId && rowModeleId !== modeleId) {
+        visible = false;
+      }
+      
+      // Filtre par statut
+      if (statut && rowStatut !== statut) {
+        visible = false;
+      }
+      
+      // Filtre par type
+      if (type && rowType !== type) {
+        visible = false;
+      }
+      
+      // Filtre par date
+      if (date && rowDate !== date) {
+        visible = false;
+      }
+      
+      row.style.display = visible ? '' : 'none';
+    });
+  }
+  
+  // Écouteurs d'événements
+  document.getElementById('filterLiveModele').addEventListener('change', filterLiveHistory);
+  document.getElementById('filterLiveStatut').addEventListener('change', filterLiveHistory);
+  document.getElementById('filterLiveType').addEventListener('change', filterLiveHistory);
+  document.getElementById('filterLiveDate').addEventListener('change', filterLiveHistory);
+  
+  // Fonction de réinitialisation
+  window.resetLiveFilters = function() {
+    document.getElementById('filterLiveModele').value = '';
+    document.getElementById('filterLiveStatut').value = '';
+    document.getElementById('filterLiveType').value = '';
+    document.getElementById('filterLiveDate').value = '';
+    
+    liveRows.forEach(row => {
+      row.style.display = '';
+    });
+  };
+});
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

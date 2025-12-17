@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\Models\JetonPropose;
 use App\Models\HistoriqueJeton;
 use App\Models\FilmDescription;
+use App\Models\HistoriqueLive;
 
 
 class ModeleController extends Controller
@@ -142,6 +143,30 @@ class ModeleController extends Controller
     $historiques = $query->paginate(20);
     $totalJetons = (clone $query)->sum('nombre_jetons');
 
+     $historiqueLivesQuery = HistoriqueLive::with('modele')->latest();
+
+    // Filtres simples
+    if ($request->filled('modele_id')) {
+        $historiqueLivesQuery->where('modele_id', $request->modele_id);
+    }
+    
+    if ($request->filled('statut')) {
+        $historiqueLivesQuery->where('statut', $request->statut);
+    }
+    
+    if ($request->filled('is_prive')) {
+        $historiqueLivesQuery->where('is_prive', $request->is_prive);
+    }
+
+    $historiqueLives = $historiqueLivesQuery->paginate(50);
+
+    // Calcul des statistiques
+    $statsLives = [
+        'total_lives' => HistoriqueLive::count(),
+        'total_prives' => HistoriqueLive::where('is_prive', true)->count(),
+        'total_publics' => HistoriqueLive::where('is_prive', false)->count(),
+        'lives_en_cours' => HistoriqueLive::where('statut', 'commencer')->count(),
+    ];
     // Envoi de toutes les données à la vue
     return view('admin', compact(
         'modeles',
@@ -157,8 +182,10 @@ class ModeleController extends Controller
         'nombrejetonsProposes',
         'historiques',
         'totalJetons',
-        'films'
-
+        'films',
+        // 🔥 Ajoutez ces nouvelles variables
+        'historiqueLives',
+        'statsLives'
     ));
 }
 

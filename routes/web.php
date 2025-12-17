@@ -361,3 +361,11 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
 Route::post('/check-email', [UserController::class, 'checkEmail'])->name('check.email');
 Route::post('/check-pseudo', [UserController::class, 'checkPseudo'])->name('check.pseudo');
 
+// Routes admin pour l'historique des lives
+Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
+    // ... autres routes existantes ...
+
+    // Historique des lives
+    Route::get('/historique-lives', [AdminController::class, 'historiqueLives'])
+        ->name('admin.historique-lives');
+});
