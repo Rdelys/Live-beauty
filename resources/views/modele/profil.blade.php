@@ -1542,7 +1542,7 @@ let stream;
 const peerConnections = {};
 
 /* === CONNEXION SOCKET.IO (unique) === */
-socket = io("wss://livebeautyofficial.com", {
+socket = io("http://localhost:3000", {
     path: '/socket.io',
     transports: ['websocket']
 });
@@ -2041,7 +2041,7 @@ socket.emit("broadcaster", {
         });
 
         // Notifier Laravel
-        await fetch('/api/live/start', {
+        await fetch('/live/start', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -2078,7 +2078,7 @@ stopBtn.addEventListener('click', async () => {
         }
 
         // 4) Notifier ton backend Laravel (API) que le live est fini
-        await fetch('/api/live/stop', {
+        await fetch('/live/stop', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

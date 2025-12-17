@@ -60,7 +60,7 @@ Route::post('/modele/login/jetons/store', [JetonController::class, 'store'])->na
 
 // Auth pour modèle modeles.livebeautyofficial.com
 Route::get('/modele/login', function (Request $request) {
-    if ($request->getHost() !== 'modeles.livebeautyofficial.com') {
+    if ($request->getHost() !== '127.0.0.1') {
         abort(403, 'Accès interdit');
     }
     return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
@@ -87,8 +87,8 @@ Route::get('/api/live/private', [LiveController::class, 'activePrivate'])
 });
 // API publique
 Route::get('/api/live/active', [LiveController::class, 'active']);
-Route::post('/api/live/start', [LiveController::class, 'start']);
-Route::post('/api/live/stop', [LiveController::class, 'stop']);
+Route::post('/live/start', [LiveController::class, 'start']);
+Route::post('/live/stop', [LiveController::class, 'stop']);
 
 // Auth user
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
@@ -360,3 +360,4 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
 
 Route::post('/check-email', [UserController::class, 'checkEmail'])->name('check.email');
 Route::post('/check-pseudo', [UserController::class, 'checkPseudo'])->name('check.pseudo');
+
