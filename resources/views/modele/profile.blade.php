@@ -388,7 +388,7 @@
                     <span class="lc-label">{{ __('Dernière connexion') }}</span>
                     <span class="lc-separator">•</span>
                     <span class="lc-date">
-                        {{ optional($modele->derniereConnexion)->created_at?->locale('fr')->translatedFormat('d F Y à H:i') ?? __('Aucune connexion') }}
+                        {{ optional($modele->derniereConnexion)->created_at?->locale('fr')->translatedFormat('d F Y à H:i') ?? __('Aucune connexion') }} UTC
                     </span>
                 </div>
             </div>
