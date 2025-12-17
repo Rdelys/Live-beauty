@@ -131,5 +131,16 @@ public function derniereConnexion()
                 ->latest('created_at');
 }
 
+    public function connexions()
+    {
+        return $this->hasMany(ModeleConnexion::class);
+    }
 
+    /**
+     * Dernière connexion
+     */
+    public function derniereConnexion2()
+    {
+        return $this->hasOne(ModeleConnexion::class)->latest();
+    }
 }
