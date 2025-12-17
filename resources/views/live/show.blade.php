@@ -75,15 +75,15 @@ body {
       background-attachment: fixed;
 
 }
-/* ===== Grille Jetons Perso (3 colonnes, 3 lignes max) ===== */
+/* 
 #modelTokenMenu .token-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);   /* 3 colonnes */
+    grid-template-columns: repeat(3, 1fr);   
     gap: 10px;
     margin-top: 8px;
 
-    max-height: 240px;                       /* ≈ 3 lignes */
-    overflow-y: auto;                        /* Scroll souris + tactile */
+    max-height: 240px;                       
+    overflow-y: auto;                        
     padding-right: 4px;
 
     scrollbar-width: thin;
@@ -99,7 +99,6 @@ body {
     border-radius: 8px;
 }
 
-/* ===== Style des items ===== */
 #modelTokenMenu .token-item {
     display: flex;
     flex-direction: column;
@@ -141,23 +140,23 @@ body {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeIn 0.8s ease forwards;
-}
+} */
 
-@keyframes fadeIn {
+/* @keyframes fadeIn {
     to {
         opacity: 1;
         transform: none;
     }
-}
+} */
 
 body:hover {
     background-position: center 51%;
     transition: background-position 2s ease;
 }
 
-.token-icon {
+/* .token-icon {
     animation: neonPulse 4s infinite ease-in-out;
-}
+} */
 
 @keyframes neonPulse {
     0%, 100% { box-shadow: 0 0 12px rgba(255,64,129,0.25); }
@@ -352,7 +351,8 @@ body:hover {
     border: none !important;
     font-size: 18px;
 }
-.token-icon{
+
+/* .token-icon{
   width:50px; height:50px;
   border-radius:14px;
   display:flex; align-items:center; justify-content:center;
@@ -365,7 +365,6 @@ body:hover {
 .token-icon:hover{ transform: translateY(-4px) scale(1.04); filter:brightness(1.05); }
 .fullscreen-icon{ background: linear-gradient(135deg,#212121,#333); color:#e0e0e0; }
 
-/* golden / surprise variants */
 .golden-icon{
   background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
   color:#3a2300; font-weight:700;
@@ -375,7 +374,6 @@ body:hover {
 @keyframes glow-gold{ 0%,100%{box-shadow:0 0 15px rgba(255,193,7,0.35)}50%{box-shadow:0 0 28px rgba(255,215,64,0.8)} }
 .surprise-icon{ background: linear-gradient(135deg,#6a1b9a,#ba68c8); box-shadow: 0 0 18px rgba(186,104,200,0.28); }
 
-/* token menu panel */
 .token-menu{
   position:absolute;
   top:56px; right:0;
@@ -405,22 +403,19 @@ body:hover {
 }
 .token-choice:hover{ transform:scale(1.02); background: linear-gradient(135deg,#ff4081,#7c4dff); box-shadow: 0 8px 24px rgba(255,64,129,0.18) }
 
-/* grid for surprises */
-/* ===== Grille Jetons 3x3 Scrollable ===== */
 .token-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);   /* 3 colonnes */
+    grid-template-columns: repeat(3, 1fr);   
     gap: 10px;
 
-    max-height: 240px;                       /* ≈ 3 lignes */
-    overflow-y: auto;                        /* scroll souris + tactile */
+    max-height: 240px;                       
+    overflow-y: auto;                        
     padding-right: 4px;
 
-    scrollbar-width: thin;                   /* Firefox */
+    scrollbar-width: thin;                   
     scrollbar-color: rgba(255,255,255,0.15) transparent;
 }
 
-/* Scrollbar (Chrome, Edge…) */
 .token-grid::-webkit-scrollbar {
     width: 6px;
 }
@@ -455,7 +450,7 @@ body:hover {
     font-weight: 700;
     color: #ffd740;
 }
-.token-emoji{ font-size:1.8rem; margin-bottom:6px; }
+.token-emoji{ font-size:1.8rem; margin-bottom:6px; } */
 
 /* token bubbles that animate above the video */
 .token-bubble{
@@ -790,23 +785,21 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
     display: none !important;
 }
 
-/* 🔥 Correction visibilité du texte dans les token-choice */
+/* 🔥 Correction visibilité du texte dans les token-choice
 .token-menu .token-choice {
-    color: #ffffff !important;        /* texte bien blanc */
-    text-shadow: 0 0 6px rgba(0,0,0,0.8);  /* lisibilité améliorée */
-    font-weight: 700;                 /* texte plus lisible */
+    color: #ffffff !important;       
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);  
+    font-weight: 700;                 /
 }
 
-/* Titre du menu mieux visible */
 .token-menu .menu-title {
     color: #ffdbf9 !important;
     text-shadow: 0 0 6px rgba(0,0,0,0.6);
 }
 
-/* Effet au survol : texte blanc toujours visible */
 .token-choice:hover {
     color: #fff !important;
-}
+} */
 
 /* === CARD PREMIUM MODELE === */
 .modele-premium-card {
@@ -945,7 +938,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
                 inset 0 0 12px rgba(255,255,255,0.05);
 }
 
-/* === Jetons Display === */
+/* === Jetons Display ===
 .jetons-display {
     display: flex;
     align-items: center;
@@ -966,7 +959,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
 .jetons-display i {
     color: #ffd740;
     font-size: 1.2rem;
-}
+} */
 
 .top-fixed {
     position: fixed;
@@ -998,6 +991,467 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
     animation: breathingGlow 4s infinite ease-in-out;
 }
 
+ :root {
+      --bg-1: #0b0014;
+      --bg-2: #3a004a;
+      --accent: #ff1744;
+      --accent-2: #ff4081;
+      --muted: rgba(255,255,255,0.12);
+      --glass: rgba(0,0,0,0.35);
+      --card: rgba(255,255,255,0.03);
+      --soft-border: rgba(255,255,255,0.08);
+      --gold-1: #ffd54f;
+      --gold-2: #ffb300;
+      --platinum: linear-gradient(135deg, #e5e4e2, #b8b8b8);
+      --diamond: linear-gradient(135deg, #b9f2ff, #7bdff2);
+      --emerald: linear-gradient(135deg, #50c878, #2e8b57);
+      --ruby: linear-gradient(135deg, #e0115f, #9b111e);
+      --sapphire: linear-gradient(135deg, #0f52ba, #1e90ff);
+      
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      
+      --shadow-1: 0 10px 30px rgba(0,0,0,0.35);
+      --shadow-soft: 0 6px 18px rgba(0,0,0,0.35);
+      --glass-blur: 12px;
+      
+      --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* ===== TOKEN ICONS PREMIUM ===== */
+    .video-top-icons {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        z-index: 1200;
+    }
+
+    .token-icon {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4),
+                    inset 0 0 16px rgba(255,255,255,0.1) !important;
+        backdrop-filter: blur(12px) !important;
+    }
+
+    .token-icon::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, 
+                   rgba(255,255,255,0.15), 
+                   rgba(255,255,255,0.05));
+        border-radius: inherit;
+        z-index: -1;
+    }
+
+    .token-icon:hover {
+        transform: translateY(-6px) scale(1.08) !important;
+        filter: brightness(1.2) !important;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+                    0 0 0 2px rgba(255,255,255,0.1) !important;
+    }
+
+    /* Specific icon styles */
+    .golden-icon {
+        background: linear-gradient(135deg, 
+                   var(--gold-1), 
+                   var(--gold-2),
+                   #ff9800) !important;
+        color: #3a2300 !important;
+        animation: goldenPulse 3s infinite ease-in-out !important;
+    }
+
+    @keyframes goldenPulse {
+        0%, 100% { 
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.4),
+                        inset 0 0 12px rgba(255,255,255,0.15) !important;
+        }
+        50% { 
+            box-shadow: 0 0 35px rgba(255, 215, 64, 0.7),
+                        0 0 0 3px rgba(255,215,64,0.3),
+                        inset 0 0 20px rgba(255,255,255,0.2) !important;
+        }
+    }
+
+    .surprise-icon {
+        background: linear-gradient(135deg, 
+                   #6a1b9a, 
+                   #ba68c8,
+                   #e91e63) !important;
+        color: white !important;
+        animation: surprisePulse 4s infinite alternate !important;
+    }
+
+    @keyframes surprisePulse {
+        0% { 
+            transform: scale(1);
+            box-shadow: 0 0 15px rgba(186,104,200,0.3) !important;
+        }
+        100% { 
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(233,30,99,0.5) !important;
+        }
+    }
+
+    .fullscreen-icon {
+        background: linear-gradient(135deg, 
+                   rgba(255,255,255,0.1), 
+                   rgba(255,255,255,0.05)) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+    }
+
+    /* ===== TOKEN MENUS PREMIUM ===== */
+    .token-menu {
+        position: absolute;
+        top: 70px;
+        right: 0;
+        min-width: 260px;
+        background: rgba(10, 10, 20, 0.95) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 20px !important;
+        padding: 16px !important;
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1150;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6),
+                    0 0 0 1px rgba(255,255,255,0.05) !important;
+        transform-origin: top right;
+        overflow: hidden;
+    }
+
+    .token-menu::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+                   transparent, 
+                   rgba(255,64,129,0.5), 
+                   transparent);
+    }
+
+    .token-menu.open {
+        display: flex;
+        animation: menuSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    @keyframes menuSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .token-menu .menu-title {
+        font-size: 0.95rem;
+        color: #ffdbf9 !important;
+        text-align: center;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding-bottom: 10px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        text-transform: uppercase;
+        text-shadow: 0 0 10px rgba(255, 64, 129, 0.3);
+    }
+
+    /* ===== TOKEN GRID PREMIUM ===== */
+    .token-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 4px 2px 4px 0;
+        margin: 8px 0;
+    }
+
+    .token-grid::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .token-grid::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
+    }
+
+    .token-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 8px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        min-height: 80px;
+    }
+
+    .token-item::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, 
+                   rgba(255,64,129,0.1), 
+                   rgba(124,77,255,0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .token-item:hover {
+        border-color: rgba(255,64,129,0.4);
+        box-shadow: 0 10px 25px rgba(255,64,129,0.25),
+                    0 0 0 1px rgba(255,64,129,0.2);
+    }
+
+    .token-item:hover::before {
+        opacity: 1;
+    }
+
+    .token-item .token-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 6px;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .token-item .token-cost {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #ffd740;
+        background: rgba(255, 215, 64, 0.1);
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 215, 64, 0.3);
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .token-item:hover .token-cost {
+        background: rgba(255, 215, 64, 0.2);
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(255, 215, 64, 0.3);
+    }
+
+    /* Surprise-specific items */
+    #modelSurpriseTokenMenu .token-item {
+        background: rgba(255,255,255,0.02);
+    }
+
+    #modelSurpriseTokenMenu .token-emoji {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        z-index: 1;
+        transition: transform 0.3s ease;
+    }
+
+    .token-item:hover .token-emoji {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    /* Token categories by value */
+    .token-item[data-cost="1"] .token-emoji { text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    .token-item[data-cost="5"] .token-emoji { text-shadow: 0 0 10px rgba(255,64,129,0.4); }
+    .token-item[data-cost="10"] .token-emoji { text-shadow: 0 0 10px rgba(76,175,80,0.4); }
+    .token-item[data-cost="50"] .token-emoji { text-shadow: 0 0 10px rgba(33,150,243,0.4); }
+    .token-item[data-cost="100"] .token-emoji { text-shadow: 0 0 10px rgba(255,152,0,0.4); }
+    .token-item[data-cost="250"] .token-emoji { text-shadow: 0 0 10px rgba(156,39,176,0.4); }
+    .token-item[data-cost="500"] .token-emoji { text-shadow: 0 0 10px rgba(244,67,54,0.4); }
+    .token-item[data-cost="750"] .token-emoji { text-shadow: 0 0 10px rgba(255,235,59,0.4); }
+    .token-item[data-cost="1000"] .token-emoji { text-shadow: 0 0 10px rgba(0,188,212,0.4); }
+
+    /* ===== TOKEN BUBBLES ANIMATION ===== */
+    .token-bubble {
+        position: absolute;
+        bottom: 120px;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-weight: 800;
+        background: linear-gradient(135deg, 
+                   rgba(40,40,40,0.9), 
+                   rgba(60,60,60,0.8));
+        color: #fff;
+        z-index: 1200;
+        pointer-events: none;
+        animation: bubbleFloat 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5),
+                    0 0 0 1px rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.15);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .token-bubble.golden {
+        background: linear-gradient(135deg, 
+                   var(--gold-1), 
+                   var(--gold-2),
+                   #ff9800) !important;
+        color: #2b1600 !important;
+        box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3),
+                    0 0 0 2px rgba(255, 215, 64, 0.3) !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+    }
+
+    @keyframes bubbleFloat {
+        0% { 
+            opacity: 0; 
+            transform: translateY(0) scale(0.8); 
+        }
+        20% { 
+            opacity: 1; 
+            transform: translateY(-20px) scale(1); 
+        }
+        60% { 
+            transform: translateY(-80px) scale(1.05); 
+        }
+        100% { 
+            opacity: 0; 
+            transform: translateY(-150px) scale(0.95); 
+        }
+    }
+
+    /* ===== JETONS DISPLAY ===== */
+    .jetons-display {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 18px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-weight: 700;
+        color: #ffd740;
+        letter-spacing: .3px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.4),
+                    inset 0 0 10px rgba(255,255,255,0.05);
+        backdrop-filter: blur(8px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .jetons-display::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, 
+                   rgba(255, 215, 64, 0.1), 
+                   transparent 60%);
+        z-index: -1;
+    }
+
+    .jetons-display i {
+        color: #ffd740;
+        font-size: 1.3rem;
+        text-shadow: 0 0 10px rgba(255, 215, 64, 0.3);
+    }
+
+    .jetons-display #userJetons {
+        color: #ffd740;
+        font-weight: 900;
+        font-size: 1.2rem;
+        text-shadow: 0 0 8px rgba(255, 215, 64, 0.4);
+        animation: countPulse 3s infinite;
+    }
+
+    @keyframes countPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .video-top-icons {
+            top: 15px;
+            right: 15px;
+            gap: 12px;
+        }
+        
+        .token-icon {
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 20px !important;
+        }
+        
+        .token-menu {
+            min-width: 220px;
+            right: -10px;
+        }
+        
+        .token-grid {
+            grid-template-columns: repeat(2, 1fr);
+            max-height: 200px;
+        }
+        
+        .token-item {
+            padding: 10px 6px;
+            min-height: 70px;
+        }
+        
+        .token-bubble {
+            font-size: 1rem;
+            padding: 10px 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .video-top-icons {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .token-icon {
+            width: 44px !important;
+            height: 44px !important;
+        }
+        
+        .token-menu {
+            min-width: 180px;
+            right: 0;
+        }
+        
+        .token-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+    }
   </style>
 </head>
 @php
