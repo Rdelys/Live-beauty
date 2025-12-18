@@ -1803,7 +1803,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
 <script>
-  const socket = io("http://localhost:3000/", {path: '/socket.io', transports: ["websocket"] });
+  const socket = io("wss://livebeautyofficial.com", {path: '/socket.io', transports: ["websocket"] });
 
   const video = document.getElementById("liveVideo");
   const soundMessage = document.getElementById("soundMessage");
