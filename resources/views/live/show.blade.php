@@ -3103,24 +3103,5 @@ updateTokenVisibility();
 
 // Surveille les changements de mode privé
 setInterval(updateTokenVisibility, 300);
-
-
-const constraints = {
-  video: { 
-    width: { ideal: 3840 },   // résolution horizontale 4K
-    height: { ideal: 2160 },  // résolution verticale 4K
-    frameRate: { ideal: 120 }  // nombre d'images par seconde
-  },
-  audio: true
-};
-
-navigator.mediaDevices.getUserMedia(constraints)
-  .then(stream => {
-    const video = document.getElementById('liveVideo');
-    video.srcObject = stream;
-    video.play();
-  })
-  .catch(err => console.error('Erreur getUserMedia:', err));
-
 </script>
 
