@@ -1919,8 +1919,24 @@ let cameraDevices = [];
 // Fonction pour récupérer les caméras disponibles
 async function getCameraDevices() {
     try {
+        // D'abord demander l'accès pour avoir les labels complets
+        const tempStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true, 
+            audio: false 
+        });
+        
+        // Arrêter le stream temporaire
+        tempStream.getTracks().forEach(track => track.stop());
+        
+        // Maintenant on peut lister les caméras avec leurs noms
         const devices = await navigator.mediaDevices.enumerateDevices();
         cameraDevices = devices.filter(device => device.kind === 'videoinput');
+        
+        console.log('Caméras détectées:', cameraDevices.map(d => ({
+            id: d.deviceId,
+            label: d.label,
+            groupId: d.groupId
+        })));
         
         // Mettre à jour les selecteurs
         updateCameraSelect('cameraSelect', cameraDevices);
@@ -1928,11 +1944,22 @@ async function getCameraDevices() {
         
         return cameraDevices;
     } catch (error) {
-        console.error('Erreur lors de la récupération des caméras:', error);
+        console.error('Erreur détection caméras:', error);
+        
+        // Fallback: essayer sans permission
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            cameraDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            updateCameraSelect('cameraSelect', cameraDevices);
+            updateCameraSelect('cameraSelectPrivate', cameraDevices);
+        } catch (e) {
+            console.error('Même sans permission, erreur:', e);
+        }
+        
         return [];
     }
 }
-
 // Mettre à jour un sélecteur de caméra
 function updateCameraSelect(selectId, devices) {
     const select = document.getElementById(selectId);
@@ -1949,21 +1976,29 @@ function updateCameraSelect(selectId, devices) {
     });
 }
 
-// Obtenir les contraintes de caméra basées sur la sélection
+// Obtenir les contraintes avec gestion d'erreur
 function getCameraConstraints(selectId) {
     const select = document.getElementById(selectId);
     const deviceId = select ? select.value : null;
     
-    if (!deviceId) {
-        return { video: true, audio: true }; // Caméra par défaut
+    if (!deviceId || !cameraDevices.some(d => d.deviceId === deviceId)) {
+        // Caméra par défaut avec résolution réduite pour plus de stabilité
+        return {
+            video: { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 25 }
+            },
+            audio: true
+        };
     }
     
     return {
         video: { 
             deviceId: { exact: deviceId },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            frameRate: { ideal: 30 }
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 25 }
         },
         audio: true
     };
@@ -1980,20 +2015,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* === LANCER LE LIVE === */
 startBtn.addEventListener('click', async () => {
     try {
-        // Caméra + micro
-        const constraints = getCameraConstraints('cameraSelect');
+        // Désactiver le bouton pour éviter les clics multiples
+        startBtn.disabled = true;
+        startBtn.textContent = '🔄 Démarrage...';
         
         // Caméra + micro avec la caméra sélectionnée
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const constraints = getCameraConstraints('cameraSelect');
+        
+        console.log('Tentative d\'accès à la caméra avec constraints:', constraints);
+        
+        // Ajouter un timeout pour getUserMedia
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: La caméra met trop de temps à démarrer')), 10000);
+        });
+        
+        // Essayer d'accéder à la caméra avec timeout
+        stream = await Promise.race([
+            navigator.mediaDevices.getUserMedia(constraints),
+            timeoutPromise
+        ]);
+        
+        console.log('Caméra démarrée avec succès');
+        
+        // Si l'utilisateur a plusieurs caméras, afficher celle active
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack) {
+            console.log('Caméra active:', videoTrack.label);
+            console.log('Dimensions:', videoTrack.getSettings());
+        }
+        
         liveVideo.srcObject = stream;
         liveSection.style.display = 'block';
         startBtn.style.display = 'none';
         stopBtn.style.display = 'inline-block';
-
+        
+        // Réinitialiser le bouton
+        startBtn.disabled = false;
+        startBtn.textContent = 'Démarrer le Live';
+        
         // Informer serveur qu'on est le broadcaster
-socket.emit("broadcaster", {
-    modeleId: {{ $modele->id }}
-});
+        socket.emit("broadcaster", {
+            modeleId: {{ $modele->id }}
+        });
+
         socket.emit("request-viewers");
 
         // Gestion des watchers
@@ -2051,7 +2115,33 @@ socket.emit("broadcaster", {
         });
 
     } catch (error) {
-        alert("Erreur caméra : " + error.message);
+        console.error('Erreur détaillée caméra:', error);
+        
+        // Réactiver le bouton
+        startBtn.disabled = false;
+        startBtn.textContent = 'Démarrer le Live';
+        
+        // Message d'erreur plus détaillé
+        let errorMessage = "Erreur caméra : " + error.message;
+        
+        if (error.name === 'NotFoundError') {
+            errorMessage = "❌ Aucune caméra détectée. Vérifiez votre connexion.";
+        } else if (error.name === 'NotAllowedError') {
+            errorMessage = "❌ Permission refusée. Autorisez l'accès à la caméra dans les paramètres du navigateur.";
+        } else if (error.name === 'NotReadableError') {
+            errorMessage = "⚠️ La caméra est utilisée par une autre application. Fermez les autres programmes.";
+        } else if (error.message.includes('Timeout')) {
+            errorMessage = "⏱️ La caméra met trop de temps à répondre. Essayez de la reconnecter.";
+        }
+        
+        alert(errorMessage);
+        
+        // Suggestions de dépannage
+        console.log('Suggestions de dépannage:');
+        console.log('1. Vérifiez que la caméra n\'est pas utilisée par une autre application');
+        console.log('2. Redémarrez votre navigateur');
+        console.log('3. Vérifiez les permissions de la caméra');
+        console.log('4. Essayez avec une caméra différente');
     }
 });
 

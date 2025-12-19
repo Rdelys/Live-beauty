@@ -870,13 +870,14 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
     position: absolute !important;
     width: 160px !important;
     height: 120px !important;
-    top: 15px !important;
-    left: 15px !important;
+    bottom: 20px !important; /* Changé de top à bottom */
+    left: 20px !important;
     object-fit: cover !important;
     z-index: 9999 !important;
-
-    /* 🔥 Correction essentielle */
-    display: none;
+    border: 2px solid #ff4081;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    display: none; /* Masqué par défaut */
 }
 
 #videoContainer::after {
@@ -1655,57 +1656,47 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
               <!-- Inclure Font Awesome (si pas déjà présent dans ta page) -->
               <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-              <div id="clientCamControls" style="margin-top:8px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                <div id="clientCamControls" style="margin-top:8px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  
+                <button id="clientCameraBtn" disabled 
+        style="
+            width:46px;
+            height:46px;
+            border:none;
+            border-radius:14px;
+            background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            color:rgba(255,255,255,0.85);
+            font-size:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter:blur(8px);
+            cursor:pointer;
+            transition:all 0.25s ease;
+        ">
+        <i class="fa-solid fa-video" style="pointer-events:none;"></i>
+    </button>
 
-                <button id="clientCameraBtn" disabled title="Vous devez être en show privée"
-                  style="
-                    width:46px;
-                    height:46px;
-                    border:none;
-                    border-radius:14px;
-                    background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-                    color:rgba(255,255,255,0.85);
-                    font-size:18px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.3);
-                    backdrop-filter:blur(8px);
-                    cursor:pointer;
-                    transition:all 0.25s ease;
-                    position:relative;
-                    overflow:hidden;
-                  "
-                  onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
-                  onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
-                >
-                  <i class="fa-solid fa-video" style="pointer-events:none;"></i>
-                </button>
-
-                <button id="clientAudioBtn" disabled title="Vous devez être en show privée"
-                  style="
-                    width:46px;
-                    height:46px;
-                    border:none;
-                    border-radius:14px;
-                    background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-                    color:rgba(255,255,255,0.85);
-                    font-size:18px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.3);
-                    backdrop-filter:blur(8px);
-                    cursor:pointer;
-                    transition:all 0.25s ease;
-                    position:relative;
-                    overflow:hidden;
-                  "
-                  onmouseover="if(!this.disabled){this.style.background='linear-gradient(135deg,#ff4b2b,#ff416c)';this.style.color='white';this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(255,65,108,0.5)'}"
-                  onmouseout="if(!this.disabled){this.style.background='linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))';this.style.color='rgba(255,255,255,0.85)';this.style.transform='scale(1)';this.style.boxShadow='0 4px 10px rgba(0,0,0,0.3)'}"
-                >
-                  <i class="fa-solid fa-microphone" style="pointer-events:none;"></i>
-                </button>
+                <button id="clientAudioBtn" disabled
+        style="
+            width:46px;
+            height:46px;
+            border:none;
+            border-radius:14px;
+            background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            color:rgba(255,255,255,0.85);
+            font-size:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter:blur(8px);
+            cursor:pointer;
+            transition:all 0.25s ease;
+        ">
+        <i class="fa-solid fa-microphone" style="pointer-events:none;"></i>
+    </button>
               </div>
 
               <!-- Mini preview locale (en bas à gauche du player) -->
@@ -2327,109 +2318,176 @@ socket.on('client-disconnect', (data) => {
 });
 
 // ---------- Start / Stop caméra client ----------
+// ---------- Start / Stop caméra client ----------
 async function startClientCam() {
-  if (!isPrivateEnabled) return alert('Vous devez être en show privée pour activer votre caméra.');
-
-  try {
-    clientStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    // preview locale
-    localPreview.srcObject = clientStream;
-    localPreview.style.display = 'block';
-
-    // create RTCPeerConnection
-    clientPc = new RTCPeerConnection({
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        // si tu as un TURN, garde-le ici
-        { urls: "turn:livebeautyofficial.com:3478", username: "webrtc", credential: "password123" }
-      ]
-    });
-
-    // envoyer candidats au modèle via serveur
-    clientPc.onicecandidate = event => {
-      if (event.candidate) {
-        socket.emit('client-candidate', {
-              modeleId: {{ $modele->id }},
-
-          toRoom: isPrivateEnabled && showPriveId ? `prive-${showPriveId}` : 'public',
-          candidate: event.candidate,
-          from: clientSocketId
+    if (!isPrivateEnabled) return alert('Vous devez être en show privée pour activer votre caméra.');
+    
+    try {
+        clientStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true, 
+            audio: true 
         });
-      }
-    };
-
-    // add tracks
-    clientStream.getTracks().forEach(t => clientPc.addTrack(t, clientStream));
-
-    // create offer
-    const offer = await clientPc.createOffer();
-    await clientPc.setLocalDescription(offer);
-
-    // envoi de l'offer au serveur (qui forwarde au modèle)
-    socket.emit('client-offer', {
-          modeleId: {{ $modele->id }},
-
-      showPriveId: showPriveId ?? null,
-      offer: clientPc.localDescription,
-      from: clientSocketId
-    });
-
-    // UI
-    clientCameraBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
-    clientAudioBtn.innerHTML  = '<i class="fa-solid fa-microphone"></i>';
-    isAudioEnabled = true;
-  } catch (err) {
-    console.error('Erreur startClientCam:', err);
-    alert('Impossible d\'accéder à la caméra/micro : ' + (err.message || err));
-  }
+        
+        // Afficher la preview locale
+        localPreview.srcObject = clientStream;
+        localPreview.style.display = 'block';
+        
+        // Créer et configurer la connexion WebRTC
+        clientPc = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "turn:livebeautyofficial.com:3478", 
+                  username: "webrtc", 
+                  credential: "password123" }
+            ]
+        });
+        
+        // Envoyer les candidats ICE au modèle
+        clientPc.onicecandidate = event => {
+            if (event.candidate) {
+                socket.emit('client-candidate', {
+                    modeleId: {{ $modele->id }},
+                    toRoom: isPrivateEnabled && showPriveId ? `prive-${showPriveId}` : 'public',
+                    candidate: event.candidate,
+                    from: clientSocketId
+                });
+            }
+        };
+        
+        // Ajouter les tracks au PeerConnection
+        clientStream.getTracks().forEach(track => {
+            clientPc.addTrack(track, clientStream);
+        });
+        
+        // Créer et envoyer l'offer
+        const offer = await clientPc.createOffer();
+        await clientPc.setLocalDescription(offer);
+        
+        socket.emit('client-offer', {
+            modeleId: {{ $modele->id }},
+            showPriveId: showPriveId ?? null,
+            offer: clientPc.localDescription,
+            from: clientSocketId
+        });
+        
+        // Mettre à jour l'UI
+        clientCameraBtn.innerHTML = '<i class="fa-solid fa-video-slash"></i>';
+        clientCameraBtn.style.background = 'linear-gradient(135deg, #ff4b2b, #ff416c)';
+        
+    } catch (err) {
+        console.error('Erreur startClientCam:', err);
+        alert('Impossible d\'accéder à la caméra/micro : ' + (err.message || err));
+    }
 }
 
 function stopClientCam() {
-  try {
-    if (clientStream) clientStream.getTracks().forEach(t => t.stop());
-    clientStream = null;
-    if (clientPc) {
-      clientPc.close();
-      clientPc = null;
+    try {
+        // Arrêter tous les tracks
+        if (clientStream) {
+            clientStream.getTracks().forEach(track => track.stop());
+            clientStream = null;
+        }
+        
+        // Fermer la connexion PeerConnection
+        if (clientPc) {
+            clientPc.close();
+            clientPc = null;
+        }
+        
+        // Masquer la preview locale
+        localPreview.srcObject = null;
+        localPreview.style.display = 'none';
+        
+        // Réinitialiser le bouton
+        clientCameraBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
+        clientCameraBtn.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))';
+        
+        // Informer le serveur
+        socket.emit('client-stop', {
+            modeleId: {{ $modele->id }},
+            showPriveId: showPriveId ?? null,
+            from: clientSocketId
+        });
+        
+    } catch (e) {
+        console.warn('Erreur stopClientCam:', e);
     }
-    localPreview.srcObject = null;
-    localPreview.style.display = 'none';
-    clientCameraBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
-    clientAudioBtn.innerHTML  = '<i class="fa-solid fa-microphone"></i>';
-    // informer le serveur / modèle
-socket.emit('client-stop', {
-    modeleId: {{ $modele->id }},
-    showPriveId: showPriveId ?? null,
-    from: clientSocketId
-});
-  } catch (e) {
-    console.warn(e);
-  }
 }
-// toggle audio local
+
+
+// ---------- Toggle audio ----------
 function toggleClientAudio() {
-  if (!clientStream) return alert('Activez d\'abord la caméra (Camera).');
-  const audioTrack = clientStream.getAudioTracks()[0];
-  if (!audioTrack) return alert('Aucun flux audio trouvé.');
-  audioTrack.enabled = !audioTrack.enabled;
-  isAudioEnabled = audioTrack.enabled;
-  clientAudioBtn.textContent = isAudioEnabled ? '🎤✅' : '🎤🔇';
-
-  // optionnel: avertir le modèle via chat
-  socket.emit('chat-message', {
-    message: isAudioEnabled ? '🔊 Le client a activé sa voix.' : '🔇 Le client a coupé sa voix.',
-    pseudo: '{{ Auth::check() ? Auth::user()->pseudo : "Client" }}'
-  });
+    if (!clientStream) {
+        alert('Activez d\'abord la caméra.');
+        return;
+    }
+    
+    const audioTrack = clientStream.getAudioTracks()[0];
+    if (!audioTrack) {
+        alert('Aucun flux audio trouvé.');
+        return;
+    }
+    
+    audioTrack.enabled = !audioTrack.enabled;
+    isAudioEnabled = audioTrack.enabled;
+    
+    // Mettre à jour l'icône du bouton
+    if (isAudioEnabled) {
+        clientAudioBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        clientAudioBtn.style.background = 'linear-gradient(135deg, #ff4b2b, #ff416c)';
+    } else {
+        clientAudioBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
+        clientAudioBtn.style.background = 'linear-gradient(135deg, #666, #444)';
+    }
 }
 
-// events boutons
-clientCameraBtn?.addEventListener('click', () => {
-  if (clientStream) stopClientCam();
-  else startClientCam();
+// Fonction appelée quand le client entre/sort du mode privé
+function updatePrivateModeUI(isPrivate) {
+    isPrivateEnabled = isPrivate;
+    
+    // Activer/désactiver les boutons caméra/micro
+    if (isPrivate) {
+        clientCameraBtn.removeAttribute('disabled');
+        clientAudioBtn.removeAttribute('disabled');
+        clientCameraBtn.title = "Activer/désactiver votre caméra";
+        clientAudioBtn.title = "Activer/désactiver votre micro";
+    } else {
+        clientCameraBtn.setAttribute('disabled', 'true');
+        clientAudioBtn.setAttribute('disabled', 'true');
+        clientCameraBtn.title = "Disponible seulement en show privé";
+        clientAudioBtn.title = "Disponible seulement en show privé";
+        
+        // S'assurer que la caméra est désactivée
+        if (clientStream) {
+            stopClientCam();
+        }
+    }
+}
+
+// Appeler cette fonction quand le show privé commence/finit
+socket.on('private-show-started', () => {
+    updatePrivateModeUI(true);
 });
+
+socket.on('private-show-ended', () => {
+    updatePrivateModeUI(false);
+});
+
+// ---------- Événements des boutons ----------
+clientCameraBtn?.addEventListener('click', () => {
+    if (clientStream) {
+        stopClientCam();
+    } else {
+        startClientCam();
+    }
+});
+
 clientAudioBtn?.addEventListener('click', () => {
-  if (!clientStream) return alert('Activez la caméra d\'abord.');
-  toggleClientAudio();
+    if (!clientStream) {
+        alert('Activez la caméra d\'abord.');
+        return;
+    }
+    toggleClientAudio();
 });
 
 // Si le client annule le show privé depuis l'UI (ex: bouton "Annuler le show privé")
