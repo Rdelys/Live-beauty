@@ -1,4 +1,4 @@
-<!-- @include('components.chatbot') -->
+@include('components.chatbot')
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
   <head>

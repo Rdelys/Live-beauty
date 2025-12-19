@@ -229,9 +229,9 @@ h1, h2, h3, h4, h5 {
 
 /* Bouton principal de statut (Live / Privé) */
 .show-status-btn {
-  border-radius: 50px;
-  font-weight: bold;
-  padding: 0.7rem 1.5rem;
+  position:absolute;top:60px;right:8px;z-index:10;
+  border-radius: 30px;
+  padding: 0.3rem 1.0rem;
   border: none;
   color: #fff;
   letter-spacing: 0.5px;
@@ -1102,11 +1102,6 @@ select:-moz-focusring {
     <button class="btn btn-sm btn-outline-light mt-1" onclick="refreshCameraList()">
    <i class="fas fa-sync-alt"></i> Actualiser la liste
  </button>
-    <div id="showStatusContainer" class="text-center my-3">
-    <button id="showStatusBtn" class="btn show-status-btn public">
-        🔓 Public
-    </button>
-</div>
 
     <button class="btn btn-danger mb-2" id="startLiveBtn">Démarrer le Live</button>
     <button class="btn btn-secondary mb-2" id="stopLiveBtn" style="display: none;">Arrêter le Live</button>
@@ -1127,10 +1122,14 @@ select:-moz-focusring {
 
 
     <div id="videoContainer" style="position: relative;">
+    
       <button id="fullscreenBtn" 
         style="position:absolute;top:10px;right:10px;z-index:10;background:rgba(0,0,0,0.5);border:none;color:white;padding:6px 10px;border-radius:6px;cursor:pointer;">
     ⛶
 </button>
+<button id="showStatusBtn" class="btn show-status-btn public">
+        <i class="fa-solid fa-globe"></i>
+    </button>
     <video id="liveVideo" autoplay muted playsinline class="w-100 rounded border border-light"></video>
 
     <!-- Overlay spectateurs -->
@@ -1816,16 +1815,16 @@ socket.on("surprise-sent", (data) => {
 const showStatusBtn = document.getElementById('showStatusBtn');
 
   function setShowStatus(isPrivate, pseudo = null) {
-    if (isPrivate) {
-      showStatusBtn.textContent = `🔒 En privée ${pseudo ? 'avec ' + pseudo : ''}`;
-      showStatusBtn.classList.remove('public');
-      showStatusBtn.classList.add('private');
-    } else {
-      showStatusBtn.textContent = '🔓 Public';
-      showStatusBtn.classList.remove('private');
-      showStatusBtn.classList.add('public');
-    }
+  if (isPrivate) {
+    showStatusBtn.innerHTML = `<i class="fa-solid fa-lock"></i> ${pseudo ? 'avec ' + pseudo : ''}`;
+    showStatusBtn.classList.remove('public');
+    showStatusBtn.classList.add('private');
+  } else {
+    showStatusBtn.innerHTML = `<i class="fa-solid fa-unlock"></i>`;
+    showStatusBtn.classList.remove('private');
+    showStatusBtn.classList.add('public');
   }
+}
 
   // 🟢 Par défaut
   setShowStatus(false);
