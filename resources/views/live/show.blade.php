@@ -73,7 +73,16 @@ body {
   background-size: cover !important;
   padding-top: 50px;
       background-attachment: fixed;
+          padding-top: 0 !important; /* Enlevez le padding-top existant si présent */
 
+
+}
+
+/* Pour les écrans mobiles */
+@media (max-width: 768px) {
+    .container-live {
+        margin-top: 70px !important;
+    }
 }
 /* 
 #modelTokenMenu .token-grid {
@@ -170,6 +179,7 @@ body:hover {
 .container-live{
   max-width:100%;
   margin: 24px auto;
+  margin-top: 80px !important; /* Ajustez cette valeur selon la hauteur de votre barre fixe */
   display:flex;
   gap:20px;
   align-items:flex-start;
@@ -556,7 +566,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 .jetons-display {
     padding: 8px 14px;
     border-radius: var(--radius-md);
-    font-weight: 700;
+    font-weight: 400;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -565,7 +575,7 @@ button:focus, input:focus{ outline: 3px solid rgba(255,64,129,0.12); outline-off
 }
 .jetons-display #userJetons {
     color: #ffd740;
-    font-weight: 900;
+    font-weight: 400;
 }
 
 /* ===== Timer Privé ===== */
@@ -909,7 +919,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
 
     background: linear-gradient(135deg, #2c003b, #4a0061);
     color: #fff;
-    font-weight: 700;
+    font-weight: 400;
     cursor: pointer;
 
     box-shadow: 0 4px 12px rgba(0,0,0,0.35),
@@ -929,7 +939,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
 
     background: rgba(0,0,0,0.55);
     color: #ffd740;
-    font-weight: 800;
+    font-weight: 400;
     font-size: 1.1rem;
     letter-spacing: 1px;
 
@@ -965,11 +975,16 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
     position: fixed;
     top: 0;
     left: 0;
-
+    background: rgba(0, 0, 0, 0.9) !important; /* Fond moins transparent */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 64, 129, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    height: 60px; /* Définissez une hauteur fixe */
+    display: flex;
+    align-items: center;
     width: 100%;
     z-index: 99999;
-
-    padding: 12px 20px;
+    padding: 10px 16px;
 }
 
 #chatColumn::before {
