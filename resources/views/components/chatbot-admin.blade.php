@@ -217,10 +217,16 @@
     </div>
 
     <div id="adminChatPanel">
-        <div id="adminChatHeader">
-            👑 {{ __('Admin Chat') }}
-            <span id="adminChatClose">&times;</span>
-        </div>
+        <!-- Dans adminChatHeader, après le titre -->
+<div id="adminChatHeader">
+    👑 {{ __('Admin Chat') }}
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="refreshChat" style="background: #ff0037; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+            🔄 Rafraîchir
+        </button>
+        <span id="adminChatClose">&times;</span>
+    </div>
+</div>
         
         <div id="adminChatStats">
             <span id="onlineUsers">En ligne: 0</span>
@@ -283,14 +289,20 @@ socket.on("stored-messages-count", data => {
     storedSpan.textContent = `Messages stockés: ${data.count}`;
 });
 
+// Modifiez la partie réception des messages stockés
 socket.on("stored-messages", messages => {
+    console.log(`📨 Réception de ${messages.length} conversations stockées`);
+    
+    // D'abord, effacer les anciens blocs existants pour éviter les doublons
     messages.forEach(group => {
         let block = document.getElementById("client-" + group.userId);
         
         if (!block) {
             list.innerHTML += `
                 <div class="adminChatBlock" id="client-${group.userId}">
-                    <h4>${group.pseudo} <span class="timestamp">(stocké)</span></h4>
+                    <h4>${group.pseudo} 
+                        <span class="timestamp">(${group.count} message${group.count > 1 ? 's' : ''} stocké${group.count > 1 ? 's' : ''})</span>
+                    </h4>
                     <div class="thread"></div>
                     <input class="adminReply" data-id="${group.userId}" placeholder="Répondre…">
                 </div>
@@ -299,17 +311,27 @@ socket.on("stored-messages", messages => {
         }
         
         const thread = block.querySelector(".thread");
+        // Effacer le contenu existant et ajouter tous les messages
+        thread.innerHTML = '';
         group.messages.forEach((msg, index) => {
             thread.innerHTML += `<p class="stored-message"><strong>${group.pseudo} :</strong> ${msg}</p>`;
         });
         
         // Marquer comme lu
         socket.emit("mark-as-read", { userId: group.userId });
+        
+        // Faire défiler vers le bas
+        list.scrollTop = list.scrollHeight;
     });
+    
+    // Mettre à jour le compteur
+    storedSpan.textContent = `Messages stockés: ${messages.reduce((total, group) => total + group.messages.length, 0)}`;
 });
 
-/* NOUVEAU MESSAGE EN DIRECT */
+// Modifiez aussi la réception des nouveaux messages
 socket.on("admin-new-message", data => {
+    console.log("📩 Nouveau message en direct:", data);
+    
     let block = document.getElementById("client-" + data.userId);
 
     if (!block) {
@@ -326,18 +348,29 @@ socket.on("admin-new-message", data => {
     const thread = block.querySelector(".thread");
     thread.innerHTML += `<p><strong>${data.pseudo} :</strong> ${data.message}</p>`;
 
-    sound.currentTime = 0;
-    sound.play().catch(()=>{});
+    // Jouer le son
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
+    }
 
-    /* Notification */
+    // Notification badge
     if (panel.style.display === "none") {
         unreadCount++;
         unread.innerText = unreadCount;
         unread.style.display = "flex";
     }
 
+    // Mettre à jour les stats
+    updateMessageStats();
     list.scrollTop = list.scrollHeight;
 });
+
+// Ajoutez cette fonction pour mettre à jour les stats
+async function updateMessageStats() {
+    // Vous pouvez aussi émettre un événement pour recharger les stats
+    socket.emit("load-stored-messages");
+}
 
 /* STATS CLIENTS EN LIGNE */
 socket.on("client-connected", data => {
@@ -371,4 +404,9 @@ document.addEventListener("keydown", e => {
         list.scrollTop = list.scrollHeight;
     }
 });
+
+// Ajoutez ce script
+document.getElementById("refreshChat").onclick = () => {
+    socket.emit("load-stored-messages");
+};
 </script>
