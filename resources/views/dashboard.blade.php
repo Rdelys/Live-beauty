@@ -1603,8 +1603,13 @@ packs.forEach(pack => {
     container.innerHTML = `
       <button class="btn btn-danger w-100 fw-bold rounded-pill acheter-stripe" 
               data-pack='${JSON.stringify(pack)}'>
-        <i class="fas fa-credit-card me-2"></i> Payer avec Stripe
-      </button>`;
+        <i class="fas fa-credit-card me-2"></i>Stripe
+      </button>
+      <button class="btn btn-outline-warning w-100 fw-bold rounded-pill mt-2" 
+            data-bs-toggle="modal" 
+            data-bs-target="#cryptoPaymentModal">
+        <i class="fab fa-bitcoin me-2"></i> Crypto
+    </button>`;
   }
 });
 
