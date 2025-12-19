@@ -18,6 +18,7 @@ use App\Http\Controllers\AdminLoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FilmDescriptionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CryptoController;
 
 
 
@@ -369,3 +370,10 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::get('/historique-lives', [AdminController::class, 'historiqueLives'])
         ->name('admin.historique-lives');
 });
+
+
+Route::middleware('auth')->post('/crypto/create', [CryptoController::class, 'create'])
+    ->name('crypto.create');
+
+Route::post('/crypto/webhook', [CryptoController::class, 'webhook'])
+    ->name('crypto.webhook');

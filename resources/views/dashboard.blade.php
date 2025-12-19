@@ -1,4 +1,4 @@
-@include('components.chatbot')
+<!-- @include('components.chatbot') -->
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
   <head>
@@ -1584,7 +1584,27 @@ document.addEventListener("click", function(e) {
 
 
 </script>-->
-
+<!-- Modal Crypto Payment Details -->
+<div class="modal fade" id="cryptoPaymentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content premium-modal">
+      <div class="modal-body text-center">
+        <div class="glow-circle mx-auto mb-3">
+          <i class="fab fa-bitcoin fa-2x"></i>
+        </div>
+        <h4 class="modal-title mb-3">Paiement Crypto</h4>
+        <p>Veuillez envoyer <span class="text-warning fw-bold" id="cryptoAmount"></span> à l'adresse suivante:</p>
+        <div class="bg-dark p-3 rounded mb-3">
+          <code id="cryptoAddress" class="text-break"></code>
+        </div>
+        <p class="text-muted small">Le paiement sera confirmé automatiquement après 2 confirmations réseau.</p>
+        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 const stripe = Stripe("{{ config('services.stripe.key') }}");
@@ -1605,11 +1625,57 @@ packs.forEach(pack => {
               data-pack='${JSON.stringify(pack)}'>
         <i class="fas fa-credit-card me-2"></i>Stripe
       </button>
-      <button class="btn btn-outline-warning w-100 fw-bold rounded-pill mt-2" 
-            data-bs-toggle="modal" 
-            data-bs-target="#cryptoPaymentModal">
-        <i class="fab fa-bitcoin me-2"></i> Crypto
-    </button>`;
+      <button class="btn btn-outline-warning acheter-crypto"
+        data-pack='${JSON.stringify(pack)}'>
+  <i class="fab fa-bitcoin"></i> Crypto
+</button>`;
+  }
+});
+
+document.addEventListener('click', async e => {
+  const btn = e.target.closest('.acheter-crypto');
+  if (!btn) return;
+
+  const pack = JSON.parse(btn.dataset.pack);
+  
+  // Désactiver le bouton pendant le traitement
+  btn.disabled = true;
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+
+  try {
+    const res = await fetch('/crypto/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      body: JSON.stringify({ pack: pack })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Erreur lors de la création du paiement');
+    }
+
+    if (data.invoice_url) {
+      window.location.href = data.invoice_url;
+    } else if (data.pay_address) {
+      // Alternative: afficher les détails de paiement
+      const modal = new bootstrap.Modal(document.getElementById('cryptoPaymentModal'));
+      document.getElementById('cryptoAmount').textContent = data.pay_amount;
+      document.getElementById('cryptoAddress').textContent = data.pay_address;
+      modal.show();
+    } else {
+      alert('URL de paiement non disponible');
+    }
+  } catch (error) {
+    console.error('Erreur:', error);
+    alert('Erreur: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
   }
 });
 

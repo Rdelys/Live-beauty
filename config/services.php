@@ -34,6 +34,10 @@ return [
     'key' => env('STRIPE_KEY'),
     'secret' => env('STRIPE_SECRET'),
 ],
-
+    'nowpayments' => [
+        'key'        => env('NOWPAYMENTS_API_KEY'),
+        'ipn_secret'=> env('NOWPAYMENTS_IPN_SECRET'),
+        'env'        => env('NOWPAYMENTS_SANDBOX', false),
+    ],
 
 ];
