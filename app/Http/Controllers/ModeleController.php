@@ -15,7 +15,7 @@ use App\Models\HistoriqueJeton;
 use App\Models\FilmDescription;
 use App\Models\HistoriqueLive;
 use App\Models\ModeleConnexion;
-use App\Models\faq;
+use App\Models\Faq;
 
 
 class ModeleController extends Controller
