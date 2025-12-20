@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Profil Modèle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>

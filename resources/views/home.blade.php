@@ -4,11 +4,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE BEAUTY</title>
+    
+    <!-- META TAGS POUR SEO -->
+    <title>@yield('meta_title', 'LIVE BEAUTY - Plateforme de Cams en Direct avec Camgirls Professionnelles')</title>
+    
+    <meta name="description" content="@yield('meta_description', 'Découvrez LIVE BEAUTY, la plateforme premium de cams en direct avec des camgirls professionnelles. Inscription gratuite, shows privés et publics, galeries photos et vidéos exclusives.')">
+    
+    <meta name="keywords" content="@yield('meta_keywords', 'cams en direct, live sex, camgirls, modèles webcam, shows privés, adult entertainment, live beauty, webcam models, {{ count($modeles ?? []) }} modèles en ligne')">
+    
+    <meta name="author" content="LIVE BEAUTY">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="rating" content="adult">
+    <meta name="language" content="{{ app()->getLocale() }}">
+    
+    <!-- OPEN GRAPH / FACEBOOK -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LIVE BEAUTY">
+    <meta property="og:title" content="@yield('og_title', 'LIVE BEAUTY - Cams en Direct Premium avec Camgirls')">
+    <meta property="og:description" content="@yield('og_description', 'Plateforme de cams en direct avec les plus belles modèles professionnelles. Inscription gratuite, shows exclusifs.')">
+    <meta property="og:image" content="@yield('og_image', asset('storage/default-og.jpg'))">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:locale" content="{{ app()->getLocale() }}">
+    
+    <!-- TWITTER CARD -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('twitter_title', 'LIVE BEAUTY - Cams en Direct')">
+    <meta name="twitter:description" content="@yield('twitter_description', 'Découvrez nos camgirls en direct. Shows exclusifs et privés. Inscription gratuite.')">
+    <meta name="twitter:image" content="@yield('twitter_image', asset('storage/default-twitter.jpg'))">
+    <meta name="twitter:site" content="@livebeautyofficial">
+    
+    <!-- CANONICAL URL -->
+    <link rel="canonical" href="{{ url()->current() }}">
+    
+    <!-- SCHEMA.ORG STRUCTURED DATA -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "LIVE BEAUTY",
+        "url": "{{ url('/') }}",
+        "description": "Plateforme premium de cams en direct avec camgirls professionnelles",
+        "publisher": {
+            "@type": "Organization",
+            "name": "LIVE BEAUTY",
+            "url": "{{ url('/') }}",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ asset('storage/logo.png') }}"
+            }
+        },
+        "audience": {
+            "@type": "PeopleAudience",
+            "suggestedMinAge": 18,
+            "suggestedMaxAge": 99
+        }
+    }
+    </script>
+    
+    <!-- LINKS CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+    
+    <!-- VOTRE CSS (inchangé) -->
     <style>
        :root {
   --primary: #e50914; /* Rouge premium (Netflix-style) */
@@ -635,7 +695,6 @@ body {
     font-size: 1.3rem;
     line-height: 1;
 }
-
     </style>
 </head>
 
@@ -657,7 +716,7 @@ body {
     <!-- Navbar principale -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><span class="live">LIVE</span> <span class="beauty">BEAUTY</span></a>
+            <a class="navbar-brand" href="/"><span class="live">LIVE</span> <span class="beauty">BEAUTY</span></a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                 aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -687,24 +746,8 @@ body {
         </li>
     </ul>
 </li>
-
-
-
-
-
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="#">Nouveaux Modèles</a>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="#">Promotions <span class="badge bg-warning text-dark">3</span></a>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="#">Top Modèles</a>
-                </li> -->
             </ul>
                 <div class="d-flex align-items-center">
-                    <!-- <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-heart"></i></a>
-                    <a href="#" class="text-white me-3 fs-4"><i class="fa-solid fa-crown"></i></a> -->
                 <a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
                     <i class="fa-solid fa-envelope"></i>
                 </a>
@@ -739,7 +782,7 @@ body {
                     @foreach($modeles as $modele)
     <div class="col-md-4 card-item fille">
     <div class="model-card card-default">
-<a href="{{ route('modele.profile', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer">
+<a href="{{ route('modele.profile', $modele->id) }}" class="d-block text-decoration-none text-light" target="_blank" rel="noopener noreferrer" aria-label="Voir le profil de {{ $modele->prenom }}">
     @php
       $photos = is_array($modele->photos) ? $modele->photos : json_decode($modele->photos ?? '[]', true);
       $photo = $photos[0] ?? null;
@@ -749,18 +792,16 @@ body {
     <div class="media-container">
       {{-- IMAGE PRINCIPALE --}}
       @if($photo)
-        <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+        <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="Photo de {{ $modele->prenom }} - Camgirl sur LIVE BEAUTY" title="{{ $modele->prenom }} - Camgirl professionnelle">
       @else
-        <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+        <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="{{ $modele->prenom }} - Camgirl" title="{{ $modele->prenom }}">
       @endif
 
       {{-- VIDÉO AU HOVER --}}
       @if($hasVideo)
   <div class="model-video">
     @if(!empty($modele->video_file) && is_array($modele->video_file))
-  <!-- <video autoplay muted loop playsinline preload="none"> -->
-      <video  muted loop playsinline preload="none">
-
+      <video muted loop playsinline preload="none">
     <source src="{{ asset('storage/' . $modele->video_file[0]) }}" type="video/mp4">
     Votre navigateur ne supporte pas la vidéo.
   </video>
@@ -770,7 +811,8 @@ body {
     frameborder="0"
     allow="autoplay; encrypted-media"
     allowfullscreen
-    style="width: 100%; height: 100%;">
+    style="width: 100%; height: 100%;"
+    title="Vidéo de {{ $modele->prenom }}">
   </iframe>
 @endif
 
@@ -793,9 +835,9 @@ body {
         @endphp
 
         @if($photo)
-            <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="photo">
+            <img src="{{ asset('storage/' . $photo) }}" class="model-photo" alt="Photo de {{ $modele->prenom }} - Galerie camgirl" title="{{ $modele->prenom }} - Photos exclusives">
         @else
-            <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="placeholder">
+            <img src="https://via.placeholder.com/300x230?text=Pas+de+photo" class="model-photo" alt="{{ $modele->prenom }}">
         @endif
 <div class="status-name">
     <span class="status-dot" style="background-color: {{ $modele->en_ligne ? '#28a745' : '#dc3545' }}"></span>
@@ -811,7 +853,8 @@ body {
               data-prix="{{ $modele->prix_flou ?? 0 }}"
               data-bs-toggle="modal" 
               data-bs-target="#galleryModal" 
-              title="Voir les photos">
+              title="Voir la galerie photos de {{ $modele->prenom }}"
+              aria-label="Ouvrir galerie photos de {{ $modele->prenom }}">
           <i class="fas fa-camera"></i>
           <span>{{ count($photos) }}</span>
       </button>
@@ -843,7 +886,8 @@ body {
         data-prix="{{ $modele->prix_flou ?? 0 }}"
         data-bs-toggle="modal" 
         data-bs-target="#galleryModal"
-        title="Voir les vidéos">
+        title="Voir les vidéos de {{ $modele->prenom }}"
+        aria-label="Ouvrir galerie vidéos de {{ $modele->prenom }}">
     <i class="fas fa-video"></i>
     <span>{{ count($videos) }}</span>
 </button>
@@ -868,7 +912,7 @@ body {
     <div class="modal-content bg-dark text-white border-0 rounded-4 shadow-lg">
       
       <!-- Fermer -->
-      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal">
+      <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 z-2" data-bs-dismiss="modal" aria-label="Fermer">
         <i class="fas fa-times"></i>
       </button>
 
@@ -876,7 +920,7 @@ body {
   <div class="row g-4">
     <!-- Colonne gauche : photo + miniatures -->
     <div class="col-md-6 d-flex flex-column align-items-center">
-      <img id="mainModelImage" src="" alt="Image principale" class="img-fluid rounded-4 shadow-lg mb-3" style="max-height: 500px; object-fit: cover; width: 100%;">
+      <img id="mainModelImage" src="" alt="Image principale du modèle" class="img-fluid rounded-4 shadow-lg mb-3" style="max-height: 500px; object-fit: cover; width: 100%;">
       <div class="d-flex flex-wrap justify-content-center gap-2" id="thumbnailContainer" style="max-width: 100%;">
         <!-- Miniatures dynamiques -->
       </div>
@@ -983,13 +1027,13 @@ document.addEventListener('click', function(e) {
     let content = '';
 
     if (type === 'photo') {
-        content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)">`;
+        content = `<img src="/storage/${item}" class="d-block w-100" style="object-fit:contain; height:100vh; cursor: zoom-in;" onclick="openFullscreen(this)" alt="Photo exclusive camgirl" title="Cliquez pour agrandir">`;
     } 
     else if (type === 'video') {
         if (item.includes('http') && !item.endsWith('.mp4')) {
-            content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen></iframe>`;
+            content = `<iframe src="${item}" class="d-block w-100" style="height:100vh;" frameborder="0" allowfullscreen title="Vidéo exclusive camgirl"></iframe>`;
         } else {
-            content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh;"></video>`;
+            content = `<video src="${item}" controls autoplay class="d-block w-100" style="height:100vh;" title="Vidéo camgirl"></video>`;
         }
     }
 
@@ -1078,16 +1122,16 @@ document.addEventListener('DOMContentLoaded', function () {
       @csrf
       <div class="modal-header">
         <h5 class="modal-title">{{ __('Connexion à votre compte') }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">{{ __('Email') }}</label>
-          <input type="email" name="email" class="form-control" required autocomplete="username">
+          <input type="email" name="email" class="form-control" required autocomplete="username" aria-label="Adresse email">
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Mot de passe') }}</label>
-          <input type="password" name="password" class="form-control" required autocomplete="current-password>
+          <input type="password" name="password" class="form-control" required autocomplete="current-password" aria-label="Mot de passe">
         </div>
         <div class="text-end">
     <a href="#" class="text-light small" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">
@@ -1109,12 +1153,12 @@ document.addEventListener('DOMContentLoaded', function () {
       @csrf
       <div class="modal-header">
         <h5 class="modal-title">{{ __('Réinitialiser le mot de passe') }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">{{ __('Adresse Emai') }}l</label>
-          <input type="email" name="email" class="form-control" required>
+          <input type="email" name="email" class="form-control" required aria-label="Adresse email pour réinitialisation">
         </div>
         <p class="small">{{ __('Vous recevrez un lien pour réinitialiser votre mot de passe.') }}</p>
       </div>
@@ -1211,22 +1255,22 @@ document.addEventListener("DOMContentLoaded", function () {
       @csrf
       <div class="modal-header">
         <h5 class="modal-title">{{ __('Créer un compte') }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">{{ __('Pseudo') }}</label>
-          <input id="pseudo" name="pseudo" class="form-control" required>
+          <input id="pseudo" name="pseudo" class="form-control" required aria-label="Choisir un pseudo">
           <small id="pseudoMessage" class="d-none"></small>
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Email') }}</label>
-          <input id="email" name="email" type="email" class="form-control" required autocomplete="username">
+          <input id="email" name="email" type="email" class="form-control" required autocomplete="username" aria-label="Adresse email">
           <small  id="emailMessage" class="d-none"></small>
         </div>
         <div class="mb-3">
           <label class="form-label">{{ __('Mot de passe') }}</label>
-          <input name="password" type="password" class="form-control" required autocomplete="new-password">
+          <input name="password" type="password" class="form-control" required autocomplete="new-password" aria-label="Créer un mot de passe">
         </div>
         <div class="form-check mt-3">
           <input class="form-check-input" type="checkbox" id="cguCheck" required>
@@ -1234,7 +1278,7 @@ document.addEventListener("DOMContentLoaded", function () {
 {{ __("J'accepte les") }}
 <a href="{{ route('cgu') }}" target="_blank">CGU</a>
 {{ __("et la") }}
-<a href="{{ route('pu') }}" target="_blank">{{ __("Politique d’Utilisation") }}</a>.
+<a href="{{ route('pu') }}" target="_blank">{{ __("Politique d'Utilisation") }}</a>.
           </label>
         </div>
       </div>
@@ -1252,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", function () {
       @csrf
       <div class="modal-header">
         <h5 class="modal-title" id="verifyEmailLabel">{{ __('Vérification de votre email') }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body">
         <p class="mb-3">
@@ -1263,7 +1307,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="d-flex justify-content-between gap-2 mb-3" style="max-width: 360px; margin:auto;">
           @for($i=1; $i<=6; $i++)
             <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-                   class="form-control text-center fs-4 code-digit" id="d{{ $i }}">
+                   class="form-control text-center fs-4 code-digit" id="d{{ $i }}" aria-label="Chiffre {{ $i }} du code">
           @endfor
         </div>
 
@@ -1293,15 +1337,15 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="modal-content bg-black border-0">
       <div class="modal-header border-0">
         <h5 class="modal-title text-white"><i class="fas fa-images me-2"></i> {{ __('Galerie') }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body p-0">
         <div id="carouselGallery" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-inner" id="galleryInner"></div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#carouselGallery" data-bs-slide="prev">
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselGallery" data-bs-slide="prev" aria-label="Précédent">
             <span class="carousel-control-prev-icon"></span>
           </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#carouselGallery" data-bs-slide="next">
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselGallery" data-bs-slide="next" aria-label="Suivant">
             <span class="carousel-control-next-icon"></span>
           </button>
         </div>
