@@ -1,2 +1,18 @@
+# public/robots.txt
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /profil
+Disallow: /modele/profil
+Disallow: /modele/login
+Disallow: /dashboard/
+Disallow: /*?*  # Paramètres d'URL
+Disallow: /*.php$
+
+Sitemap: https://www.livebeautyofficial.com/sitemap.xml
+
+# Pour Google Image
+User-agent: Googlebot-Image
+Allow: /storage/
+Disallow: /storage/temp/
