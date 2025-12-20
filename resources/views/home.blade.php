@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <!-- Google Search Console Verification -->
+<meta name="google-site-verification" content="0Digm1mSx-HnHXXF4w1zNI52tTv6GTFxxI" />
     <!-- META TAGS POUR SEO -->
     <title>@yield('meta_title', 'LIVE BEAUTY - Plateforme de Cams en Direct avec Camgirls Professionnelles')</title>
     
