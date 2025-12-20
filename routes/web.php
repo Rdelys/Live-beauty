@@ -21,6 +21,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CryptoController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\FaqPublicController;
+
+
 
 
 
@@ -388,3 +392,42 @@ Route::middleware('auth:sanctum')->group(function () {
 // Sitemap XML
 Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
+Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
+    // ... autres routes existantes ...
+    
+    // Routes FAQ avec support AJAX - CORRIGÉES
+    Route::prefix('faq')->group(function () {
+        // Route pour créer une FAQ (POST /admin/faq)
+        Route::post('/', [FaqController::class, 'store'])->name('admin.faq.store');
+        
+        // Route pour mettre à jour une FAQ (PUT /admin/faq/{faq})
+        Route::put('/{faq}', [FaqController::class, 'update'])->name('admin.faq.update');
+        
+        // Route pour supprimer une FAQ (DELETE /admin/faq/{faq})
+        Route::delete('/{faq}', [FaqController::class, 'destroy'])->name('admin.faq.destroy');
+        
+        // Route pour changer le statut actif (POST /admin/faq/{faq}/toggle-active)
+        Route::post('/{faq}/toggle-active', [FaqController::class, 'toggleActive'])
+            ->name('admin.faq.toggle-active');
+        
+        // Routes API pour AJAX - IMPORTANT: Avant les routes génériques
+        Route::get('/api', [FaqController::class, 'indexApi'])->name('admin.faq.api.index');
+        
+        // Route pour éditer une FAQ via API (GET /admin/faq/{faq}/edit/api)
+        Route::get('/{faq}/edit/api', [FaqController::class, 'editApi'])->name('admin.faq.api.edit');
+    });
+});
+
+// Routes FAQ publiques
+Route::prefix('faq')->name('faq.')->group(function () {
+    // Page principale FAQ
+    Route::get('/', [FaqPublicController::class, 'index'])->name('index');
+    
+    // Page d'une FAQ spécifique
+    Route::get('/{id}/{slug?}', [FaqPublicController::class, 'show'])
+         ->where('id', '[0-9]+')
+         ->name('show');
+    
+    // API pour AJAX
+    Route::get('/api/list', [FaqPublicController::class, 'apiIndex'])->name('api.index');
+});

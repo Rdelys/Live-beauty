@@ -15,7 +15,7 @@
   />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
   <style>
     
   /* ================================
@@ -1311,6 +1311,9 @@ table {
 <a href="#" class="menu-link" onclick="showSection('connexions-modeles-content')">
     <i class="fas fa-sign-in-alt"></i> Connexions Modèles
 </a>
+<a href="#" class="menu-link" onclick="showSection('faq-content')">
+    <i class="fas fa-question-circle"></i> FAQ
+</a>
 
   <form method="POST" action="{{ route('admin.logout') }}">
     @csrf
@@ -1432,6 +1435,110 @@ table {
 
 </div>
 
+<div id="faq-content" class="content-section d-none">
+    <h2><i class="fas fa-question-circle text-danger"></i> Gestion FAQ</h2>
+    <p>Ajoutez, modifiez et gérez les questions fréquentes.</p>
+
+    <!-- Bouton Ajouter -->
+    <div class="mb-4">
+        <button class="btn btn-primary" onclick="showFaqForm()">
+            <i class="fas fa-plus"></i> Ajouter une FAQ
+        </button>
+    </div>
+
+    <!-- Formulaire (caché par défaut) -->
+    <div id="faq-form-container" class="card bg-dark p-4 mb-4 d-none">
+        <h4 id="faq-form-title">Nouvelle FAQ</h4>
+        <form id="faq-form">
+            @csrf
+            <input type="hidden" id="faq-id" name="id">
+            
+            <div class="mb-3">
+                <label class="form-label">Question</label>
+                <input type="text" id="faq-question" name="question" class="form-control" required maxlength="500">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Réponse</label>
+                <textarea id="faq-reponse" name="reponse" class="form-control" rows="4" required></textarea>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Catégorie</label>
+                    <input type="text" id="faq-categorie" name="categorie" class="form-control" maxlength="100">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ordre</label>
+                    <input type="number" id="faq-order" name="order" class="form-control" min="0" value="0">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select id="faq-active" name="active" class="form-control">
+                        <option value="1">Actif</option>
+                        <option value="0">Inactif</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="cancelFaqForm()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tableau des FAQ -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="bg-danger text-white">
+                <tr>
+                    <th>ID</th>
+                    <th>Question</th>
+                    <th>Réponse</th>
+                    <th>Catégorie</th>
+                    <th>Ordre</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="faq-table-body">
+                @foreach($faqs as $faq)
+                <tr id="faq-row-{{ $faq->id }}">
+                    <td>{{ $faq->id }}</td>
+                    <td style="max-width: 250px;">{{ Str::limit($faq->question, 80) }}</td>
+                    <td style="max-width: 350px;">{{ Str::limit($faq->reponse, 120) }}</td>
+                    <td>{{ $faq->categorie ?? '—' }}</td>
+                    <td>{{ $faq->order }}</td>
+                    <td>
+                        <span class="badge bg-{{ $faq->active ? 'success' : 'secondary' }}">
+                            {{ $faq->active ? 'Actif' : 'Inactif' }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editFaq({{ $faq->id }})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        
+                        <button class="btn btn-{{ $faq->active ? 'warning' : 'success' }} btn-sm" 
+                                onclick="toggleFaqActive({{ $faq->id }})">
+                            <i class="fas fa-{{ $faq->active ? 'eye-slash' : 'eye' }}"></i>
+                        </button>
+                        
+                        <button class="btn btn-danger btn-sm" onclick="deleteFaq({{ $faq->id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
 <!-- 🔥 Section Historique des Lives -->
 <div id="historique-lives-content" class="content-section d-none">
   <h2><i class="fas fa-video text-danger"></i> Historique des Lives</h2>
@@ -2794,6 +2901,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "Films descriptions": document.getElementById("films-descriptions-content"),
           "Historique Lives": document.getElementById("historique-lives-content"), // ← Nouveau
   "Connexions Modèles": document.getElementById("connexions-modeles-content"), // ← Nouveau
+  "FAQ": document.getElementById("faq-content"), // ← Nouveau
 
 
 
@@ -3457,6 +3565,286 @@ document.addEventListener('DOMContentLoaded', function() {
       row.style.display = '';
     });
   };
+});
+</script>
+<script>
+// Variables globales
+let currentFaqId = null;
+
+// Afficher la section FAQ
+function showSection(sectionId) {
+    // Cacher toutes les sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('d-none');
+    });
+    
+    // Afficher la section demandée
+    document.getElementById(sectionId).classList.remove('d-none');
+    
+    // Gestion spéciale pour FAQ
+    if (sectionId === 'faq-content') {
+        loadFaqs();
+    }
+}
+
+// Fonction utilitaire pour obtenir le token CSRF
+function getCsrfToken() {
+    // Essayer de récupérer depuis la balise meta
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (metaTag) {
+        return metaTag.content;
+    }
+    
+    // Essayer de récupérer depuis le formulaire
+    const formToken = document.querySelector('#faq-form input[name="_token"]');
+    if (formToken) {
+        return formToken.value;
+    }
+    
+    console.error('Token CSRF non trouvé');
+    return '';
+}
+
+// Afficher/masquer le formulaire FAQ
+function showFaqForm(faq = null) {
+    const formContainer = document.getElementById('faq-form-container');
+    const formTitle = document.getElementById('faq-form-title');
+    
+    if (faq) {
+        // Mode édition
+        formTitle.textContent = 'Modifier la FAQ';
+        document.getElementById('faq-id').value = faq.id;
+        document.getElementById('faq-question').value = faq.question;
+        document.getElementById('faq-reponse').value = faq.reponse;
+        document.getElementById('faq-categorie').value = faq.categorie || '';
+        document.getElementById('faq-order').value = faq.order;
+        document.getElementById('faq-active').value = faq.active ? '1' : '0';
+        currentFaqId = faq.id;
+    } else {
+        // Mode création
+        formTitle.textContent = 'Nouvelle FAQ';
+        document.getElementById('faq-form').reset();
+        document.getElementById('faq-id').value = '';
+        document.getElementById('faq-active').value = '1'; // Par défaut actif
+        document.getElementById('faq-order').value = '0';
+        currentFaqId = null;
+    }
+    
+    formContainer.classList.remove('d-none');
+    formContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelFaqForm() {
+    document.getElementById('faq-form-container').classList.add('d-none');
+    currentFaqId = null;
+}
+
+// Charger les FAQs (AJAX)
+async function loadFaqs() {
+    try {
+        const response = await fetch('/admin/faq/api');
+        if (response.ok) {
+            const data = await response.json();
+            updateFaqTable(data.faqs);
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des FAQs:', error);
+    }
+}
+
+// Mettre à jour le tableau des FAQs
+function updateFaqTable(faqs) {
+    const tbody = document.getElementById('faq-table-body');
+    tbody.innerHTML = '';
+    
+    faqs.forEach(faq => {
+        const row = `
+            <tr id="faq-row-${faq.id}">
+                <td>${faq.id}</td>
+                <td style="max-width: 250px;">${truncateText(faq.question, 80)}</td>
+                <td style="max-width: 350px;">${truncateText(faq.reponse, 120)}</td>
+                <td>${faq.categorie || '—'}</td>
+                <td>${faq.order}</td>
+                <td>
+                    <span class="badge bg-${faq.active ? 'success' : 'secondary'}">
+                        ${faq.active ? 'Actif' : 'Inactif'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="editFaq(${faq.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-${faq.active ? 'warning' : 'success'} btn-sm" 
+                            onclick="toggleFaqActive(${faq.id})">
+                        <i class="fas fa-${faq.active ? 'eye-slash' : 'eye'}"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteFaq(${faq.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+// Éditer une FAQ
+// Éditer une FAQ - VERSION CORRIGÉE
+async function editFaq(id) {
+    try {
+        const response = await fetch(`/admin/faq/${id}/edit/api`);
+        
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const faq = await response.json();
+        
+        // DEBUG: Affichez ce que vous recevez
+        console.log('FAQ reçue:', faq);
+        
+        // Vérifiez la structure de l'objet
+        if (faq && faq.id) {
+            // Formatez correctement les valeurs
+            const formattedFaq = {
+                id: faq.id,
+                question: faq.question || '',
+                reponse: faq.reponse || '',
+                categorie: faq.categorie || '',
+                order: faq.order || 0,
+                active: Boolean(faq.active)
+            };
+            
+            showFaqForm(formattedFaq);
+        } else if (faq.success === false) {
+            alert(faq.message || 'FAQ non trouvée');
+        } else {
+            console.error('Structure FAQ invalide:', faq);
+            alert('Format de réponse invalide');
+        }
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement de la FAQ:', error);
+        alert('Erreur lors du chargement de la FAQ: ' + error.message);
+    }
+}
+
+// Toggle statut actif/inactif
+async function toggleFaqActive(id) {
+    if (!confirm('Voulez-vous changer le statut de cette FAQ ?')) return;
+    
+    try {
+        const response = await fetch(`/admin/faq/${id}/toggle-active`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.success || 'Statut mis à jour');
+            loadFaqs();
+        } else {
+            alert('Erreur lors de la mise à jour du statut');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la mise à jour du statut');
+    }
+}
+
+// Supprimer une FAQ
+async function deleteFaq(id) {
+    if (!confirm('Voulez-vous vraiment supprimer cette FAQ ?')) return;
+    
+    try {
+        const response = await fetch(`/admin/faq/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.success || 'FAQ supprimée');
+            loadFaqs();
+        } else {
+            alert('Erreur lors de la suppression');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la suppression');
+    }
+}
+
+// Gestion du formulaire FAQ
+document.getElementById('faq-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Convertir les valeurs en types appropriés
+    data.order = parseInt(data.order) || 0;
+    data.active = data.active === '1';
+    
+    const url = currentFaqId ? `/admin/faq/${currentFaqId}` : '/admin/faq';
+    const method = currentFaqId ? 'PUT' : 'POST';
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken()
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.success || 'Opération réussie');
+            cancelFaqForm();
+            loadFaqs();
+        } else {
+            // Si ce n'est pas du JSON, essayer de lire le texte
+            const text = await response.text();
+            try {
+                const error = JSON.parse(text);
+                alert(error.message || 'Erreur lors de l\'opération');
+            } catch {
+                alert('Erreur: ' + response.status + ' ' + response.statusText);
+            }
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'envoi du formulaire');
+    }
+});
+
+// Fonction utilitaire pour tronquer le texte
+function truncateText(text, maxLength) {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestionnaire pour le lien du menu FAQ
+    document.querySelector('a[onclick*="faq-content"]')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        showSection('faq-content');
+    });
+    
+    // Charger les FAQs si on est déjà sur la section FAQ
+    if (!document.getElementById('faq-content').classList.contains('d-none')) {
+        loadFaqs();
+    }
 });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

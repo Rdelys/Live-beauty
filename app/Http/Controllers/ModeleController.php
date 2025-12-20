@@ -15,6 +15,7 @@ use App\Models\HistoriqueJeton;
 use App\Models\FilmDescription;
 use App\Models\HistoriqueLive;
 use App\Models\ModeleConnexion;
+use App\Models\faq;
 
 
 class ModeleController extends Controller
@@ -195,6 +196,9 @@ class ModeleController extends Controller
         'total_publics' => HistoriqueLive::where('is_prive', false)->count(),
         'lives_en_cours' => HistoriqueLive::where('statut', 'commencer')->count(),
     ];
+
+            $faqs = Faq::orderBy('order')->orderBy('created_at', 'desc')->get();
+
     // Envoi de toutes les données à la vue
     return view('admin', compact(
         'modeles',
@@ -215,7 +219,7 @@ class ModeleController extends Controller
         'historiqueLives',
         'statsLives',
                     'connexions',
-            'statsConnexions'
+            'statsConnexions','faqs'
     ));
 }
 

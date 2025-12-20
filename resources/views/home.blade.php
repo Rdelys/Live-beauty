@@ -814,6 +814,13 @@ body {
 </button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">{{ __('Inscription GRATUITE') }}
 </button>
+@if(Route::has('faq.index'))
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('faq.index') }}">
+            <i class="fas fa-question-circle me-1"></i> FAQ
+        </a>
+    </li>
+@endif
                 </div>
             </div>
         </div>
