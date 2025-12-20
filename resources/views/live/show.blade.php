@@ -1702,7 +1702,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
               <!-- Mini preview locale (en bas à gauche du player) -->
 
               <!-- Menus (remplis via Blade) -->
-              <!-- <div id="defaultTokenMenu" class="token-menu" aria-hidden="true">
+              <!-- <div id="defaultTokenMenu" class="token-menu">
                 <div class="menu-title">{{ __('Jetons standards') }} </div>
                 @php $jetonsGlobaux = $jetons->whereNull('modele_id'); @endphp
                 @foreach($jetonsGlobaux as $jeton)
@@ -1715,7 +1715,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
                 @endforeach
               </div> -->
 
-              <div id="modelTokenMenu" class="token-menu" aria-hidden="true">
+              <div id="modelTokenMenu" class="token-menu">
                   <div class="menu-title">Actions de {{ $modele->prenom }}</div>
 
                   <div class="token-grid"> <!-- AJOUT ICI -->
@@ -1737,7 +1737,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
               </div>
 
               <!-- Menu Surprise -->
-              <div id="modelSurpriseTokenMenu" class="token-menu" aria-hidden="true">
+              <div id="modelSurpriseTokenMenu" class="token-menu">
                 <div class="menu-title">{{ __('Envoyer une Surprise') }} ✨</div>
                 <div class="token-grid">
                     <div class="token-item" data-cost="1"><div class="token-emoji">💌</div><div class="token-cost">1</div></div>
@@ -1781,7 +1781,7 @@ box-shadow: 0 0 20px rgba(255,64,129,0.45), 0 0 40px rgba(124,77,255,0.35);
 
 
   <!-- Modal confirmation show privé -->
-<div class="modal fade" id="confirmPrivateModal" tabindex="-1" aria-labelledby="confirmPrivateLabel" aria-hidden="true">
+<div class="modal fade" id="confirmPrivateModal" tabindex="-1" aria-labelledby="confirmPrivateLabel" >
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white border-0 rounded-3 shadow">
       <div class="modal-header border-0">
@@ -2922,7 +2922,7 @@ document.addEventListener("keydown", (e) => {
 
 
 <!-- Modal Premium : modèle a quitté -->
-<div class="modal fade" id="modelLeftModal" tabindex="-1" aria-labelledby="modelLeftLabel" aria-hidden="true">
+<div class="modal fade" id="modelLeftModal" tabindex="-1" aria-labelledby="modelLeftLabel" >
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content modal-premium text-center text-white border-0 shadow-lg position-relative overflow-hidden">
 
@@ -3125,9 +3125,9 @@ function onTokenChoiceClick(e, isGolden) {
     document.querySelectorAll('#defaultTokenMenu .token-choice').forEach(btn => {
         btn.addEventListener('click', (e) => onTokenChoiceClick(e, false));
     });
-    document.querySelectorAll('#modelTokenMenu .token-choice').forEach(btn => {
-        btn.addEventListener('click', (e) => onTokenChoiceClick(e, true));
-    });
+    document.querySelectorAll('#modelTokenMenu .token-item').forEach(btn => {
+    btn.addEventListener('click', (e) => onTokenChoiceClick(e, true));
+});
 
     document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
