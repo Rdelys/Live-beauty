@@ -77,8 +77,8 @@
 
 /* ===================== 📦 PANEL ===================== */
 #adminChatPanel {
-    width: 500px; /* PLUS LARGE */
-    max-height: 700px; /* PLUS HAUT */
+    width: 500px;
+    max-height: 700px;
     background: rgba(12,12,12,0.95);
     border: 2px solid #ff0037;
     border-radius: 22px;
@@ -158,7 +158,7 @@
     scrollbar-color: #ff0037 #111;
 }
 
-/* =========== 📩 MESSAGE BLOCK (agrandi + lisible) =========== */
+/* =========== 📩 MESSAGE BLOCK =========== */
 .adminChatBlock {
     background: rgba(30,30,30,0.95);
     border: 1px solid #550010;
@@ -191,11 +191,36 @@
 }
 
 .stored-message {
-    opacity: 0.8;
     border-left: 3px solid #ff0037;
     padding-left: 10px;
-    margin: 5px 0;
+    margin: 8px 0;
+}
+
+/* Timestamps */
+.message-timestamp {
+    font-size: 11px;
+    color: #888;
+    margin-left: 8px;
     font-style: italic;
+}
+
+.admin-timestamp {
+    font-size: 11px;
+    color: #ff7799;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.date-separator {
+    text-align: center;
+    margin: 10px 0;
+    color: #ff0037;
+    font-size: 12px;
+    font-weight: bold;
+    border-top: 1px dashed #444;
+    border-bottom: 1px dashed #444;
+    padding: 5px;
+    background: rgba(255, 0, 55, 0.1);
 }
 
 /* Input */
@@ -209,6 +234,24 @@
     margin-top: 10px;
     font-size: 15px;
 }
+
+/* Bouton refresh */
+#refreshChat {
+    background: #ff0037;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#refreshChat:hover {
+    background: #ff2a55;
+}
 </style>
 
 <div id="adminChatWrapper" class="adminchat-wrapper">
@@ -217,16 +260,15 @@
     </div>
 
     <div id="adminChatPanel">
-        <!-- Dans adminChatHeader, après le titre -->
-<div id="adminChatHeader">
-    👑 {{ __('Admin Chat') }}
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <button id="refreshChat" style="background: #ff0037; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
-            🔄 Rafraîchir
-        </button>
-        <span id="adminChatClose">&times;</span>
-    </div>
-</div>
+        <div id="adminChatHeader">
+            👑 {{ __('Admin Chat') }}
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button id="refreshChat">
+                    🔄 Rafraîchir
+                </button>
+                <span id="adminChatClose">&times;</span>
+            </div>
+        </div>
         
         <div id="adminChatStats">
             <span id="onlineUsers">En ligne: 0</span>
@@ -252,6 +294,7 @@ const storedSpan = document.getElementById("storedMessages");
 
 let unreadCount = 0;
 let connectedClients = {};
+let lastProcessedDates = {};
 
 /* Ouvrir */
 toggle.onclick = () => {
@@ -284,16 +327,95 @@ socket.on("connect", () => {
     console.log("👑 Admin connecté au socket");
 });
 
+/* Fonctions utilitaires pour les dates */
+function formatDateTime(timestamp) {
+    if (!timestamp) return '';
+    
+    try {
+        const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+        if (isNaN(date.getTime())) return '';
+        
+        const now = new Date();
+        const today = now.toDateString();
+        const messageDate = date.toDateString();
+        
+        // Si c'est aujourd'hui
+        if (today === messageDate) {
+            return `Aujourd'hui ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // Si c'est hier
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (yesterday.toDateString() === messageDate) {
+            return `Hier ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // Sinon, date complète
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    } catch (e) {
+        console.error("Erreur formatDateTime:", e);
+        return '';
+    }
+}
+
+function getDateLabel(timestamp) {
+    if (!timestamp) return '';
+    
+    try {
+        const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+        if (isNaN(date.getTime())) return '';
+        
+        const now = new Date();
+        const today = now.toDateString();
+        const messageDate = date.toDateString();
+        
+        if (today === messageDate) {
+            return 'Aujourd\'hui';
+        }
+        
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (yesterday.toDateString() === messageDate) {
+            return 'Hier';
+        }
+        
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    } catch (e) {
+        return '';
+    }
+}
+
+function addDateSeparatorIfNeeded(userId, timestamp, thread) {
+    if (!timestamp) return false;
+    
+    const dateLabel = getDateLabel(timestamp);
+    if (!dateLabel) return false;
+    
+    if (!lastProcessedDates[userId]) {
+        lastProcessedDates[userId] = {};
+    }
+    
+    if (lastProcessedDates[userId][dateLabel] !== true) {
+        lastProcessedDates[userId][dateLabel] = true;
+        thread.innerHTML += `<div class="date-separator">${dateLabel}</div>`;
+        return true;
+    }
+    
+    return false;
+}
+
 /* MESSAGES STOCKÉS */
 socket.on("stored-messages-count", data => {
     storedSpan.textContent = `Messages stockés: ${data.count}`;
 });
 
-// Modifiez la partie réception des messages stockés
 socket.on("stored-messages", messages => {
     console.log(`📨 Réception de ${messages.length} conversations stockées`);
     
-    // D'abord, effacer les anciens blocs existants pour éviter les doublons
+    // Réinitialiser les dates traitées
+    lastProcessedDates = {};
+    
     messages.forEach(group => {
         let block = document.getElementById("client-" + group.userId);
         
@@ -311,24 +433,40 @@ socket.on("stored-messages", messages => {
         }
         
         const thread = block.querySelector(".thread");
-        // Effacer le contenu existant et ajouter tous les messages
         thread.innerHTML = '';
+        
+        // Ajouter les messages avec timestamps
         group.messages.forEach((msg, index) => {
-            thread.innerHTML += `<p class="stored-message"><strong>${group.pseudo} :</strong> ${msg}</p>`;
+            const timestamp = group.timestamps && group.timestamps[index] ? group.timestamps[index] : null;
+            
+            // Ajouter séparateur de date si nécessaire
+            addDateSeparatorIfNeeded(group.userId, timestamp, thread);
+            
+            // Formater l'heure
+            const timeHtml = timestamp ? 
+                `<span class="message-timestamp">${formatDateTime(timestamp)}</span>` : 
+                '';
+                
+            thread.innerHTML += `
+                <p class="stored-message">
+                    <strong>${group.pseudo} :</strong> ${msg} ${timeHtml}
+                </p>`;
         });
         
         // Marquer comme lu
         socket.emit("mark-as-read", { userId: group.userId });
-        
-        // Faire défiler vers le bas
-        list.scrollTop = list.scrollHeight;
     });
     
     // Mettre à jour le compteur
     storedSpan.textContent = `Messages stockés: ${messages.reduce((total, group) => total + group.messages.length, 0)}`;
+    
+    // Faire défiler vers le bas
+    setTimeout(() => {
+        list.scrollTop = list.scrollHeight;
+    }, 100);
 });
 
-// Modifiez aussi la réception des nouveaux messages
+// Réception des nouveaux messages
 socket.on("admin-new-message", data => {
     console.log("📩 Nouveau message en direct:", data);
     
@@ -346,7 +484,27 @@ socket.on("admin-new-message", data => {
     }
 
     const thread = block.querySelector(".thread");
-    thread.innerHTML += `<p><strong>${data.pseudo} :</strong> ${data.message}</p>`;
+    
+    // Ajouter séparateur de date si nécessaire
+    const timestamp = data.timestamp || new Date().toISOString();
+    addDateSeparatorIfNeeded(data.userId, timestamp, thread);
+    
+    // Formater le timestamp
+    const timeHtml = `<span class="message-timestamp">${formatDateTime(timestamp)}</span>`;
+    
+    // Afficher le message avec l'heure
+    thread.innerHTML += `
+        <p class="stored-message">
+            <strong>${data.pseudo} :</strong> ${data.message} ${timeHtml}
+        </p>`;
+
+    // Si c'est un message traduit, afficher l'original
+    if (data.original_message && data.translated) {
+        thread.innerHTML += `
+            <p style="font-size: 12px; color: #ff7799; margin-left: 15px;">
+                <em>Original (${data.original_language || 'auto'}): "${data.original_message}"</em>
+            </p>`;
+    }
 
     // Jouer le son
     if (sound) {
@@ -363,12 +521,15 @@ socket.on("admin-new-message", data => {
 
     // Mettre à jour les stats
     updateMessageStats();
-    list.scrollTop = list.scrollHeight;
+    
+    // Faire défiler vers le bas
+    setTimeout(() => {
+        list.scrollTop = list.scrollHeight;
+    }, 100);
 });
 
-// Ajoutez cette fonction pour mettre à jour les stats
-async function updateMessageStats() {
-    // Vous pouvez aussi émettre un événement pour recharger les stats
+// Fonction pour mettre à jour les stats
+function updateMessageStats() {
     socket.emit("load-stored-messages");
 }
 
@@ -394,19 +555,47 @@ document.addEventListener("keydown", e => {
         if (!msg) return;
 
         const id = String(e.target.dataset.id);
+        const now = new Date();
+        const timestamp = formatDateTime(now);
 
-        socket.emit("admin-reply", { userId: id, message: msg });
+        // Envoyer au serveur
+        socket.emit("admin-reply", { 
+            userId: id, 
+            message: msg,
+            timestamp: now.toISOString()
+        });
 
+        // Afficher localement
         const thread = document.querySelector(`#client-${id} .thread`);
-        thread.innerHTML += `<p><strong style="color:#ff0037">Admin :</strong> ${msg}</p>`;
+        
+        // Ajouter le message admin avec timestamp
+        thread.innerHTML += `
+            <p style="margin: 8px 0;">
+                <strong style="color:#ff0037">Admin :</strong> ${msg} 
+                <span class="admin-timestamp">${timestamp}</span>
+            </p>`;
 
         e.target.value = "";
-        list.scrollTop = list.scrollHeight;
+        
+        // Faire défiler vers le bas
+        setTimeout(() => {
+            list.scrollTop = list.scrollHeight;
+        }, 50);
     }
 });
 
-// Ajoutez ce script
+// Rafraîchir le chat
 document.getElementById("refreshChat").onclick = () => {
     socket.emit("load-stored-messages");
+    // Réinitialiser l'affichage
+    list.innerHTML = '';
+    lastProcessedDates = {};
 };
+
+// Initialiser au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    if (socket.connected) {
+        socket.emit("identify", { type: "admin" });
+    }
+});
 </script>
