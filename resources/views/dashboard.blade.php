@@ -135,7 +135,6 @@
     }
 
     .nav-link:hover {
-      color: var(--accent) !important;
       transform: scale(1.05);
     }
 
@@ -659,7 +658,6 @@
     }
 
     .nav-link:hover i {
-      color: var(--accent);
       transform: scale(1.15);
       text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
     }
@@ -966,7 +964,11 @@
                     <a href="#" class="text-white fs-5 me-3" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Modifier mon profil">
                         <i class="fas fa-user-cog"></i>
                     </a>
-
+                    @if(Route::has('faq.index'))
+                            <a class="nav-link" target="_blank" href="{{ route('faq.index') }}">
+                                <i class="fas fa-question-circle me-1"></i> FAQ
+                            </a>
+                    @endif
                     <!-- Icône déconnexion -->
                     <a href="{{ route('logout') }}" class="text-white fs-5 me-2" title="Déconnexion">
                         <i class="fas fa-power-off"></i>

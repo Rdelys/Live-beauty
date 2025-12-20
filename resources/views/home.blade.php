@@ -192,7 +192,6 @@ body {
 }
 
 .nav-link:hover {
-  color: var(--accent) !important;
   transform: scale(1.05);
 }
 
@@ -689,9 +688,7 @@ body {
     }
 
     .nav-link:hover i {
-      color: var(--accent);
       transform: scale(1.15);
-      text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
     }
 
     /* Espacement et alignement */
@@ -807,6 +804,11 @@ body {
 </li>
             </ul>
                 <div class="d-flex align-items-center">
+                  @if(Route::has('faq.index'))
+        <a class="nav-link" target="_blank" href="{{ route('faq.index') }}">
+            <i class="fas fa-question-circle me-1"></i> FAQ
+        </a>
+@endif
                 <a href="mailto:contact@livebeautyofficial.com" class="text-white me-3 fs-4" title="Envoyer un email">
                     <i class="fa-solid fa-envelope"></i>
                 </a>
@@ -814,13 +816,7 @@ body {
 </button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#registerModal">{{ __('Inscription GRATUITE') }}
 </button>
-@if(Route::has('faq.index'))
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('faq.index') }}">
-            <i class="fas fa-question-circle me-1"></i> FAQ
-        </a>
-    </li>
-@endif
+
                 </div>
             </div>
         </div>
