@@ -38,31 +38,89 @@
     <!-- CANONICAL URL -->
     <link rel="canonical" href="{{ url()->current() }}">
     
-    <!-- SCHEMA.ORG STRUCTURED DATA -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "LIVE BEAUTY",
-        "url": "{{ url('/') }}",
-        "description": "Plateforme premium de cams en direct avec camgirls professionnelles",
-        "publisher": {
-            "@type": "Organization",
-            "name": "LIVE BEAUTY",
-            "url": "{{ url('/') }}",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "{{ asset('storage/logo.png') }}"
-            }
-        },
-        "audience": {
-            "@type": "PeopleAudience",
-            "suggestedMinAge": 18,
-            "suggestedMaxAge": 99
-        }
+  
+    <!-- GOOGLE SITE VERIFICATION (à remplacer avec votre code) -->
+<meta name="google-site-verification" content="VOTRE_CODE_GOOGLE_SEARCH_CONSOLE">
+
+<!-- BING VERIFICATION -->
+<meta name="msvalidate.01" content="VOTRE_CODE_BING">
+
+<!-- YANDEX VERIFICATION -->
+<meta name="yandex-verification" content="VOTRE_CODE_YANDEX">
+
+<!-- ADDITIONAL META TAGS -->
+<meta name="theme-color" content="#e50914">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="LIVE BEAUTY">
+
+<!-- POUR ADULT CONTENT -->
+<meta name="rating" content="RTA-5042-1996-1400-1577-RTA">
+<meta name="RATING" content="RTA-5042-1996-1400-1577-RTA">
+<meta http-equiv="PICS-Label" content='(pics-1.1 "http://www.icra.org/pics/vocabularyv03/" l gen true for "https://www.livebeautyofficial.com" r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true for "https://www.livebeautyofficial.com" r (n 1 s 1 v 1 l 1))'>
+
+<!-- GEO TARGETING -->
+<meta name="geo.region" content="FR">
+<meta name="geo.placename" content="France">
+<meta name="geo.position" content="48.8566;2.3522">
+<meta name="ICBM" content="48.8566, 2.3522">
+
+<!-- CANONICAL (très important) -->
+<link rel="canonical" href="https://www.livebeautyofficial.com">
+
+<!-- ALTERNATE LANGUAGES -->
+<link rel="alternate" hreflang="fr" href="https://www.livebeautyofficial.com">
+<link rel="alternate" hreflang="en" href="https://www.livebeautyofficial.com/en">
+<link rel="alternate" hreflang="x-default" href="https://www.livebeautyofficial.com">
+
+<!-- SCHEMA.ORG ADDITIONAL DATA -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "AdultEntertainment",
+    "name": "LIVE BEAUTY",
+    "url": "https://www.livebeautyofficial.com",
+    "logo": "{{ asset('storage/logo.png') }}",
+    "image": "{{ asset('storage/default-og.jpg') }}",
+    "description": "Plateforme premium de cams en direct avec des camgirls professionnelles. Inscription gratuite, shows privés et publics.",
+    "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "FR"
+    },
+    "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "contact@livebeautyofficial.com"
+    },
+    "audience": {
+        "@type": "PeopleAudience",
+        "suggestedMinAge": 18
     }
-    </script>
-    
+}
+</script>
+
+<!-- BREADCRUMB SCHEMA -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Accueil",
+            "item": "https://www.livebeautyofficial.com"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Camgirls en Direct",
+            "item": "https://www.livebeautyofficial.com#modeles"
+        }
+    ]
+}
+</script>
     <!-- LINKS CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

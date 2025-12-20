@@ -29,6 +29,8 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\BlockCountries::class,
             \App\Http\Middleware\HostFilter::class,
+                    \App\Http\Middleware\SeoHeaders::class,
+
         ],
 
         'api' => [

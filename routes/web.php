@@ -20,7 +20,7 @@ use App\Http\Controllers\FilmDescriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CryptoController;
 use App\Http\Controllers\LanguageController;
-
+use App\Http\Controllers\SitemapController;
 
 
 
@@ -384,3 +384,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/translate', [LanguageController::class, 'translate']);
     Route::post('/detect-language', [LanguageController::class, 'detect']);
 });
+
+// Sitemap XML
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+

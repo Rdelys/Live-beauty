@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
     {
         // Ici tu mets toutes tes commandes planifiées
         $schedule->command('shows:update-status')->everyMinute();
+            $schedule->command('sitemap:submit')->daily();
+
     }
 
     /**

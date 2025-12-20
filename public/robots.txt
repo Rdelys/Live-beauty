@@ -1,18 +1,47 @@
-# public/robots.txt
 User-agent: *
 Allow: /
 Disallow: /admin/
-Disallow: /login
-Disallow: /profil
-Disallow: /modele/profil
+Disallow: /admin-login
 Disallow: /modele/login
+Disallow: /modele/profil
 Disallow: /dashboard/
-Disallow: /*?*  # Paramètres d'URL
+Disallow: /profil
+Disallow: /connexion
+Disallow: /register
+Disallow: /*?*
 Disallow: /*.php$
+Disallow: /storage/temp/
+Disallow: /config/
+Disallow: /vendor/
+Disallow: /node_modules/
 
-Sitemap: https://www.livebeautyofficial.com/sitemap.xml
+# Blocage des robots indésirables
+User-agent: GPTBot
+Disallow: /
 
-# Pour Google Image
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
 User-agent: Googlebot-Image
 Allow: /storage/
 Disallow: /storage/temp/
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+Sitemap: https://www.livebeautyofficial.com/sitemap.xml
+Sitemap: https://livebeautyofficial.com/sitemap.xml
