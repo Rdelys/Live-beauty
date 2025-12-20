@@ -261,7 +261,7 @@ select {
     appearance: none !important;
 }
 
-/* Flèche custom (pour éviter celle blanche d’origine) */
+/* Flèche custom (pour éviter celle blanche d'origine) */
 select.form-control {
     background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='14' viewBox='0 0 20 20' width='14' xmlns='http://www.w3.org/2000/svg'><polygon points='0,0 20,0 10,10'/></svg>");
     background-repeat: no-repeat;
@@ -273,6 +273,19 @@ select.form-control {
 select option {
     background: #111 !important;
     color: #fff !important;
+}
+
+/* -------------------------------
+   MESSAGE D'AIDE
+--------------------------------*/
+.help-text {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.help-text i {
+    color: #ff335a;
 }
 
     </style>
@@ -345,7 +358,7 @@ select option {
     <div class="info-block">
 
         <!-- FORMULAIRE -->
-        <form action="{{ route('film.store') }}" method="POST">
+        <form action="{{ route('film.store') }}" method="POST" id="filmForm">
             @csrf
 
             <!-- SELECT modèle -->
@@ -360,7 +373,6 @@ select option {
             </div>
 
             <!-- DETAIL -->
-
             <div class="mb-3">
                 <label class="label">Détail du film :</label>
                 <select name="detail" class="form-control bg-dark text-white border-secondary" required>
@@ -371,12 +383,22 @@ select option {
                 </select>
             </div>
 
-            <!-- MINUTES -->
+            <!-- MINUTES - VERSION AMÉLIORÉE -->
             <div class="mb-3">
                 <label class="label">Minutes :</label>
                 <input type="number" name="minutes" id="minutesInput"
-                    class="form-control bg-dark text-white border-secondary" min="5" value="5">
+                    class="form-control bg-dark text-white border-secondary"
+                    min="1" max="60" value="5" required>
+                <div class="help-text">
+                    <i class="fas fa-info-circle"></i> Astuce : Tapez 1 pour 10 minutes, 2 pour 20 minutes, 3 pour 30 minutes, etc.
+                </div>
+                <div class="help-text">
+                    <i class="fas fa-info-circle"></i> Pour 5 minutes, tapez directement 5.
+                </div>
             </div>
+
+            <!-- CHAMP CACHÉ POUR LES VRAIES MINUTES -->
+            <input type="hidden" name="real_minutes" id="realMinutes" value="5">
 
             <p id="jetonsMessage" class="text-warning fw-bold mt-2">
                 5 minutes = 250 jetons
@@ -391,7 +413,7 @@ select option {
                 </select>
             </div>
 
-            <button class="btn btn-danger w-100 fw-bold mt-3">
+            <button type="submit" class="btn btn-danger w-100 fw-bold mt-3">
                 <i class="fas fa-paper-plane me-2"></i> Envoyer la demande
             </button>
 
@@ -399,7 +421,7 @@ select option {
 
     </div>
 
-    <!-- LISTE DES DEMANDES (STATIQUE) -->
+    <!-- LISTE DES DEMANDES -->
     <h4 class="mt-4 mb-3" style="color:#ff003c;">Historique des demandes</h4>
 
     <div class="info-block">
@@ -407,8 +429,8 @@ select option {
     <table class="table table-dark table-bordered align-middle">
         <thead>
             <tr>
-                <th>Pseudo </th>
-                <th>Email </th>
+                <th>Pseudo</th>
+                <th>Email</th>
                 <th>Modèle</th>
                 <th>Film demandé</th>
                 <th>Minutes</th>
@@ -446,38 +468,103 @@ select option {
 
 </div>
 
-
-
-    <!-- SECTION PARAMÈTRES
-    <div id="settings" class="section">
-
-        <h2 class="fw-bold mb-3" style="color:#ff003c;">
-            <i class="fas fa-gear me-2"></i> Paramètres
-        </h2>
-
-        <p>Section à configurer ensemble (changement email, mot de passe, notif…)</p>
-    </div> -->
-
 </div>
+
 <script>
     const minutesInput = document.getElementById('minutesInput');
+    const realMinutesInput = document.getElementById('realMinutes');
     const jetonsMessage = document.getElementById('jetonsMessage');
+    const filmForm = document.getElementById('filmForm');
 
-    minutesInput.addEventListener('input', () => {
-        let minutes = parseInt(minutesInput.value);
-
-        if (minutes < 5) {
-            minutesInput.value = 5;
-            minutes = 5;
+    function calculateMinutes(value) {
+        // Si l'utilisateur tape 1, 2, 3 ou 4, on multiplie par 10
+        if (value >= 1 && value <= 4) {
+            return value * 10;
         }
+        // Sinon, on garde la valeur telle quelle (minimum 5)
+        return Math.max(value, 5);
+    }
 
-        let extraMinutes = minutes - 5;
-        let jetons = 250 + (extraMinutes * 20);
+    function calculateJetons(minutes) {
+        if (minutes <= 5) {
+            return 250;
+        }
+        // 250 jetons pour les 5 premières minutes
+        // + 20 jetons par minute supplémentaire
+        return 250 + ((minutes - 5) * 20);
+    }
 
-        jetonsMessage.textContent = `${minutes} minutes = ${jetons} jetons`;
+    function updateDisplay() {
+        let inputValue = parseInt(minutesInput.value) || 5;
+        
+        // Calcul des vraies minutes
+        let realMinutes = calculateMinutes(inputValue);
+        
+        // Mise à jour du champ caché
+        realMinutesInput.value = realMinutes;
+        
+        // Calcul des jetons
+        let jetons = calculateJetons(realMinutes);
+        
+        // Affichage du message
+        if (inputValue >= 1 && inputValue <= 4) {
+            jetonsMessage.innerHTML = `
+                <i class="fas fa-magic me-1"></i> 
+                ${inputValue} = ${realMinutes} minutes = ${jetons} jetons
+                <br><small class="text-muted">(Conversion automatique : ${inputValue} → ${realMinutes} minutes)</small>
+            `;
+        } else {
+            jetonsMessage.innerHTML = `
+                <i class="fas fa-clock me-1"></i> 
+                ${realMinutes} minutes = ${jetons} jetons
+            `;
+        }
+        
+        // Validation côté client
+        if (inputValue < 1) {
+            minutesInput.value = 1;
+            updateDisplay();
+        }
+    }
+
+    // Événement sur la saisie
+    minutesInput.addEventListener('input', updateDisplay);
+
+    // Validation avant soumission du formulaire
+    filmForm.addEventListener('submit', function(e) {
+        let inputValue = parseInt(minutesInput.value) || 5;
+        
+        if (inputValue < 1) {
+            e.preventDefault();
+            alert('Veuillez entrer un nombre valide (1-60)');
+            minutesInput.focus();
+            return false;
+        }
+        
+        // S'assurer que les vraies minutes sont bien calculées
+        let realMinutes = calculateMinutes(inputValue);
+        realMinutesInput.value = realMinutes;
+        
+        // Confirmation pour les petites valeurs
+        if (inputValue >= 1 && inputValue <= 4) {
+            let confirmMessage = `Vous avez tapé ${inputValue}. Ceci sera converti en ${realMinutes} minutes (${inputValue} × 10).\n\n`;
+            confirmMessage += `Coût : ${calculateJetons(realMinutes)} jetons\n\n`;
+            confirmMessage += `Confirmer la demande ?`;
+            
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+        
+        return true;
+    });
+
+    // Initialisation au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDisplay();
     });
 </script>
-
 
 </body>
 </html>
