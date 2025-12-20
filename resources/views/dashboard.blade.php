@@ -802,6 +802,35 @@
     background-color: rgba(255,255,255,0.1);
 }
 
+/* Style pour le dropdown des langues */
+.lang-dropdown {
+    position: relative;
+    z-index: 9999; /* Valeur très élevée */
+}
+
+.lang-dropdown .dropdown-menu {
+    z-index: 10000 !important; /* Encore plus élevé */
+    position: absolute;
+    top: 100%;
+    left: auto;
+    right: 0;
+    min-width: 120px;
+}
+
+/* S'assurer qu'il dépasse tout */
+.navbar {
+    z-index: 1000; /* Plus bas que le dropdown */
+}
+
+/* S'assurer que le modal backdrop ne couvre pas le dropdown */
+.modal-backdrop {
+    z-index: 1050; /* Plus bas que le dropdown */
+}
+
+.modal {
+    z-index: 1060;
+}
+
 .dropdown-menu-dark {
     background-color: #111;
     border: 1px solid rgba(255,0,0,0.2);
