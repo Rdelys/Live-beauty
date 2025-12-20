@@ -21,7 +21,6 @@ class SeoHeaders
             'X-Robots-Tag' => 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
             'X-Content-Type-Options' => 'nosniff',
             'Referrer-Policy' => 'strict-origin-when-cross-origin',
-            'Permissions-Policy' => 'camera=(), microphone=(), geolocation=()',
         ];
         
         // Pour les pages adultes
