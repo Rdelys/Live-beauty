@@ -200,6 +200,20 @@ window._chatAlreadyLoaded = true;
         <span id="close-chatbot">&times;</span>
     </div>
 
+    <div style="padding: 8px 16px; background: rgba(255,0,55,0.1); border-bottom: 1px solid #550010;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <small style="color: #ff7799;">Langue: {{ Auth::user()->preferred_language ?? 'FR' }}</small>
+            <select id="languageSelector" style="background: #111; color: white; border: 1px solid #ff0037; padding: 3px 8px; border-radius: 4px;">
+                <option value="FR" {{ (Auth::user()->preferred_language ?? 'FR') === 'FR' ? 'selected' : '' }}>Français</option>
+                <option value="EN" {{ (Auth::user()->preferred_language ?? 'FR') === 'EN' ? 'selected' : '' }}>English</option>
+                <option value="ES" {{ (Auth::user()->preferred_language ?? 'FR') === 'ES' ? 'selected' : '' }}>Español</option>
+                <option value="IT" {{ (Auth::user()->preferred_language ?? 'FR') === 'IT' ? 'selected' : '' }}>Italiano</option>
+                <option value="DE" {{ (Auth::user()->preferred_language ?? 'FR') === 'DE' ? 'selected' : '' }}>Deutsch</option>
+                <!-- Ajoutez d'autres langues selon vos besoins -->
+            </select>
+        </div>
+    </div>
+
     <div id="chatbot-messages">
         <div class="msg-left welcome-msg">🔥 {{ __('Bienvenue') }} {{ Auth::user()->pseudo }} !</div>
         <div class="msg-left welcome-msg">😘 {{ __('Comment puis-je t’aider aujourd’hui') }} ?</div>
@@ -330,6 +344,42 @@ function scrollChatToBottom() {
 
 document.getElementById("chatbot-toggle").addEventListener("click", () => {
     setTimeout(scrollChatToBottom, 150);
+});
+
+document.getElementById('languageSelector').addEventListener('change', function() {
+    const selectedLang = this.value;
+    
+    fetch('/api/set-language', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            language: selectedLang
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Rafraîchir la connexion socket pour prendre en compte la nouvelle langue
+            if (window.socketChat) {
+                window.socketChat.disconnect();
+                window.socketChat.connect();
+            }
+            
+            // Afficher un message de confirmation
+            const messagesDiv = document.getElementById('chatbot-messages');
+            messagesDiv.innerHTML += `
+                <div class="msg-left" style="background: #1a3a1a; color: #77ff77;">
+                    🌐 Langue mise à jour: ${selectedLang}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Erreur changement de langue:', error);
+    });
 });
 </script>
 

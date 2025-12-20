@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FilmDescriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CryptoController;
+use App\Http\Controllers\LanguageController;
 
 
 
@@ -377,3 +378,9 @@ Route::middleware('auth')->post('/crypto/create', [CryptoController::class, 'cre
 
 Route::post('/crypto/webhook', [CryptoController::class, 'webhook'])
     ->name('crypto.webhook');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/set-language', [LanguageController::class, 'setPreferredLanguage']);
+    Route::post('/translate', [LanguageController::class, 'translate']);
+    Route::post('/detect-language', [LanguageController::class, 'detect']);
+});

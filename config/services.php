@@ -40,4 +40,9 @@ return [
         'env'        => env('NOWPAYMENTS_SANDBOX', false),
     ],
 
+    'deepl' => [
+        'api_key' => env('DEEPL_API_KEY'),
+        'api_url' => env('DEEPL_API_URL', 'https://api-free.deepl.com'),
+    ],
+
 ];
