@@ -2408,6 +2408,31 @@ function refreshCameraList() {
         alert('Liste des caméras actualisée');
     });
 }
+
+async function refreshCameraList() {
+    try {
+        // D'abord essayer avec des permissions explicites
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: { ideal: "environment" } // Pour webcams externes
+            } 
+        });
+        
+        // Laisser le stream actif pendant l'énumération
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter(d => d.kind === 'videoinput');
+        
+        console.log('Caméras détectées:', cameras);
+        
+        // NE PAS arrêter le stream immédiatement
+        // stream.getTracks().forEach(track => track.stop());
+        
+        return cameras;
+    } catch (error) {
+        console.error('Erreur:', error);
+        return [];
+    }
+}
 // === LANCER LIVE PRIVÉ ===
 startPrivateForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
