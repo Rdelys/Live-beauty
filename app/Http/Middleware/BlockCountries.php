@@ -92,11 +92,14 @@ class BlockCountries
         }
 
         // Console log côté client
-        if ($request->isMethod('get') && str_contains($request->header('Accept'), 'text/html')) {
-            app()->terminating(function () use ($ip, $country, $iso) {
-                echo "<script>console.log('IP: {$ip}, Pays: {$country} ({$iso})');</script>";
-            });
-        }
+        // Stocker dans la session pour l'injecter plus tard
+session([
+    'geoip_log' => [
+        'ip' => $ip,
+        'country' => $country,
+        'iso' => $iso
+    ]
+]);
 
         // Stocker le pays dans la session pour Stripe
         session([
