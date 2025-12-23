@@ -1223,9 +1223,9 @@ select:-moz-focusring {
     {{ $jp->nom }}
 
     @if($jp->modele_id == session('modele_id'))
-        ❤️‍🔥 (Déjà pris par vous)
+        ❤️‍🔥
     @elseif($jp->modele_id)
-        🔒 (Pris par un autre modèle)
+        🔒
     @endif
 </option>
 
