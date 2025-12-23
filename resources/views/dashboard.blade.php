@@ -63,8 +63,8 @@
 }
 
 body {
-    background: radial-gradient(circle at 50% 0%, #0a0a0a 0%, #000 100%);
-    color: var(--white-pure);
+    background: #000; /* Fallback solide */
+    background: radial-gradient(circle at 50% 0%, #0a0a0a 0%, #000 100%);    color: var(--white-pure);
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;

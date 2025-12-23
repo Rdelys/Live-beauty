@@ -238,8 +238,8 @@ body {
     color: var(--white-pure);
     text-shadow: 0 0 15px var(--red-primary);
     padding: 2px 6px;
-    background: linear-gradient(90deg, var(--red-primary), var(--red-neon));
-    -webkit-background-clip: text;
+    background: #000; /* Fallback solide */
+    background: radial-gradient(circle at 50% 0%, #0a0a0a 0%, #000 100%);    -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     animation: textGlow 3s infinite alternate;
