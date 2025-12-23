@@ -390,7 +390,7 @@ body {
 
 /* ===== SIDEBAR AVEC EFFETS GLASS ===== */
 .sidebar {
-    background: linear-gradient(180deg, rgba(21, 21, 21, 0.95) 0%, rgba(21, 21, 21, 0.85) 100%);
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.85) 100%);
     backdrop-filter: blur(20px) saturate(200%);
     border-right: var(--border-glass);
     padding: 1.2rem 0.8rem;
@@ -1726,6 +1726,155 @@ body {
 .model-card.card-photo {
     margin-bottom: 0;
 }
+
+/* ===== STYLES MOBILE POUR SIDEBAR REDUCTIBLE ===== */
+@media (max-width: 768px) {
+    /* Cache le sidebar par défaut sur mobile */
+    .sidebar {
+        position: fixed !important;
+        top: 56px !important; /* Hauteur de la navbar */
+        left: -280px; /* Caché à gauche */
+        width: 280px;
+        height: calc(100vh - 56px) !important;
+        z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.85) 100%) !important;
+        backdrop-filter: blur(20px) saturate(200%) !important;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Classe pour afficher le sidebar */
+    .sidebar.mobile-open {
+        transform: translateX(280px);
+        left: 0;
+    }
+
+    /* Overlay pour le fond quand le sidebar est ouvert */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 56px);
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 999;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Bouton pour ouvrir/fermer le sidebar */
+    .sidebar-toggle-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--red-primary), var(--red-neon));
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.2rem;
+        z-index: 9999;
+        box-shadow: var(--glow-red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-bounce);
+    }
+
+    .sidebar-toggle-btn:hover {
+        transform: scale(1.1);
+        box-shadow: var(--glow-strong);
+    }
+
+    /* Ajustement du contenu principal */
+    .col-md-10 {
+        width: 100% !important;
+        padding: 1rem !important;
+    }
+
+    /* La ligne avec sidebar et contenu devient une seule colonne */
+    .container-fluid .row {
+        flex-direction: column;
+    }
+
+    /* Suppression de la colonne sidebar du flux normal */
+    .col-md-2 {
+        width: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Ajustement des cartes pour occuper tout l'espace */
+    .col-md-4 {
+        width: 100%;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+
+    /* Animation d'apparition des cartes */
+    .model-card {
+        animation: cardSlideIn 0.5s ease-out;
+    }
+
+    @keyframes cardSlideIn {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+}
+
+/* Version tablette (entre 768px et 992px) */
+@media (min-width: 769px) and (max-width: 992px) {
+    /* Ajustement pour préserver un peu de sidebar */
+    .col-md-2 {
+        width: 240px;
+    }
+    
+    .col-md-10 {
+        width: calc(100% - 240px);
+    }
+    
+    /* Cacher le bouton toggle sur tablette */
+    .sidebar-toggle-btn {
+        display: none !important;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+/* Version mobile très petite */
+@media (max-width: 576px) {
+    .sidebar {
+        width: 85vw;
+        left: -85vw;
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(85vw);
+    }
+
+    .sidebar-toggle-btn {
+        bottom: 15px;
+        left: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
     </style>
 </head>
 
@@ -2500,6 +2649,69 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Créer le bouton toggle
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'sidebar-toggle-btn';
+    toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    toggleBtn.setAttribute('aria-label', 'Ouvrir/fermer le menu');
+    document.body.appendChild(toggleBtn);
 
+    // Créer l'overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    // Récupérer le sidebar
+    const sidebar = document.querySelector('.sidebar');
+
+    // Fonction pour ouvrir/fermer
+    function toggleSidebar() {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        
+        // Changer l'icône
+        if (sidebar.classList.contains('mobile-open')) {
+            toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+            toggleBtn.style.left = 'calc(20px + 280px)'; // Déplacer le bouton avec le sidebar
+        } else {
+            toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            toggleBtn.style.left = '20px';
+        }
+    }
+
+    // Événements
+    toggleBtn.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    // Fermer le sidebar si on clique sur un lien (optionnel)
+    sidebar.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A' && window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+
+    // Ajuster la position du bouton sur resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            // Cacher le bouton et overlay sur desktop
+            toggleBtn.style.display = 'none';
+            overlay.classList.remove('active');
+            sidebar.classList.remove('mobile-open');
+            sidebar.style.transform = 'none';
+        } else {
+            toggleBtn.style.display = 'flex';
+        }
+    });
+
+    // Initialiser l'affichage du bouton
+    if (window.innerWidth <= 768) {
+        toggleBtn.style.display = 'flex';
+    } else {
+        toggleBtn.style.display = 'none';
+    }
+});
+</script>
 </body>
 </html>
