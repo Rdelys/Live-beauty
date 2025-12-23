@@ -125,7 +125,7 @@ body {
 }
 
 .navbar-brand .live {
-    color: var(--white-pure);
+    color: var(--white-pure) !important;
     text-shadow: 0 0 15px var(--red-primary);
     padding: 2px 6px;
     background: linear-gradient(90deg, var(--red-primary), var(--red-neon));
