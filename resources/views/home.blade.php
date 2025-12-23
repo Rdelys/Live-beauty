@@ -1737,6 +1737,7 @@ body {
         width: 280px;
         height: calc(100vh - 56px) !important;
         z-index: 1000;
+            padding: 1.4rem 1rem !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow-y: auto;
         background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.85) 100%) !important;
@@ -1747,7 +1748,6 @@ body {
     /* Classe pour afficher le sidebar */
     .sidebar.mobile-open {
         transform: translateX(280px);
-        left: 0;
     }
 
     /* Overlay pour le fond quand le sidebar est ouvert */
@@ -2674,7 +2674,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Changer l'icône
         if (sidebar.classList.contains('mobile-open')) {
             toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
-            toggleBtn.style.left = 'calc(20px + 280px)'; // Déplacer le bouton avec le sidebar
+            toggleBtn.style.left = '20px)'; // Déplacer le bouton avec le sidebar
         } else {
             toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
             toggleBtn.style.left = '20px';

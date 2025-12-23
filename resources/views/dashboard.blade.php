@@ -2141,6 +2141,7 @@ body {
         width: 280px;
         height: calc(100vh - 56px) !important;
         z-index: 1000;
+            padding: 1.4rem 1rem !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow-y: auto;
         background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.85) 100%) !important;
