@@ -1655,7 +1655,7 @@ body {
     50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Classe pour le mode sombre/clair */
+/* Classe pour le mode sombre/clair
 @media (prefers-color-scheme: light) {
     body {
         background: linear-gradient(135deg, #f5f5f5, #ffffff);
@@ -1681,7 +1681,7 @@ body {
         -webkit-background-clip: text;
         background-clip: text;
     }
-}
+} */
 
 /* Prévention des animations pour les préférences de réduction de mouvement */
 @media (prefers-reduced-motion: reduce) {
