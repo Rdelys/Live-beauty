@@ -38,6 +38,10 @@ class Modele extends Authenticatable implements CanResetPasswordContract
         'prix_flou',
         'prix_flou_detail',
         'prive',
+            'message_font_size',
+    'message_color',
+    'received_message_font_size',
+    'received_message_color',
     ];
 
     protected $casts = [
@@ -48,6 +52,11 @@ class Modele extends Authenticatable implements CanResetPasswordContract
         'prix_flou'  => 'float',
         'prix_flou_detail' => 'float',
         'prive'      => 'boolean',
+            'message_font_size' => 'string',
+    'message_color' => 'string',
+    'received_message_font_size' => 'string',
+    'received_message_color' => 'string',
+
     ];
 
     // 🔥 Optionnel : protéger le mot de passe à la sortie

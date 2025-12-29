@@ -57,6 +57,12 @@ class ModeleController extends Controller
         'type_flou' => 'nullable|string|in:soft,strong,pixel',
         'prix_flou' => 'nullable|numeric|min:0',
         'prix_flou_detail' => 'nullable|numeric|min:0',
+        
+        // ✅ NOUVEAUX CHAMPS - Personnalisation des messages
+        'message_font_size' => 'nullable|string|max:10',
+        'message_color' => 'nullable|string|max:20',
+        'received_message_font_size' => 'nullable|string|max:10',
+        'received_message_color' => 'nullable|string|max:20',
     ]);
 
     // ✅ Conversion du tableau de langues en chaîne (ex: "FR,EN,ES")
@@ -110,6 +116,12 @@ class ModeleController extends Controller
         'type_flou'  => $validated['type_flou'] ?? null,
         'prix_flou'  => $validated['prix_flou'] ?? null,
         'prix_flou_detail' => $validated['prix_flou_detail'] ?? null,
+        
+        // ✅ NOUVEAUX CHAMPS - Personnalisation des messages
+        'message_font_size' => $validated['message_font_size'] ?? '14px',
+        'message_color' => $validated['message_color'] ?? '#ffffff',
+        'received_message_font_size' => $validated['received_message_font_size'] ?? '14px',
+        'received_message_color' => $validated['received_message_color'] ?? '#ffffff',
     ]);
 
     return redirect()->back()->with('success', 'Modèle ajouté avec succès !');
@@ -235,7 +247,7 @@ class ModeleController extends Controller
 {
     $modele = Modele::findOrFail($id);
 
-    // ✅ Validation mise à jour
+    // ✅ Validation mise à jour - AJOUTEZ LES NOUVEAUX CHAMPS
     $validated = $request->validate([
         'nom'        => 'nullable|string|max:255',
         'prenom'     => 'nullable|string|max:255',
@@ -260,12 +272,18 @@ class ModeleController extends Controller
         'type_flou'         => 'nullable|string|in:soft,strong,pixel',
         'prix_flou'         => 'nullable|numeric|min:0',
         'prix_flou_detail'  => 'nullable|numeric|min:0',
+        
+        // ✅ NOUVEAUX CHAMPS - Personnalisation des messages
+        'message_font_size' => 'nullable|string|max:10',
+        'message_color' => 'nullable|string|max:20',
+        'received_message_font_size' => 'nullable|string|max:10',
+        'received_message_color' => 'nullable|string|max:20',
     ]);
 
     // ✅ Conversion du tableau de langues en chaîne
     $langues = $request->langue ? implode(',', $request->langue) : null;
 
-    // ✅ Remplissage du modèle
+    // ✅ Remplissage du modèle avec les données validées
     $modele->fill($validated);
     $modele->langue = $langues;
 
@@ -273,6 +291,20 @@ class ModeleController extends Controller
     $modele->mode = $request->boolean('mode') ? 1 : 0;
     $modele->prix_flou = $request->filled('prix_flou') ? floatval($request->prix_flou) : null;
     $modele->prix_flou_detail = $request->filled('prix_flou_detail') ? floatval($request->prix_flou_detail) : null;
+    
+    // ✅ Définir les valeurs par défaut si non fournies pour les nouveaux champs
+    if (!$request->filled('message_font_size')) {
+        $modele->message_font_size = '14px';
+    }
+    if (!$request->filled('message_color')) {
+        $modele->message_color = '#ffffff';
+    }
+    if (!$request->filled('received_message_font_size')) {
+        $modele->received_message_font_size = '14px';
+    }
+    if (!$request->filled('received_message_color')) {
+        $modele->received_message_color = '#ffffff';
+    }
 
     // ✅ Gestion des vidéos (fusion avec existantes)
     if ($request->hasFile('video_file')) {
@@ -374,6 +406,7 @@ class ModeleController extends Controller
 
         return back()->with('success', 'Vidéos ajoutées avec succès.');
     }
+    
     public function achats() {
     $achats = Achat::with(['user','modele'])->latest()->get();
     return view('admin.achats', compact('achats'));

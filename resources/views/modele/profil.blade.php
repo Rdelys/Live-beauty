@@ -1051,13 +1051,13 @@ select:-moz-focusring {
     <p><strong>Nom :</strong> {{ $modele->nom }}</p>
     <p><strong>Email :</strong> {{ $modele->email }}</p>
     <p><strong>Description :</strong> {{ $modele->description }}</p>
-        <p><strong>Âge :</strong> {{ $modele->age ?? 'Non défini' }}</p>
+    <p><strong>Âge :</strong> {{ $modele->age ?? 'Non défini' }}</p>
     <p><strong>Taille :</strong> {{ $modele->taille ?? 'Non définie' }}</p>
     <p><strong>Silhouette :</strong> {{ $modele->silhouette ?? 'Non définie' }}</p>
     <p><strong>Poitrine :</strong> {{ $modele->poitrine ?? 'Non définie' }}</p>
     <p><strong>Fesse :</strong> {{ $modele->fesse ?? 'Non définie' }}</p>
     <p><strong>Langues parlées :</strong> {!! $modele->langue ?? 'Non défini' !!}</p>
-    <p><strong>Ce qu’elle propose :</strong> {{ $modele->services ?? 'Non défini' }}</p>
+    <p><strong>Ce qu'elle propose :</strong> {{ $modele->services ?? 'Non défini' }}</p>
 
     @if($modele->mode)
       <p><strong>Type de flou :</strong> 
@@ -1077,16 +1077,102 @@ select:-moz-focusring {
       </p>
     @endif
     
-
     <p><strong>Nombre jetons show privée :</strong> {{ $modele->nombre_jetons_show_privee ?? 'Non défini' }}</p>
-<p><strong>Durée show privée :</strong> {{ $modele->duree_show_privee ? $modele->duree_show_privee . ' minutes' : 'Non définie' }}</p>
+    <p><strong>Durée show privée :</strong> {{ $modele->duree_show_privee ? $modele->duree_show_privee . ' minutes' : 'Non définie' }}</p>
+    
+    <!-- NOUVELLE SECTION : Personnalisation des messages -->
+    <div class="mt-4 pt-3 border-top border-secondary">
+        <h5 class="text-warning mb-3">🎨 Personnalisation des messages</h5>
+        
+        <div class="row">
+            <!-- Messages envoyés -->
+            <div class="col-md-6 mb-3">
+                <p><strong>Taille messages envoyés :</strong> 
+                    @php
+                        $sentSize = $modele->message_font_size ?? '14px';
+                        $sentSizeLabels = [
+                            '12px' => 'Petite (12px)',
+                            '14px' => 'Normale (14px)',
+                            '16px' => 'Grande (16px)',
+                            '18px' => 'Très grande (18px)',
+                            '20px' => 'Énorme (20px)'
+                        ];
+                    @endphp
+                    {{ $sentSizeLabels[$sentSize] ?? $sentSize }}
+                </p>
+                <p>
+                    <strong>Couleur messages envoyés :</strong>
+                    <span class="badge rounded-pill ms-2" style="background-color: {{ $modele->message_color ?? '#ffffff' }}; color: #000; padding: 4px 12px;">
+                        {{ $modele->message_color ?? '#ffffff' }}
+                    </span>
+                    <span class="ms-2" style="display: inline-block; width: 20px; height: 20px; background-color: {{ $modele->message_color ?? '#ffffff' }}; border: 1px solid #666; border-radius: 3px;"></span>
+                </p>
+            </div>
+            
+            <!-- Messages reçus -->
+            <div class="col-md-6 mb-3">
+                <p><strong>Taille messages reçus :</strong> 
+                    @php
+                        $receivedSize = $modele->received_message_font_size ?? '14px';
+                        $receivedSizeLabels = [
+                            '12px' => 'Petite (12px)',
+                            '14px' => 'Normale (14px)',
+                            '16px' => 'Grande (16px)',
+                            '18px' => 'Très grande (18px)',
+                            '20px' => 'Énorme (20px)'
+                        ];
+                    @endphp
+                    {{ $receivedSizeLabels[$receivedSize] ?? $receivedSize }}
+                </p>
+                <p>
+                    <strong>Couleur messages reçus :</strong>
+                    <span class="badge rounded-pill ms-2" style="background-color: {{ $modele->received_message_color ?? '#ffffff' }}; color: #000; padding: 4px 12px;">
+                        {{ $modele->received_message_color ?? '#ffffff' }}
+                    </span>
+                    <span class="ms-2" style="display: inline-block; width: 20px; height: 20px; background-color: {{ $modele->received_message_color ?? '#ffffff' }}; border: 1px solid #666; border-radius: 3px;"></span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Aperçu visuel -->
+        <div class="mt-4 p-3 bg-dark rounded border border-secondary">
+            <h6 class="text-light mb-3">👁️ Aperçu visuel</h6>
+            
+            <div class="row">
+                <!-- Aperçu message envoyé -->
+                <div class="col-md-6 mb-3">
+                    <p class="text-light mb-2"><small>Message envoyé (modèle) :</small></p>
+                    <div class="chat-bubble d-inline-block p-2 rounded" 
+                         style="font-size: {{ $modele->message_font_size ?? '14px' }}; 
+                                color: {{ $modele->message_color ?? '#ffffff' }};
+                                background: rgba(255,255,255,0.05);
+                                border: 1px solid rgba(255,255,255,0.08);">
+                        <strong>{{ $modele->prenom ?? 'Modèle' }}</strong> : Message d'exemple
+                    </div>
+                </div>
+                
+                <!-- Aperçu message reçu -->
+                <div class="col-md-6 mb-3">
+                    <p class="text-light mb-2"><small>Message reçu (client) :</small></p>
+                    <div class="chat-bubble d-inline-block p-2 rounded" 
+                         style="font-size: {{ $modele->received_message_font_size ?? '14px' }}; 
+                                color: {{ $modele->received_message_color ?? '#ffffff' }};
+                                background: rgba(255,255,255,0.05);
+                                border: 1px solid rgba(255,255,255,0.08);">
+                        <strong>Client</strong> : Message d'exemple
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bouton modal -->
-    <button class="btn btn-warning mt-3" data-bs-toggle="modal" data-bs-target="#editProfilModal">
-        ✏️ Modifier mes infos
-    </button>
+    <div class="mt-4">
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProfilModal">
+            ✏️ Modifier mes infos
+        </button>
+    </div>
 </div>
-
 
   <div class="tab-pane fade text-start" id="workspace" role="tabpanel">
     <h5 class="text-white mb-3">🎥 Lancer une session Live Sexy Cam</h5>
@@ -1842,22 +1928,35 @@ const showStatusBtn = document.getElementById('showStatusBtn');
     console.log("🔓 Le show est redevenu public");
   });
 
+// Modifier l'écouteur socket.on("chat-message") pour appliquer les styles
 socket.on("chat-message", (data) => {
-  const chatWrapper = document.querySelector(".chat-wrapper");
-  if (chatWrapper) {
-      const bubble = document.createElement("div");
-      bubble.classList.add("chat-bubble");
-      bubble.style.color = data.color || "#fff";
-      bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
-      chatWrapper.appendChild(bubble);
-      chatWrapper.scrollTop = chatWrapper.scrollHeight;
-  }
+    const chatWrapper = document.querySelector(".chat-wrapper");
+    if (chatWrapper) {
+        const bubble = document.createElement("div");
+        bubble.classList.add("chat-bubble");
+        
+        // Vérifier si le message est envoyé par le modèle
+        const isModelMessage = data.pseudo.trim() === "{{ $modele->prenom ?? '' }}".trim();
+        
+        // Appliquer les styles appropriés
+        if (isModelMessage) {
+            bubble.style.fontSize = data.fontSize || "{{ $modele->message_font_size ?? '14px' }}";
+            bubble.style.color = data.color || "{{ $modele->message_color ?? '#ffffff' }}";
+        } else {
+            bubble.style.fontSize = "{{ $modele->received_message_font_size ?? '14px' }}";
+            bubble.style.color = "{{ $modele->received_message_color ?? '#ffffff' }}";
+        }
+        
+        bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+        chatWrapper.appendChild(bubble);
+        chatWrapper.scrollTop = chatWrapper.scrollHeight;
+    }
 
-  // 🔇 Ne joue le son que si le message vient d’un client
-  const modelePrenom = "{{ $modele->prenom ?? '' }}".trim();
-  if (soundMessage && data.pseudo.trim() !== modelePrenom) {
-      soundMessage.play().catch(() => {});
-  }
+    // 🔇 Ne joue le son que si le message vient d'un client
+    const modelePrenom = "{{ $modele->prenom ?? '' }}".trim();
+    if (soundMessage && data.pseudo.trim() !== modelePrenom) {
+        soundMessage.play().catch(() => {});
+    }
 });
 
 
@@ -2204,6 +2303,21 @@ socket.on('modele-deconnecte', (payload) => {
   window.location.reload();
 });
 
+// Fonction pour appliquer les styles aux messages envoyés par le modèle
+function applyMessageStyles(messageElement, isSentByModel = true) {
+    const messageFontSize = "{{ $modele->message_font_size ?? '14px' }}";
+    const messageColor = "{{ $modele->message_color ?? '#ffffff' }}";
+    const receivedMessageFontSize = "{{ $modele->received_message_font_size ?? '14px' }}";
+    const receivedMessageColor = "{{ $modele->received_message_color ?? '#ffffff' }}";
+    
+    if (isSentByModel) {
+        messageElement.style.fontSize = messageFontSize;
+        messageElement.style.color = messageColor;
+    } else {
+        messageElement.style.fontSize = receivedMessageFontSize;
+        messageElement.style.color = receivedMessageColor;
+    }
+}
 
 /* === ENVOI MESSAGE CHAT === */
 function sendMessage(e) {
@@ -2211,13 +2325,13 @@ function sendMessage(e) {
     const msg = document.getElementById("messageInput").value.trim();
     if (!msg) return;
 
-    const color = getRandomColor(); // 🎨 couleur aléatoire
-
     socket.emit("chat-message", {
         pseudo: "{{ $modele->prenom ?? 'Modèle' }}",
         message: msg,
-        color: color,
-        modeleId: {{ $modele->id }}
+        modeleId: {{ $modele->id }},
+        // Ajouter les infos de style
+        fontSize: "{{ $modele->message_font_size ?? '14px' }}",
+        color: "{{ $modele->message_color ?? '#ffffff' }}"
     });
 
     document.getElementById("messageInput").value = '';
@@ -2539,14 +2653,26 @@ privateSocket.emit("broadcaster", {
       privateMessageInput.value = "";
     });
 
-    privateSocket.on("chat-message", (data) => {
-      const bubble = document.createElement("div");
-      bubble.classList.add("chat-bubble");
-      bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
-      privateMessagesDiv.appendChild(bubble);
-      privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
-      soundMessage.play().catch(()=>{});
-    });
+    // Faire la même chose pour le chat privé
+privateSocket?.on("chat-message", (data) => {
+    const bubble = document.createElement("div");
+    bubble.classList.add("chat-bubble");
+    
+    const isModelMessage = data.pseudo.trim() === "{{ $modele->prenom ?? '' }}".trim();
+    
+    if (isModelMessage) {
+        bubble.style.fontSize = "{{ $modele->message_font_size ?? '14px' }}";
+        bubble.style.color = "{{ $modele->message_color ?? '#ffffff' }}";
+    } else {
+        bubble.style.fontSize = "{{ $modele->received_message_font_size ?? '14px' }}";
+        bubble.style.color = "{{ $modele->received_message_color ?? '#ffffff' }}";
+    }
+    
+    bubble.innerHTML = `<strong>${data.pseudo}</strong> : ${data.message}`;
+    privateMessagesDiv.appendChild(bubble);
+    privateMessagesDiv.scrollTop = privateMessagesDiv.scrollHeight;
+    soundMessage.play().catch(()=>{});
+});
 
     /* JETONS */
     privateSocket.on("jeton-sent", (data) => {
@@ -2806,6 +2932,47 @@ togglePrivateMicBtn?.addEventListener("click", () => {
             <label class="form-label">Durée du show privée (minutes)</label>
             <input type="number" name="duree_show_privee" value="{{ $modele->duree_show_privee ?? '' }}" class="form-control">
           </div>
+
+          <!-- Section Taille et couleur des messages -->
+<div class="mb-3">
+    <h6 class="text-warning mb-3">🎨 Personnalisation des messages</h6>
+    
+    <!-- Messages envoyés -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Taille des messages envoyés</label>
+            <select name="message_font_size" class="form-control">
+                <option value="12px" {{ $modele->message_font_size == '12px' ? 'selected' : '' }}>Petite (12px)</option>
+                <option value="14px" {{ $modele->message_font_size == '14px' ? 'selected' : '' }}>Normale (14px)</option>
+                <option value="16px" {{ $modele->message_font_size == '16px' ? 'selected' : '' }}>Grande (16px)</option>
+                <option value="18px" {{ $modele->message_font_size == '18px' ? 'selected' : '' }}>Très grande (18px)</option>
+                <option value="20px" {{ $modele->message_font_size == '20px' ? 'selected' : '' }}>Énorme (20px)</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Couleur des messages envoyés</label>
+            <input type="color" name="message_color" value="{{ $modele->message_color ?? '#ffffff' }}" class="form-control form-control-color">
+        </div>
+    </div>
+    
+    <!-- Messages reçus -->
+    <div class="row">
+            <div class="col-md-6">
+                <label class="form-label">Taille des messages reçus</label>
+                <select name="received_message_font_size" class="form-control">
+                    <option value="12px" {{ $modele->received_message_font_size == '12px' ? 'selected' : '' }}>Petite (12px)</option>
+                    <option value="14px" {{ $modele->received_message_font_size == '14px' ? 'selected' : '' }}>Normale (14px)</option>
+                    <option value="16px" {{ $modele->received_message_font_size == '16px' ? 'selected' : '' }}>Grande (16px)</option>
+                    <option value="18px" {{ $modele->received_message_font_size == '18px' ? 'selected' : '' }}>Très grande (18px)</option>
+                    <option value="20px" {{ $modele->received_message_font_size == '20px' ? 'selected' : '' }}>Énorme (20px)</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Couleur des messages reçus</label>
+                <input type="color" name="received_message_color" value="{{ $modele->received_message_color ?? '#ffffff' }}" class="form-control form-control-color">
+            </div>
+        </div>
+    </div>
         </div> <!-- FIN modal-body -->
 
         <div class="modal-footer">
