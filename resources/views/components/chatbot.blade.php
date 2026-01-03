@@ -1176,7 +1176,7 @@ class PremiumChat {
     changeLanguage() {
         const selectedLang = this.elements.language.value;
         
-        fetch('/api/set-language', {
+        fetch('/set-language', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
