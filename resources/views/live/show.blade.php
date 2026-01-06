@@ -1845,17 +1845,55 @@ const peerConnection = new RTCPeerConnection({
       socket.emit("candidate", broadcasterId, event.candidate);
     }
   };
+
+  // Définir la langue de l'utilisateur
+const userLanguage = navigator.language.split('-')[0] || 'fr'; // Détecter la langue du navigateur
+const supportedLanguages = ['en', 'es', 'fr', 'de', 'it', 'nl', 'pl', 'pt', 'ru', 'ja', 'zh'];
+
+// Vérifier si la langue est supportée
+const finalLanguage = supportedLanguages.includes(userLanguage) ? userLanguage : 'fr';
+
   // Dans la partie où vous émettez "watcher"
 socket.on("connect", () => {
+    socket.emit("set-language", finalLanguage);
+    
     socket.emit("watcher", {
-    pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
-    modeleId: {{ $modele->id }},
-    @if(isset($showPriveId))
-        showPriveId: {{ $showPriveId }},
-    @endif
+        pseudo: "{{ Auth::check() ? Auth::user()->pseudo : 'Anonyme' }}",
+        modeleId: {{ $modele->id }},
+        language: finalLanguage,
+        @if(isset($showPriveId))
+            showPriveId: {{ $showPriveId }},
+        @endif
+    });
 });
 
-});
+// Fonction pour changer de langue
+function changeLanguage(lang) {
+    if (supportedLanguages.includes(lang)) {
+        socket.emit("set-language", lang);
+        location.reload(); // Recharger pour appliquer la nouvelle langue
+    }
+}
+
+// Afficher un sélecteur de langue optionnel
+function addLanguageSelector() {
+    const languageSelector = `
+        <div style="position: fixed; bottom: 10px; left: 10px; z-index: 9999;">
+            <select id="languageSelect" onchange="changeLanguage(this.value)" 
+                    style="background: rgba(0,0,0,0.7); color: white; border: 1px solid #ff4081; padding: 5px; border-radius: 5px;">
+                <option value="fr" ${finalLanguage === 'fr' ? 'selected' : ''}>🇫🇷 Français</option>
+                <option value="en" ${finalLanguage === 'en' ? 'selected' : ''}>🇬🇧 English</option>
+                <option value="es" ${finalLanguage === 'es' ? 'selected' : ''}>🇪🇸 Español</option>
+                <option value="de" ${finalLanguage === 'de' ? 'selected' : ''}>🇩🇪 Deutsch</option>
+                <option value="it" ${finalLanguage === 'it' ? 'selected' : ''}>🇮🇹 Italiano</option>
+            </select>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', languageSelector);
+}
+
+// Appeler la fonction pour ajouter le sélecteur
+document.addEventListener('DOMContentLoaded', addLanguageSelector);
 
 
 // ✅ Nettoyage moderne sans "unload" (évite les violations Chrome)
