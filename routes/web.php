@@ -67,7 +67,7 @@ Route::post('/modele/login/jetons/store', [JetonController::class, 'store'])->na
 // Auth pour modèle modeles.livebeautyofficial.com
 Route::get('/modele/login', function (Request $request) {
     if ($request->getHost() !== 'modeles.livebeautyofficial.com') {
-        abort(403, 'Accès interdit');
+        return redirect()->away('https://modeles.livebeautyofficial.com/modele/login');
     }
     return app(\App\Http\Controllers\ModeleAuthController::class)->showLoginForm($request);
 })->name('modele.login');
